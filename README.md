@@ -1,17 +1,9 @@
-# This is the go project template
+# go-stdlib
 
-To finish setting up the template, run:
-
-```bash
-hack/setup-project.sh
-```
-
-# $REPO
-
-[![CI](https://github.com/$OWNER/$REPO/actions/workflows/ci.yaml/badge.svg)](https://github.com/$OWNER/$REPO/actions/workflows/ci.yaml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/$OWNER/$REPO)](https://pkg.go.dev/github.com/$OWNER/$REPO)
-[![Go Report Card](https://goreportcard.com/badge/github.com/$OWNER/$REPO)](https://goreportcard.com/report/github.com/$OWNER/$REPO)
-[![License](https://img.shields.io/github/license/$OWNER/$REPO)](LICENSE)
+[![CI](https://github.com/neticdk/go-stdlib/actions/workflows/ci.yaml/badge.svg)](https://github.com/neticdk/go-stdlib/actions/workflows/ci.yaml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/neticdk/go-stdlib)](https://pkg.go.dev/github.com/neticdk/go-stdlib)
+[![Go Report Card](https://goreportcard.com/badge/github.com/neticdk/go-stdlib)](https://goreportcard.com/report/github.com/neticdk/go-stdlib)
+[![License](https://img.shields.io/github/license/neticdk/go-stdlib)](LICENSE)
 
 A go project that does the needful...
 
@@ -25,7 +17,7 @@ A go project that does the needful...
 Install using `go get`:
 
 ```bash
-go get github.com/$OWNER/$REPO
+go get github.com/neticdk/go-stdlib
 ```
 
 ## Usage
@@ -39,7 +31,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/$OWNER/$REPO"
+	"github.com/neticdk/go-stdlib"
 )
 
 func main() {

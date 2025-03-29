@@ -45,7 +45,7 @@ gen() {
 }
 
 test() {
-    go test -cover ./... "$*"
+    go test -cover ./... "$@"
 }
 
 act() {
@@ -53,11 +53,11 @@ act() {
 }
 
 race() {
-    go test -cover -race ./... "$*"
+    go test -cover -race ./... "$@"
 }
 
 bench() {
-    go test -bench=./...
+    go test -bench=./... ./...
 }
 
 vet() {
@@ -82,7 +82,7 @@ build() {
     clean
     fmt
     [ "${NOLINT}" -eq 0 ] && lint
-    eval go build -o bin/ "$DEFAULT_GO_OPTS" "$*"
+    eval go build "$DEFAULT_GO_OPTS" "$*"
 }
 
 docker_build() {

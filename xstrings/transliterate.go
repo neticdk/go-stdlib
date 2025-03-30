@@ -1,8 +1,10 @@
 package xstrings
 
-import "github.com/gosimple/unidecode"
+import "github.com/neticdk/stdlib/xstrings/transliterate"
 
 // Transliterate converts a string to its transliterated form.
+//
+// Deprecated: Use the String() method from github.com/neticdk/stdlib/xstrings/transliterate package directly.
 func Transliterate(s string) string {
-	return unidecode.Unidecode(s)
+	return transliterate.String(s)
 }

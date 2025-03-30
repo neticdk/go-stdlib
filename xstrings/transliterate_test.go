@@ -45,7 +45,7 @@ func TestTransliterate(t *testing.T) {
 		{
 			name:     "symbols",
 			input:    "©®™",
-			expected: "(c)(r)",
+			expected: "(c)(r)(tm)",
 		},
 	}
 

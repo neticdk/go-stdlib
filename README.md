@@ -15,7 +15,7 @@ use any external dependencies unless listed below.
 
 Exceptions:
 
-- `golang.org/x/sys/windows` - used for windows specific functionality
+- `golang.org/x/*` - maintained by go and dependency free
 - `github.com/stretchr/testify` - used for testing
 
 Do *NOT* add exceptions to this list without peer review.

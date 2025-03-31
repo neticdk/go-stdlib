@@ -4,7 +4,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/neticdk/stdlib/xstrings/transliterate"
+	"github.com/neticdk/go-stdlib/xstrings/transliterate"
 	"github.com/stretchr/testify/assert"
 )
 

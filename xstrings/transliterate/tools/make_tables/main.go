@@ -27,7 +27,7 @@ const (
 	outputTableDir     = "internal/table"             // Directory for xNNN.go files
 	outputDecoderFile  = "decode.go"                  // Output file for init function
 	maxSection         = 0x1F9                        // Generate blocks up to U+FFFF
-	packagePathPrefix  = "github.com/neticdk/stdlib/" // Adjust to your actual module path root
+	packagePathPrefix  = "github.com/neticdk/go-stdlib/" // Adjust to your actual module path root
 	internalImportPath = packagePathPrefix + "xstrings/transliterate/internal/table"
 )
 

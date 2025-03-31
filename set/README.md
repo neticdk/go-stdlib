@@ -3,7 +3,7 @@
 # set
 
 ```go
-import "github.com/neticdk/stdlib/set"
+import "github.com/neticdk/go-stdlib/set"
 ```
 
 ## Index

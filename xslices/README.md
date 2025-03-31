@@ -3,7 +3,7 @@
 # xslices
 
 ```go
-import "github.com/neticdk/stdlib/xslices"
+import "github.com/neticdk/go-stdlib/xslices"
 ```
 
 ## Index

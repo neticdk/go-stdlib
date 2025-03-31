@@ -1,4 +1,4 @@
-module github.com/neticdk/stdlib
+module github.com/neticdk/go-stdlib
 
 go 1.24.1
 

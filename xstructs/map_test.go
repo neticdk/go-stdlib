@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/neticdk/stdlib/xstructs"
+	"github.com/neticdk/go-stdlib/xstructs"
 )
 
 func TestToMap(t *testing.T) {

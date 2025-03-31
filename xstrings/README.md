@@ -3,7 +3,7 @@
 # xstrings
 
 ```go
-import "github.com/neticdk/stdlib/xstrings"
+import "github.com/neticdk/go-stdlib/xstrings"
 ```
 
 ## Index
@@ -105,7 +105,7 @@ func Transliterate(s string) string
 
 Transliterate converts a string to its transliterated form.
 
-Deprecated: Use the String\(\) method from github.com/neticdk/stdlib/xstrings/transliterate package directly.
+Deprecated: Use the String\(\) method from github.com/neticdk/go-stdlib/xstrings/transliterate package directly.
 
 <a name="TransformOption"></a>
 ## type [TransformOption](<https://github.com/neticdk/go-stdlib/blob/main/xstrings/option.go#L5>)

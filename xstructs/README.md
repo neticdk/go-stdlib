@@ -3,7 +3,7 @@
 # xstructs
 
 ```go
-import "github.com/neticdk/stdlib/xstructs"
+import "github.com/neticdk/go-stdlib/xstructs"
 ```
 
 ## Index

@@ -3,7 +3,7 @@
 # version
 
 ```go
-import "github.com/neticdk/stdlib/version"
+import "github.com/neticdk/go-stdlib/version"
 ```
 
 ## Index

@@ -101,7 +101,7 @@ func handleStruct(obj any) any {
 			}
 			value = value.Elem()
 		}
-		if value.Kind() == reflect.Struct {
+		if value.Kind() == reflect.Struct || value.Kind() == reflect.Map {
 			if _, ok := xslices.FindFunc(tagOpts, func(s string) bool {
 				return s == "inline"
 			}); ok {

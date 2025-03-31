@@ -51,6 +51,7 @@ Do *NOT* add exceptions to this list without peer review.
 - `xset` - set data structure
 - `xslices` - slice data type functions
 - `xstrings` - string data type functions
+- `xstructs` - struct data type functions
 
 ## Installation
 

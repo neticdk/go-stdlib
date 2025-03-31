@@ -2,10 +2,6 @@
 name: CI
 
 # This is the default event from the go-project-template
-# Replace it with something like the one below
-on:
-  workflow_dispatch:
-
 on:
   push:
     branches:

@@ -3,7 +3,7 @@
 # xjson
 
 ```go
-import "github.com/neticdk/stdlib/xjson"
+import "github.com/neticdk/go-stdlib/xjson"
 ```
 
 ## Index

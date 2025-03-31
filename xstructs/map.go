@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/neticdk/stdlib/xslices"
+	"github.com/neticdk/go-stdlib/xslices"
 )
 
 // tagCategories is a list of tag categories to check for.

@@ -3,7 +3,7 @@
 # unit
 
 ```go
-import "github.com/neticdk/stdlib/unit"
+import "github.com/neticdk/go-stdlib/unit"
 ```
 
 Package unit provides utilities for handling units including human\-readable unit formatting, parsing, and registration of custom units and formatting systems.

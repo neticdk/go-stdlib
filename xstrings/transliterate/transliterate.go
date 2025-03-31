@@ -6,7 +6,7 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/neticdk/stdlib/xstrings/transliterate/internal/table"
+	"github.com/neticdk/go-stdlib/xstrings/transliterate/internal/table"
 )
 
 //go:generate go run tools/make_tables/main.go

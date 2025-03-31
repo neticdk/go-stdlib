@@ -2,7 +2,7 @@
 
 package transliterate
 
-import "github.com/neticdk/stdlib/xstrings/transliterate/internal/table"
+import "github.com/neticdk/go-stdlib/xstrings/transliterate/internal/table"
 
 // decodeTransliterations populates the global Tables map in the internal table package
 // with the generated transliteration data slices (table.X000, table.X001, etc.).

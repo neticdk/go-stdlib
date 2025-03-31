@@ -3,7 +3,7 @@
 # transliterate
 
 ```go
-import "github.com/neticdk/stdlib/xstrings/transliterate"
+import "github.com/neticdk/go-stdlib/xstrings/transliterate"
 ```
 
 Package transliterate provides functionality to convert Unicode text into plain ASCII equivalents.

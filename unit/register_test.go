@@ -3,7 +3,7 @@ package unit_test
 import (
 	"testing"
 
-	"github.com/neticdk/stdlib/unit"
+	"github.com/neticdk/go-stdlib/unit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

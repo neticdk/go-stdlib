@@ -137,3 +137,5 @@
 // Choose the appropriate formatting approach and extensibility features based on
 // your specific use case and audience expectations.
 package unit
+
+//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md

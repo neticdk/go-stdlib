@@ -58,6 +58,10 @@ transliterate.Configure(
 
 Configuration should be done early in your application lifecycle, preferably before any calls to String\(\) or WithLimit\(\).
 
+### Table Generation
+
+The transliteration tables are generated from a text definition file. See tools/make\_tables/README.md and tools/convert\_tables/README.md for details on maintaining the tables.
+
 Examples:
 
 ```

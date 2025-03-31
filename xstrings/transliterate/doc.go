@@ -68,3 +68,5 @@
 //	ascii := transliterate.String("これはひらがなです") // Output: "korehahiraganadesu"
 //	ascii := transliterate.String("你好，世界") // Output: "Ni Hao, Shi Jie" (Depends on table)
 package transliterate
+
+//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md

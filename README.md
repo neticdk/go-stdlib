@@ -39,16 +39,26 @@ Do *NOT* add exceptions to this list without peer review.
 ## Documentation
 
 - Document all exported (public) identifiers
-- Maintain a `doc.go` and a `README.md` file in each package with introduction,
-  installation instructions and usage examples.
+- Maintain a `doc.go` in each package with introduction, installation
+  instructions and usage examples.
+- Use `make gen` to generate `README.md` files
+
+### doc.go minimum
+
+```go
+// Package mypkg does ...
+package mypkg
+
+//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md
+```
 
 ## Packages
 
 - `file` - file operations
+- `set` - set data structure
 - `unit` - unit formatting and conversion package
 - `version` - version functions
 - `xjson` - JSON functions
-- `xset` - set data structure
 - `xslices` - slice data type functions
 - `xstrings` - string data type functions
 - `xstructs` - struct data type functions

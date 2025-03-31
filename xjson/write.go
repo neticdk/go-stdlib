@@ -1,4 +1,4 @@
-package json
+package xjson
 
 import (
 	"bytes"

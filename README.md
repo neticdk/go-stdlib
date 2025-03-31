@@ -1,5 +1,6 @@
 # Netic go standard library
 
+[![GitHub Tag](https://img.shields.io/github/v/tag/neticdk/go-stdlib)](https://github.com/neticdk/go-stdlib/releases)
 [![CI](https://github.com/neticdk/go-stdlib/actions/workflows/ci.yaml/badge.svg)](https://github.com/neticdk/go-stdlib/actions/workflows/ci.yaml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/neticdk/go-stdlib)](https://pkg.go.dev/github.com/neticdk/go-stdlib)
 [![Go Report Card](https://goreportcard.com/badge/github.com/neticdk/go-stdlib)](https://goreportcard.com/report/github.com/neticdk/go-stdlib)

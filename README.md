@@ -18,6 +18,10 @@ Exceptions:
 - `golang.org/x/*` - maintained by go and dependency free
 - `github.com/stretchr/testify` - used for testing
 
+CI checks the imports against regular expressions found in the
+`.allowed-imports` file. To allow new imports, add them to the
+`.allowed-imports` file in a separate PR.
+
 Do *NOT* add exceptions to this list without peer review.
 
 ## Package names

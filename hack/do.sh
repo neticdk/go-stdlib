@@ -120,4 +120,29 @@ release() {
     esac
 }
 
+check_imports() {
+    if [ ! -f .allowed-imports ]; then
+        echo "Error: .allowed-imports file not found."
+        exit 1
+    fi
+
+    allowed_imports=$(grep -v '^#' .allowed-imports)
+
+    imports=$(go list -m -f '{{ .Indirect }} {{ .Main }} {{ .Path }}' all | awk '{ if ($1 == "false" && $2 == "false") { print $3 } }')
+
+    for import in $imports; do
+        allowed=false
+        for regex in ${allowed_imports}; do
+            if echo "$import" | grep -q -E "$regex"; then
+                allowed=true
+                break
+            fi
+        done
+        if [ "$allowed" = "false" ]; then
+            echo "Error: Import '$import' is not allowed."
+            exit 1
+        fi
+    done
+}
+
 "$@"

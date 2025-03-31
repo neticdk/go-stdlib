@@ -84,3 +84,7 @@ docker-push:
 .PHONY: dev-deps
 dev-deps:
 	@hack/do.sh dev_deps
+
+.PHONY: check-imports
+check-imports:
+	@hack/do.sh check_imports

@@ -1,0 +1,4 @@
+# this file contains a list of allowed go mod imports in the form of regular
+# expresions
+^github.com/stretchr/testify$
+^golang.org/x/.+$

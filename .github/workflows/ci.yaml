@@ -1,46 +1,49 @@
 ---
 name: CI
 
-# This is the deefault even from the go-project-template
+# This is the default event from the go-project-template
 # Replace it with something like the one below
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
-# on:
-#     push:
-#         branches:
-#             - main
-#     pull_request:
-#         branches:
-#             - main
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-            - name: Set up Go
-              uses: actions/setup-go@v5
-              with:
-                  go-version-file: ./go.mod
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./go.mod
 
-            - name: Install dependencies
-              run: |
-                  go mod download
-                  go mod verify
+      - name: Install dependencies
+        run: |
+          go mod download
+          go mod verify
 
-            - name: golangci-lint
-              uses: golangci/golangci-lint-action@v6
-              with:
-                  version: latest
+      - name: Check imports
+        run: make check-imports
 
-            - name: Run tests
-              run: go test -race -cover -v ./...
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
 
-            - name: Run benchmarks
-              run: go test -bench=. ./...
+      - name: Run tests
+        run: go test -race -cover -v ./...
+
+      - name: Run benchmarks
+        run: go test -bench=. ./...

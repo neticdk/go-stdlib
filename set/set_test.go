@@ -3,7 +3,7 @@ package set
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestNewSet(t *testing.T) {

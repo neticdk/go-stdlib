@@ -3,7 +3,7 @@ package xslices
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestMap(t *testing.T) {
@@ -45,7 +45,7 @@ func TestMap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := Map(tt.input, tt.fn)
-			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, result, tt.expected)
 		})
 	}
 }

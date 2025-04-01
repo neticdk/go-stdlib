@@ -2,8 +2,6 @@ package xstrings
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestToKebabCase(t *testing.T) {
@@ -97,7 +95,9 @@ func TestToKebabCase(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ToKebabCase(tt.input)
-			assert.Equal(t, tt.expected, result)
+			if result != tt.expected {
+				t.Errorf("ToKebabCase(%q) = %q; want %q", tt.input, result, tt.expected)
+			}
 		})
 	}
 }
@@ -125,7 +125,9 @@ func TestToCamelCase(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ToCamelCase(tt.input)
-			assert.Equal(t, tt.expected, result)
+			if result != tt.expected {
+				t.Errorf("ToCamelCase(%q) = %q; want %q", tt.input, result, tt.expected)
+			}
 		})
 	}
 }
@@ -154,7 +156,9 @@ func TestToPascalCase(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ToPascalCase(tt.input)
-			assert.Equal(t, tt.expected, result)
+			if result != tt.expected {
+				t.Errorf("ToPascalCase(%q) = %q; want %q", tt.input, result, tt.expected)
+			}
 		})
 	}
 }
@@ -183,7 +187,9 @@ func TestToDelimited(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ToDelimited(tt.input, tt.delimiter)
-			assert.Equal(t, tt.expected, result)
+			if result != tt.expected {
+				t.Errorf("ToDelimited(%q, %q) = %q; want %q", tt.input, tt.delimiter, result, tt.expected)
+			}
 		})
 	}
 }

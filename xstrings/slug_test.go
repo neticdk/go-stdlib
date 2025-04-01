@@ -2,8 +2,6 @@ package xstrings
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSlugifyDefaultOptions(t *testing.T) {
@@ -136,7 +134,10 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 				WithLowercase(tc.lowercase),
 				WithTransliterate(tc.transliterate),
 			)
-			assert.Equal(t, tc.expected, actual)
+			if actual != tc.expected {
+				t.Errorf("Slugify(%q, decamelize=%t, lowercase=%t, transliterate=%t) = %q; want %q",
+					tc.input, tc.decamelize, tc.lowercase, tc.transliterate, actual, tc.expected)
+			}
 		})
 	}
 }

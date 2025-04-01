@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/neticdk/go-stdlib/xstrings/transliterate"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestCacheStats(t *testing.T) {
@@ -20,7 +19,9 @@ func TestCacheStats(t *testing.T) {
 
 	t.Run("initial stats should be zero", func(t *testing.T) {
 		hits := getStats()
-		assert.Zero(t, hits, "initial hits should be zero")
+		if hits != 0 {
+			t.Errorf("initial hits should be zero, got %d", hits)
+		}
 	})
 
 	t.Run("cache misses on first access", func(t *testing.T) {
@@ -33,7 +34,9 @@ func TestCacheStats(t *testing.T) {
 		transliterate.String(text)
 
 		hits := getStats()
-		assert.Equal(t, startHits, hits, "shouldn't have any cache hits")
+		if hits != startHits {
+			t.Errorf("shouldn't have any cache hits, got %d, expected %d", hits, startHits)
+		}
 	})
 
 	t.Run("cache hits on repeated access", func(t *testing.T) {
@@ -45,7 +48,10 @@ func TestCacheStats(t *testing.T) {
 		transliterate.String(text) // Third time
 
 		hits := getStats()
-		assert.Equal(t, uint64(6), hits, "should have 6 hits (2 chars × 3 repeated calls)")
+		expectedHits := uint64(6) // 2 chars × 3 repeated calls after the first
+		if hits != expectedHits {
+			t.Errorf("should have %d hits (2 chars × 3 repeated calls), got %d", expectedHits, hits)
+		}
 	})
 
 	t.Run("mixed ascii and non-ascii", func(t *testing.T) {
@@ -60,9 +66,10 @@ func TestCacheStats(t *testing.T) {
 		hits := getStats()
 		// ASCII characters shouldn't affect cache stats
 		expectedNewHits := uint64(4) // 2 non-ASCII chars × 2 calls after cache population
-
-		assert.Equal(t, startHits+expectedNewHits, hits,
-			"should only count cache hits for non-ASCII chars")
+		expectedTotalHits := startHits + expectedNewHits
+		if hits != expectedTotalHits {
+			t.Errorf("should only count cache hits for non-ASCII chars, expected %d, got %d", expectedTotalHits, hits)
+		}
 	})
 
 	t.Run("concurrent access", func(t *testing.T) {
@@ -71,27 +78,33 @@ func TestCacheStats(t *testing.T) {
 		startHits := getStats()
 
 		// Run concurrent translations
-		done := make(chan struct{})
+		var wg sync.WaitGroup
+		wg.Add(2)
 		go func() {
+			defer wg.Done()
 			for range 100 {
 				transliterate.String("世界")
 			}
-			done <- struct{}{}
 		}()
 		go func() {
+			defer wg.Done()
 			for range 100 {
 				transliterate.String("世界")
 			}
-			done <- struct{}{}
 		}()
 
 		// Wait for both goroutines
-		<-done
-		<-done
+		wg.Wait()
 
 		hits := getStats()
-		assert.Greater(t, hits, startHits,
-			"should have recorded cache hits from concurrent access")
+		// The exact number can vary due to race conditions on the first few calls,
+		// but it should be substantially greater than the start hits.
+		// Expected hits: (2 chars * 199 calls) = 398 minimum if fully sequential after first call.
+		// Max hits would be slightly less depending on exact timing.
+		// We just check it increased significantly.
+		if hits <= startHits {
+			t.Errorf("should have recorded cache hits from concurrent access, got %d, expected > %d", hits, startHits)
+		}
 	})
 
 	t.Run("cache eviction", func(t *testing.T) {
@@ -106,27 +119,30 @@ func TestCacheStats(t *testing.T) {
 			text1 += string(i)
 		}
 
-		// Create second set of different characters
+		// Create second set of different characters to fill/evict cache
 		var text2 string
 		for i := rune(0x3400); i < rune(0x3400+maxEntries); i++ {
 			text2 += string(i)
 		}
 
-		// First pass with text1
 		transliterate.String(text1)
-		hits1 := transliterate.GetCacheStats()
+		initialHits := transliterate.GetCacheStats()
+		if initialHits != 0 {
+			t.Errorf("expected 0 hits after first population, got %d", initialHits)
+		}
 
 		// Run with text2 to trigger eviction
 		transliterate.String(text2)
 
-		// Run text1 again - should get new hits if cache was evicted
-		transliterate.ResetCacheStats() // Reset to clearly see new hits
+		// Run text1 again - should miss cache if evicted
+		transliterate.ResetCacheStats() // Reset to clearly see misses as 0 hits
 		transliterate.String(text1)
-		hits2 := transliterate.GetCacheStats()
+		hitsAfterEviction := transliterate.GetCacheStats()
 
-		// If cache was evicted, we should see fresh hits for text1
-		assert.Equal(t, hits1, hits2,
-			"should see same number of hits after eviction and reload")
+		// If cache was evicted, hits should be 0 again for text1
+		if hitsAfterEviction != 0 {
+			t.Errorf("expected 0 hits after potential eviction and re-run, got %d", hitsAfterEviction)
+		}
 	})
 }
 
@@ -135,21 +151,27 @@ func TestCacheEdgeCases(t *testing.T) {
 		transliterate.ResetCacheStats()
 		transliterate.String("")
 		hits := transliterate.GetCacheStats()
-		assert.Zero(t, hits, "empty string should not affect cache")
+		if hits != 0 {
+			t.Errorf("empty string should not affect cache, got %d hits", hits)
+		}
 	})
 
 	t.Run("ascii only", func(t *testing.T) {
 		transliterate.ResetCacheStats()
 		transliterate.String("Hello123!@#")
 		hits := transliterate.GetCacheStats()
-		assert.Zero(t, hits, "ASCII-only string should not affect cache")
+		if hits != 0 {
+			t.Errorf("ASCII-only string should not affect cache, got %d hits", hits)
+		}
 	})
 
 	t.Run("invalid utf8", func(t *testing.T) {
 		transliterate.ResetCacheStats()
 		transliterate.String("Hello\xf0\x28World")
 		hits := transliterate.GetCacheStats()
-		assert.Zero(t, hits, "invalid UTF-8 should not affect cache")
+		if hits != 0 {
+			t.Errorf("invalid UTF-8 should not affect cache, got %d hits", hits)
+		}
 	})
 }
 
@@ -159,20 +181,30 @@ func TestCacheSizeLimits(t *testing.T) {
 		transliterate.ResetCacheStats()
 		transliterate.ClearCache()
 
+		maxCacheSize := 1000
+		// Make sure the cache size is set
+		transliterate.Configure(transliterate.WithMaxCacheSize(maxCacheSize))
+
 		// Fill cache to exactly maxCacheSize
 		var text string
-		for i := rune(0x4E00); i < rune(0x4E00+1000); i++ {
+		for i := rune(0x4E00); i < rune(0x4E00+maxCacheSize); i++ {
 			text += string(i)
 		}
 
 		transliterate.String(text)
-		hits1 := transliterate.GetCacheStats()
+		size := transliterate.GetCacheSize()
+		if size != maxCacheSize {
+			t.Errorf("cache size should be %d, got %d", maxCacheSize, size)
+		}
 
-		// Add one more character
-		transliterate.String(text + "世")
-		hits2 := transliterate.GetCacheStats()
+		// Add one more character + run again
+		transliterate.String(text + "世") // Should trigger hits for original `text` chars
+		newSize := transliterate.GetCacheSize()
 
-		assert.Greater(t, hits2, hits1, "cache should handle boundary conditions")
+		expectedSize := maxCacheSize
+		if newSize != expectedSize {
+			t.Errorf("cache size should be %d after adding one more character, got %d", expectedSize, newSize)
+		}
 	})
 
 	t.Run("repeated characters", func(t *testing.T) {
@@ -180,18 +212,24 @@ func TestCacheSizeLimits(t *testing.T) {
 		transliterate.ClearCache()
 
 		// Test with repeated characters
+		// First pass - caches '世', hits on 2nd and 3rd '世'
 		text := "世世世"
 		transliterate.String(text) // First pass - should cache but no hits
 		hits1 := transliterate.GetCacheStats()
 
-		// Second pass - should get hits
+		// Second pass - should hit on all three '世'
 		transliterate.String(text)
 		hits2 := transliterate.GetCacheStats()
 
-		assert.Equal(t, uint64(2), hits1,
-			"first pass should record 2 hits")
-		assert.Equal(t, uint64(5), hits2,
-			"second pass should record 5 hits (one per character)")
+		expectedHits1 := uint64(2) // Hits for 2nd and 3rd char
+		if hits1 != expectedHits1 {
+			t.Errorf("first pass should record %d hits, got %d", expectedHits1, hits1)
+		}
+
+		expectedHits2 := uint64(5) // 2 from first pass + 3 from second pass
+		if hits2 != expectedHits2 {
+			t.Errorf("second pass should record %d total hits, got %d", expectedHits2, hits2)
+		}
 	})
 
 	t.Run("repeated character patterns", func(t *testing.T) {
@@ -215,8 +253,9 @@ func TestCacheSizeLimits(t *testing.T) {
 				transliterate.String(p.text)
 				hits := transliterate.GetCacheStats()
 
-				assert.Equal(t, p.expected, hits,
-					"unexpected number of hits for pattern: %s", p.text)
+				if hits != p.expected {
+					t.Errorf("unexpected number of hits for pattern '%s': expected %d, got %d", p.text, p.expected, hits)
+				}
 			})
 		}
 	})
@@ -227,21 +266,28 @@ func TestCacheSizeLimits(t *testing.T) {
 
 		text := "世界"
 
-		// First pass - caching
+		// First pass - caching, no hits
 		transliterate.String(text)
 		hits1 := transliterate.GetCacheStats()
+		if hits1 != 0 {
+			t.Errorf("first pass should have 0 hits, got %d", hits1)
+		}
 
-		// Second pass - hits
+		// Second pass - hits for both chars
 		transliterate.String(text)
 		hits2 := transliterate.GetCacheStats()
+		expectedHits2 := uint64(2) // 0 + 2
+		if hits2 != expectedHits2 {
+			t.Errorf("second pass should have %d total hits, got %d", expectedHits2, hits2)
+		}
 
-		// Third pass - more hits
+		// Third pass - more hits for both chars
 		transliterate.String(text)
 		hits3 := transliterate.GetCacheStats()
-
-		assert.Equal(t, uint64(0), hits1, "first pass should have no hits")
-		assert.Equal(t, uint64(2), hits2, "second pass should have 2 hits")
-		assert.Equal(t, uint64(4), hits3, "third pass should have 4 hits")
+		expectedHits3 := uint64(4) // 2 + 2
+		if hits3 != expectedHits3 {
+			t.Errorf("third pass should have %d total hits, got %d", expectedHits3, hits3)
+		}
 	})
 }
 
@@ -270,7 +316,11 @@ func TestCacheConcurrency(t *testing.T) {
 
 		wg.Wait()
 		hits := transliterate.GetCacheStats()
-		assert.Greater(t, hits, uint64(0), "should record hits under high concurrency")
+
+		minExpectedHits := uint64(1000) // A reasonable lower bound check
+		if hits <= minExpectedHits {    // Use a reasonable lower bound instead of just > 0
+			t.Errorf("should record significant hits under high concurrency, got %d, expected > %d", hits, minExpectedHits)
+		}
 	})
 }
 

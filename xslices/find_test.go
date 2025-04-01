@@ -2,8 +2,6 @@ package xslices
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestFindFunc(t *testing.T) {
@@ -42,12 +40,20 @@ func TestFindFunc(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			actual, found := FindFunc(tc.haystack, tc.f)
-			assert.Equal(t, tc.expected, actual)
-			assert.Equal(t, tc.found, found)
+			if actual != tc.expected {
+				t.Errorf("FindFunc() = %v, want %v", actual, tc.expected)
+			}
+			if found != tc.found {
+				t.Errorf("FindFunc() found = %v, want %v", found, tc.found)
+			}
 
 			actualPtr, foundPtr := FindFunc(tc.haystack, tc.f)
-			assert.Equal(t, tc.expected, actualPtr)
-			assert.Equal(t, tc.found, foundPtr)
+			if actualPtr != tc.expected {
+				t.Errorf("FindFunc() = %v, want %v", actualPtr, tc.expected)
+			}
+			if foundPtr != tc.found {
+				t.Errorf("FindFunc() found = %v, want %v", foundPtr, tc.found)
+			}
 		})
 	}
 }

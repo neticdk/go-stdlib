@@ -17,7 +17,6 @@ use any external dependencies unless listed below.
 Exceptions:
 
 - `golang.org/x/*` - maintained by go and dependency free
-- `github.com/stretchr/testify` - used for testing
 
 CI checks the imports against regular expressions found in the
 `.allowed-imports` file. To allow new imports, add them to the
@@ -55,6 +54,7 @@ package mypkg
 
 ## Packages
 
+- `assert` / `require` - assertion functions
 - `file` - file operations
 - `set` - set data structure
 - `unit` - unit formatting and conversion package

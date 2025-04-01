@@ -16,7 +16,6 @@ import "github.com/neticdk/go-stdlib/xstrings"
 - [func ToKebabCase\(s string\) string](<#ToKebabCase>)
 - [func ToPascalCase\(s string\) string](<#ToPascalCase>)
 - [func ToSnakeCase\(s string\) string](<#ToSnakeCase>)
-- [func Transliterate\(s string\) string](<#Transliterate>)
 - [type TransformOption](<#TransformOption>)
   - [func WithDecamelize\(decamelize bool\) TransformOption](<#WithDecamelize>)
   - [func WithDelimiter\(delimiter string\) TransformOption](<#WithDelimiter>)
@@ -34,7 +33,7 @@ const DefaultDelimiter = "-"
 ```
 
 <a name="Slugify"></a>
-## func [Slugify](<https://github.com/neticdk/go-stdlib/blob/main/xstrings/slug.go#L12>)
+## func [Slugify](<https://github.com/neticdk/go-stdlib/blob/main/xstrings/slug.go#L14>)
 
 ```go
 func Slugify(s string, options ...TransformOption) string
@@ -95,17 +94,6 @@ func ToSnakeCase(s string) string
 ```
 
 ToSnakeCase converts a string to snake case.
-
-<a name="Transliterate"></a>
-## func [Transliterate](<https://github.com/neticdk/go-stdlib/blob/main/xstrings/transliterate.go#L8>)
-
-```go
-func Transliterate(s string) string
-```
-
-Transliterate converts a string to its transliterated form.
-
-Deprecated: Use the String\(\) method from github.com/neticdk/go-stdlib/xstrings/transliterate package directly.
 
 <a name="TransformOption"></a>
 ## type [TransformOption](<https://github.com/neticdk/go-stdlib/blob/main/xstrings/option.go#L5>)

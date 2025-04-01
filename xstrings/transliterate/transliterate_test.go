@@ -3,8 +3,6 @@ package transliterate
 import (
 	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestTransliterate(t *testing.T) {
@@ -206,7 +204,9 @@ func TestTransliterate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := String(tt.input)
-			assert.Equal(t, tt.expected, result)
+			if result != tt.expected {
+				t.Errorf("Expected: %s, Got: %s", tt.expected, result)
+			}
 		})
 	}
 }
@@ -248,11 +248,19 @@ func TestWithLimit(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := WithLimit(tt.input)
 			if tt.expectError {
-				assert.Error(t, err)
-				assert.Empty(t, result)
+				if err == nil {
+					t.Errorf("expected an error, but got nil")
+				}
+				if result != "" {
+					t.Errorf("expected empty result, but got %q", result)
+				}
 			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expected, result)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if result != tt.expected {
+					t.Errorf("expected %q, got %q", tt.expected, result)
+				}
 			}
 		})
 	}

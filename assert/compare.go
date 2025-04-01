@@ -2,7 +2,9 @@ package assert
 
 import (
 	"cmp"
+	"fmt"
 	"reflect"
+	"strings"
 )
 
 // Zero asserts that a value is the zero value for its type.
@@ -13,6 +15,8 @@ func Zero(t testingT, data any, msgAndArgs ...any) bool {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
 	}
+
+	ctx := NewAssertionContext(1)
 
 	isZero := false
 	if data == nil {
@@ -25,7 +29,7 @@ func Zero(t testingT, data any, msgAndArgs ...any) bool {
 	}
 
 	if !isZero {
-		t.Errorf("Expected zero value, got: %#v", data)
+		reportError(t, ctx, "Expected zero value, got: %#v", data)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -39,6 +43,8 @@ func NotZero(t testingT, data any, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	isZero := false
 	if data == nil {
 		isZero = true
@@ -50,7 +56,7 @@ func NotZero(t testingT, data any, msgAndArgs ...any) bool {
 	}
 
 	if isZero {
-		t.Errorf("Expected non-zero value, got zero for type %T: %#v", data, data)
+		reportError(t, ctx, "Expected non-zero value, got zero for type %T: %#v", data, data)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -64,8 +70,11 @@ func Greater[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any) b
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if !(got > threshold) { // Check !(a > b) which is a <= b
 		t.Errorf("Value is not greater than threshold:\n      Got: %v\nThreshold: %v", got, threshold)
+		reportComparisonError(t, ctx, "Value is not greater than threshold", got, threshold)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -79,8 +88,10 @@ func GreaterOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ..
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if !(got >= threshold) { // Check !(a >= b) which is a < b
-		t.Errorf("Value is not greater than or equal to threshold:\n      Got: %v\nThreshold: %v", got, threshold)
+		reportComparisonError(t, ctx, "Value is not greater than or equal to threshold", got, threshold)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -94,8 +105,10 @@ func Less[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any) bool
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if !(got < threshold) { // Check !(a < b) which is a >= b
-		t.Errorf("Value is not less than threshold:\n      Got: %v\nThreshold: %v", got, threshold)
+		reportComparisonError(t, ctx, "Value is not less than threshold", got, threshold)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -109,8 +122,10 @@ func LessOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...an
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if !(got <= threshold) { // Check !(a <= b) which is a > b
-		t.Errorf("Value is not less than or equal to threshold:\n      Got: %v\nThreshold: %v", got, threshold)
+		reportComparisonError(t, ctx, "Value is not less than or equal to threshold", got, threshold)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -124,9 +139,11 @@ func Positive[T cmp.Ordered](t testingT, got T, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	var zero T         // Get the zero value for the type T
 	if !(got > zero) { // Check if got <= 0
-		t.Errorf("Expected positive value, got: %v", got)
+		reportError(t, ctx, "Expected positive value, got: %v", got)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -140,9 +157,11 @@ func Negative[T cmp.Ordered](t testingT, got T, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	var zero T         // Get the zero value for the type T
 	if !(got < zero) { // Check if got >= 0
-		t.Errorf("Expected negative value, got: %v", got)
+		reportError(t, ctx, "Expected negative value, got: %v", got)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -160,8 +179,10 @@ func ElementsMatch[T comparable](t testingT, listA []T, listB []T, msgAndArgs ..
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if len(listA) != len(listB) {
-		t.Errorf("ElementsMatch failed: length of listA (%d) does not match length of listB (%d)", len(listA), len(listB))
+		reportError(t, ctx, "ElementsMatch failed: length of listA (%d) does not match length of listB (%d)", len(listA), len(listB))
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -178,10 +199,30 @@ func ElementsMatch[T comparable](t testingT, listA []T, listB []T, msgAndArgs ..
 	}
 
 	if !reflect.DeepEqual(countsA, countsB) {
-		t.Errorf("ElementsMatch failed: listA (%v) does not match listB (%v)", listA, listB)
+		reportError(t, ctx, "ElementsMatch failed: listA (%v) does not match listB (%v)", listA, listB)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
 	return true
+}
+
+// reportComparisonError reports errors for comparison assertions (Greater, Less, etc.)
+func reportComparisonError(t testingT, ctx *AssertionContext, comparison string, got, threshold any) { //revive:disable-line:argument-limit
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
+	// Start building parts of the message
+	parts := []string{
+		fmt.Sprintf("Got: %#v", got),
+		fmt.Sprintf("Threshold: %#v", threshold),
+	}
+
+	// Create a message that clearly states the comparison relationship
+	messageHeading := fmt.Sprintf("Value is not %s threshold", comparison)
+	messageBody := strings.Join(parts, "\n  ") // Consistent indentation
+	message := fmt.Sprintf("%s:\n  %s", messageHeading, messageBody)
+
+	reportError(t, ctx, "%s", message)
 }

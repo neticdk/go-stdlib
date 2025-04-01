@@ -11,8 +11,10 @@ func Error(t testingT, got error, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if got == nil {
-		t.Errorf("Expected error, got nil")
+		reportError(t, ctx, "Expected error, got nil")
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -26,8 +28,10 @@ func NoError(t testingT, got error, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if got != nil {
-		t.Errorf("Expected no error, got: %v", got)
+		reportError(t, ctx, "Expected no error, got: %v", got)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -41,14 +45,16 @@ func ErrorIs(t testingT, got error, target error, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if got == nil {
-		t.Errorf("Expected error matching %v, but got nil error", target)
+		reportError(t, ctx, "Expected error matching %v, but got nil error", target)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
 	if !errors.Is(got, target) {
-		t.Errorf("Error is not the target type:\n Got error: %v\nWant target: %v", got, target)
+		reportError(t, ctx, "Error is not the target type:\n Got error: %v\n Want target: %v", got, target)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -66,6 +72,8 @@ func ErrorAs(t testingT, got error, targetPtr any, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if got == nil {
 		// Determine target type for better error message
 		targetType := "unknown type"
@@ -75,20 +83,20 @@ func ErrorAs(t testingT, got error, targetPtr any, msgAndArgs ...any) bool {
 				targetType = ptrType.Elem().String()
 			}
 		}
-		t.Errorf("Expected error of type %s, but got nil error", targetType)
+		reportError(t, ctx, "Expected error of type %q, but got nil error", targetType)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
 	if targetPtr == nil {
-		t.Errorf("Target pointer for ErrorAs cannot be nil")
+		reportError(t, ctx, "Target pointer for ErrorAs cannot be nil")
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
 	ptrType := reflect.TypeOf(targetPtr)
 	if ptrType.Kind() != reflect.Ptr {
-		t.Errorf("Target for ErrorAs must be a pointer, got %T", targetPtr)
+		reportError(t, ctx, "Target for ErrorAs must be a pointer, got %T", targetPtr)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -98,7 +106,7 @@ func ErrorAs(t testingT, got error, targetPtr any, msgAndArgs ...any) bool {
 	// Let errors.As handle the check for simplicity for now.
 
 	if !errors.As(got, targetPtr) {
-		t.Errorf("Error cannot be assigned to target type %T:\n Got error: %v", targetPtr, got)
+		reportError(t, ctx, "Error cannot be assigned to target type %T:\n Got error: %v", targetPtr, got)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}

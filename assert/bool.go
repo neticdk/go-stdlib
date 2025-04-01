@@ -6,8 +6,10 @@ func True(t testingT, got bool, msgAndArgs ...any) bool { //revive:disable-line:
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if !got {
-		t.Errorf("Expected true, got false")
+		reportError(t, ctx, "Expected true, got false")
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -20,8 +22,10 @@ func False(t testingT, got bool, msgAndArgs ...any) bool { //revive:disable-line
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if got {
-		t.Errorf("Expected false, got true")
+		reportError(t, ctx, "Expected false, got true")
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}

@@ -1,8 +1,17 @@
 package assert
 
 import (
+	"fmt"
+	"math"
 	"reflect"
+	"strings"
 	"time"
+)
+
+// Define epsilon constants based on precision requirements
+const (
+	float32Epsilon = 1e-6  // For float32
+	float64Epsilon = 1e-15 // For float64
 )
 
 // Equal asserts that the given values are equal.
@@ -13,9 +22,24 @@ func Equal[T any](t testingT, got T, want T, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if !equalInternal(got, want) {
-		// Note to self: this is where we might want to add diff output
-		t.Errorf("Values are not equal:\n Got: %#v\nWant: %#v", got, want)
+		var details []string
+		if DiffsEnabled && shouldGenerateDiff(got, want) {
+			diff := computeDiff(got, want)
+			if diff != "" {
+				// Add the diff with proper indentation
+				diffLines := strings.Split(diff, "\n")
+				if len(diffLines) > 0 {
+					details = append(details, "Diff:")
+					for _, line := range diffLines {
+						details = append(details, "  "+line)
+					}
+				}
+			}
+		}
+		reportEqualityError(t, ctx, "equal", got, want, details...)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -31,9 +55,10 @@ func NotEqual[T any](t testingT, got T, want T, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if equalInternal(got, want) {
-		// Note to self: this is where we might want to add diff output
-		t.Errorf("Values should not be equal:\n Got: %#v", got)
+		reportEqualityError(t, ctx, "not equal", got, want)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -46,9 +71,18 @@ func InDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAndAr
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	diff, absDelta := deltaInternal(got, want, delta)
-	if diff > absDelta {
-		t.Errorf("Values are not within delta (%.6g):\n Got: %g\nWant: %g", delta, got, want)
+
+	// Calculate an appropriate epsilon based on the scale of the values
+	epsilon := calculateEpsilon(got, want, diff, absDelta)
+
+	if diff > (absDelta + epsilon) {
+		reportEqualityError(t, ctx, "within delta", got, want,
+			fmt.Sprintf("Delta: %g", delta),
+			fmt.Sprintf("Difference: %g", diff),
+			fmt.Sprintf("Allowed difference: %g", absDelta))
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -63,9 +97,18 @@ func NotInDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAn
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	diff, absDelta := deltaInternal(got, want, delta)
-	if diff <= absDelta {
-		t.Errorf("Values are within delta (%.6g):\n Got: %g\nWant: %g", delta, got, want)
+
+	// Calculate an appropriate epsilon based on the scale of the values
+	epsilon := calculateEpsilon(got, want, diff, absDelta)
+
+	if diff <= (absDelta + epsilon) {
+		reportEqualityError(t, ctx, "not within delta", got, want,
+			fmt.Sprintf("Delta: %g", delta),
+			fmt.Sprintf("Difference: %.6g", diff),
+			fmt.Sprintf("Allowed difference: %g", absDelta))
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -109,4 +152,72 @@ func equalInternal[T any](got T, want T) bool {
 	}
 
 	return false
+}
+
+// reportEqualityError reports errors for equality assertions (Equal, NotEqual, etc.)
+func reportEqualityError(t testingT, ctx *AssertionContext, assertion string, got, want any, details ...string) { //revive:disable-line:argument-limit
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
+	// Start building parts of the message
+	parts := []string{
+		fmt.Sprintf("Got: %#v", got),
+		fmt.Sprintf("Want: %#v", want),
+	}
+
+	// Add any additional details
+	if len(details) > 0 {
+		parts = append(parts, "Details:")
+		for _, detail := range details {
+			parts = append(parts, "  "+detail) // Add indentation to details
+		}
+	}
+
+	// Create a message based on the assertion type
+	var messageHeading string
+	switch assertion {
+	case "equal":
+		messageHeading = "Values are not equal"
+	case "not equal":
+		messageHeading = "Values should not be equal"
+	case "within delta":
+		messageHeading = "Values are not within delta"
+	case "not within delta":
+		messageHeading = "Values are within delta"
+	case "same":
+		messageHeading = "Values do not reference the same object"
+	default:
+		messageHeading = fmt.Sprintf("Equality assertion '%s' failed", assertion)
+	}
+
+	messageBody := strings.Join(parts, "\n  ") // Consistent indentation
+	message := fmt.Sprintf("%s:\n  %s", messageHeading, messageBody)
+
+	reportError(t, ctx, "%s", message)
+}
+
+// calculateEpsilon determines an appropriate epsilon based on the magnitude of values
+func calculateEpsilon[T ~float32 | ~float64](got, want, diff, absDelta T) T {
+	// Default epsilon based on type
+	var baseEpsilon T
+	if reflect.TypeOf(got).Kind() == reflect.Float32 {
+		baseEpsilon = T(float32Epsilon)
+	} else {
+		baseEpsilon = T(float64Epsilon)
+	}
+
+	// Scale epsilon based on magnitude of values and delta
+	maxMagnitude := T(math.Max(math.Abs(float64(got)), math.Abs(float64(want))))
+	if maxMagnitude > 1.0 {
+		// For large values, scale epsilon relative to their magnitude
+		return baseEpsilon * maxMagnitude
+	}
+
+	// For values near delta boundary, use a more conservative epsilon
+	if math.Abs(float64(diff-absDelta)) < float64(baseEpsilon*100) {
+		return baseEpsilon * 10
+	}
+
+	return baseEpsilon
 }

@@ -16,9 +16,11 @@ func Contains(t testingT, collection any, element any, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	found, err := containsElementInternal(collection, element)
 	if err != nil {
-		t.Errorf("Error checking contains: %v\n Collection: %#v\n Element: %#v", err, collection, element)
+		reportCollectionError(t, ctx, "Error checking contains", collection, element, err)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -30,7 +32,7 @@ func Contains(t testingT, collection any, element any, msgAndArgs ...any) bool {
 		} else if colKind == reflect.Map {
 			errMsg = "Map does not contain value"
 		}
-		t.Errorf("%s:\n Collection: %#v\n    Element: %#v", errMsg, collection, element)
+		reportCollectionError(t, ctx, errMsg, collection, element, nil)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -45,9 +47,11 @@ func NotContains(t testingT, collection any, element any, msgAndArgs ...any) boo
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	found, err := containsElementInternal(collection, element)
 	if err != nil {
-		t.Errorf("Error checking not-contains: %v\n Collection: %#v\n Element: %#v", err, collection, element)
+		reportCollectionError(t, ctx, "Error checking not-contains", collection, element, err)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -59,7 +63,7 @@ func NotContains(t testingT, collection any, element any, msgAndArgs ...any) boo
 		} else if colKind == reflect.Map {
 			errMsg = "Map should not contain value"
 		}
-		t.Errorf("%s:\n Collection: %#v\n    Element: %#v", errMsg, collection, element)
+		reportCollectionError(t, ctx, errMsg, collection, element, nil)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -72,9 +76,11 @@ func ContainsKey[K comparable, V any](t testingT, m map[K]V, key K, msgAndArgs .
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	_, ok := m[key]
 	if !ok {
-		t.Errorf("Map does not contain key:\n      Map: %#v\n Expected Key: %#v", m, key)
+		reportCollectionError(t, ctx, "Map does not contain key", m, key, nil)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -88,9 +94,11 @@ func NotContainsKey[K comparable, V any](t testingT, m map[K]V, key K, msgAndArg
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	_, ok := m[key]
 	if ok {
-		t.Errorf("Map should not contain key:\n      Map: %#v\n Unexpected Key: %#v", m, key)
+		reportCollectionError(t, ctx, "Map should not contain key", m, key, nil)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -106,8 +114,10 @@ func Empty(t testingT, data any, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if !isEmptyInternal(data) {
-		t.Errorf("Expected empty/zero value, got: %#v", data)
+		reportError(t, ctx, "Expected empty/zero value, got %#v", data)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -121,8 +131,10 @@ func NotEmpty(t testingT, data any, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if isEmptyInternal(data) {
-		t.Errorf("Expected non-empty/non-zero value, got empty/zero: %#v", data)
+		reportError(t, ctx, "Expected non-empty/zero value, got empty/zero: %#v", data)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -135,6 +147,8 @@ func Len(t testingT, data any, expectedLen int, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	v := reflect.ValueOf(data)
 	var actualLen int
 
@@ -142,13 +156,13 @@ func Len(t testingT, data any, expectedLen int, msgAndArgs ...any) bool {
 	case reflect.Slice, reflect.Map, reflect.String, reflect.Chan, reflect.Array:
 		actualLen = v.Len()
 	default:
-		t.Errorf("Cannot get length of type %T, value: %#v", data, data)
+		reportError(t, ctx, "Cannot get length of type %T, value: %#v", data, data)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
 	if actualLen != expectedLen {
-		t.Errorf("Length mismatch:\n Expected: %d\n      Got: %d\n    Value: %#v", expectedLen, actualLen, data)
+		reportError(t, ctx, "Length mismatch:\n Expected: %d\n Got: %d\n Value: %#v", expectedLen, actualLen, data)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -220,4 +234,24 @@ func containsElementInternal(collection any, element any) (bool, error) {
 	default:
 		return false, fmt.Errorf("type %T is not searchable for elements (only slice, array, map, string)", collection)
 	}
+}
+
+func reportCollectionError(t testingT, ctx *AssertionContext, errType string, collection, element any, err error) { //revive:disable-line:argument-limit
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
+	parts := []string{
+		fmt.Sprintf("Collection: %#v", collection),
+		fmt.Sprintf("Element: %#v", element),
+	}
+
+	if err != nil {
+		parts = append(parts, fmt.Sprintf("Error: %v", err))
+	}
+
+	messageBody := strings.Join(parts, "\n  ")
+	message := fmt.Sprintf("%s:\n  %s", errType, messageBody)
+
+	reportError(t, ctx, "%s", message)
 }

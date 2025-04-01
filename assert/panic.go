@@ -11,6 +11,8 @@ func Panics(t testingT, f func(), msgAndArgs ...any) (didPanic bool, panicValue 
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	defer func() {
 		if r := recover(); r != nil {
 			didPanic = true
@@ -21,7 +23,7 @@ func Panics(t testingT, f func(), msgAndArgs ...any) (didPanic bool, panicValue 
 	f()
 
 	if !didPanic {
-		t.Errorf("Expected panic, but code did not panic")
+		reportError(t, ctx, "Expected panic, but code did not panic")
 		logOptionalMessage(t, msgAndArgs...)
 	}
 
@@ -34,6 +36,8 @@ func NotPanics(t testingT, f func(), msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	defer func() {
 		if r := recover(); r != nil {
 			// Get stack trace
@@ -43,10 +47,8 @@ func NotPanics(t testingT, f func(), msgAndArgs ...any) bool {
 			//
 			// Format error message with panic value and type
 			panicType := fmt.Sprintf("%T", r)
-			errorMsg := fmt.Sprintf("Unexpected panic [%s]: %v\n\nStack trace:\n%s",
-				panicType, r, stackString)
 
-			t.Errorf(errorMsg)
+			reportError(t, ctx, "Unexpected panic [%s]: %v\n\nStack trace:\n%s", panicType, r, stackString)
 			logOptionalMessage(t, msgAndArgs...)
 		}
 	}()

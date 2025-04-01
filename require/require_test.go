@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt" // Import fmt for Errorf implementation
 	"testing"
+	"time"
 
 	"github.com/neticdk/go-stdlib/require"
 )
@@ -200,6 +201,58 @@ func TestPanics(t *testing.T) {
 
 func TestNotPanics(t *testing.T) {
 	require.NotPanics(t, func() {}, "NotPanics should pass when function does not panic")
+}
+
+// --- time ---
+
+func TestTimeAfter(t *testing.T) {
+	now := time.Now()
+	after := now.Add(1 * time.Hour)
+
+	// Test passing case
+	require.TimeAfter(t, after, now, "Time should be after now")
+}
+
+func TestTimeBefore(t *testing.T) {
+	now := time.Now()
+	before := now.Add(-1 * time.Hour)
+
+	// Test passing case
+	require.TimeBefore(t, before, now, "Time should be before now")
+}
+
+func TestTimeEqual(t *testing.T) {
+	now := time.Now()
+	sameTimeOtherZone := now.In(time.FixedZone("UTC+2", 2*60*60))
+
+	// Test passing case
+	require.TimeEqual(t, now, now, "Identical times should be equal")
+	require.TimeEqual(t, now, sameTimeOtherZone, "Same time in different zone should be equal")
+}
+
+func TestWithinDuration(t *testing.T) {
+	now := time.Now()
+	nearTime := now.Add(30 * time.Second)
+
+	// Test passing case
+	require.WithinDuration(t, nearTime, now, 1*time.Minute, "Times should be within 1 minute")
+}
+
+func TestTimeEqualWithPrecision(t *testing.T) {
+	baseTime := time.Date(2023, 5, 15, 10, 30, 0, 0, time.UTC)
+	sameMinute := time.Date(2023, 5, 15, 10, 30, 45, 0, time.UTC)
+
+	// Test passing case
+	require.TimeEqualWithPrecision(t, baseTime, sameMinute, time.Minute, "Times should be equal when truncated to minutes")
+}
+
+func TestWithinTime(t *testing.T) {
+	now := time.Now()
+	start := now.Add(-1 * time.Hour)
+	end := now.Add(1 * time.Hour)
+
+	// Test passing case
+	require.WithinTime(t, now, start, end, "Time should be within the window")
 }
 
 // --- Failure Path Tests ---
@@ -472,4 +525,51 @@ func TestNotPanics_Failure(t *testing.T) {
 	mockT := &mockTestingT{}
 	require.NotPanics(mockT, func() { panic("oh no") })
 	assertFailedNow(t, mockT, "require.NotPanics")
+}
+
+func TestTimeAfterFailure(t *testing.T) {
+	mockT := &mockTestingT{}
+	now := time.Now()
+	before := now.Add(-1 * time.Hour)
+	require.TimeAfter(mockT, before, now)
+	assertFailedNow(t, mockT, "require.TimeAfter")
+}
+
+func TestTimeBeforeFailure(t *testing.T) {
+	mockT := &mockTestingT{}
+	now := time.Now()
+	after := now.Add(1 * time.Hour)
+	require.TimeBefore(mockT, after, now)
+	assertFailedNow(t, mockT, "require.TimeBefore")
+}
+
+func TestTimeEqualFailure(t *testing.T) {
+	mockT := &mockTestingT{}
+	now := time.Now()
+	require.TimeEqual(mockT, now, now.Add(1*time.Second))
+	assertFailedNow(t, mockT, "require.TimeEqual")
+}
+
+func TestWithinTimeFailure(t *testing.T) {
+	mockT := &mockTestingT{}
+	now := time.Now()
+	start := now.Add(1 * time.Hour)
+	end := now.Add(2 * time.Hour)
+	require.WithinTime(mockT, now, start, end)
+	assertFailedNow(t, mockT, "require.WithinTime")
+}
+
+func TestWithinDurationFailure(t *testing.T) {
+	mockT := &mockTestingT{}
+	now := time.Now()
+	duration := 1 * time.Hour
+	require.WithinDuration(mockT, now, now.Add(2*time.Hour), duration)
+	assertFailedNow(t, mockT, "require.WithinDuration")
+}
+
+func TestTimeEqualWithPrecisionFailure(t *testing.T) {
+	mockT := &mockTestingT{}
+	now := time.Now()
+	require.TimeEqualWithPrecision(mockT, now, now.Add(1*time.Second), time.Millisecond)
+	assertFailedNow(t, mockT, "require.TimeEqualWithPrecision")
 }

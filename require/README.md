@@ -38,14 +38,20 @@ This is useful when a test cannot proceed meaningfully after a specific assertio
 - [func NotNil\(t testingT, data any, msgAndArgs ...any\)](<#NotNil>)
 - [func NotPanics\(t testingT, f func\(\), msgAndArgs ...any\)](<#NotPanics>)
 - [func NotZero\(t testingT, data any, msgAndArgs ...any\)](<#NotZero>)
-- [func Panics\(t testingT, f func\(\), msgAndArgs ...any\)](<#Panics>)
+- [func Panics\(t testingT, f func\(\), msgAndArgs ...any\) \(didPanic bool, panicValue any\)](<#Panics>)
 - [func Positive\[T cmp.Ordered\]\(t testingT, got T, msgAndArgs ...any\)](<#Positive>)
+- [func TimeAfter\(t testingT, got, threshold time.Time, msgAndArgs ...any\)](<#TimeAfter>)
+- [func TimeBefore\(t testingT, got, threshold time.Time, msgAndArgs ...any\)](<#TimeBefore>)
+- [func TimeEqual\(t testingT, got, want time.Time, msgAndArgs ...any\)](<#TimeEqual>)
+- [func TimeEqualWithPrecision\(t testingT, got, want time.Time, precision time.Duration, msgAndArgs ...any\)](<#TimeEqualWithPrecision>)
 - [func True\(t testingT, value bool, msgAndArgs ...any\)](<#True>)
+- [func WithinDuration\(t testingT, got, want time.Time, delta time.Duration, msgAndArgs ...any\)](<#WithinDuration>)
+- [func WithinTime\(t testingT, got time.Time, start, end time.Time, msgAndArgs ...any\)](<#WithinTime>)
 - [func Zero\(t testingT, data any, msgAndArgs ...any\)](<#Zero>)
 
 
 <a name="Contains"></a>
-## func [Contains](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L45>)
+## func [Contains](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L46>)
 
 ```go
 func Contains(t testingT, collection any, element any, msgAndArgs ...any)
@@ -54,7 +60,7 @@ func Contains(t testingT, collection any, element any, msgAndArgs ...any)
 Contains requires that the specified list\(array, slice...\) contains the specified element.
 
 <a name="ContainsKey"></a>
-## func [ContainsKey](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L65>)
+## func [ContainsKey](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L66>)
 
 ```go
 func ContainsKey[K comparable, V any](t testingT, m map[K]V, key K, msgAndArgs ...any)
@@ -63,7 +69,7 @@ func ContainsKey[K comparable, V any](t testingT, m map[K]V, key K, msgAndArgs .
 ContainsKey requires that the specified map contains the specified key.
 
 <a name="ElementsMatch"></a>
-## func [ElementsMatch](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L199>)
+## func [ElementsMatch](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L200>)
 
 ```go
 func ElementsMatch[T comparable](t testingT, listA []T, listB []T, msgAndArgs ...any)
@@ -72,7 +78,7 @@ func ElementsMatch[T comparable](t testingT, listA []T, listB []T, msgAndArgs ..
 ElementsMatch requires that the specified lists or maps contain the same elements in any order.
 
 <a name="Empty"></a>
-## func [Empty](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L86>)
+## func [Empty](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L87>)
 
 ```go
 func Empty(t testingT, data any, msgAndArgs ...any)
@@ -81,7 +87,7 @@ func Empty(t testingT, data any, msgAndArgs ...any)
 Empty requires that the specified object is empty. Objects considered empty are nil, "", false, 0, or a channel, slice, array or map with len == 0.
 
 <a name="Equal"></a>
-## func [Equal](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L211>)
+## func [Equal](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L212>)
 
 ```go
 func Equal[T any](t testingT, got T, want T, msgAndArgs ...any)
@@ -90,7 +96,7 @@ func Equal[T any](t testingT, got T, want T, msgAndArgs ...any)
 Equal requires that the two objects are equal.
 
 <a name="Error"></a>
-## func [Error](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L255>)
+## func [Error](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L256>)
 
 ```go
 func Error(t testingT, got error, msgAndArgs ...any)
@@ -99,7 +105,7 @@ func Error(t testingT, got error, msgAndArgs ...any)
 Error requires that the specified err is not nil.
 
 <a name="ErrorAs"></a>
-## func [ErrorAs](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L285>)
+## func [ErrorAs](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L286>)
 
 ```go
 func ErrorAs(t testingT, got error, target any, msgAndArgs ...any)
@@ -108,7 +114,7 @@ func ErrorAs(t testingT, got error, target any, msgAndArgs ...any)
 ErrorAs requires that the specified error is assignable to the target.
 
 <a name="ErrorIs"></a>
-## func [ErrorIs](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L275>)
+## func [ErrorIs](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L276>)
 
 ```go
 func ErrorIs(t testingT, got error, target error, msgAndArgs ...any)
@@ -117,7 +123,7 @@ func ErrorIs(t testingT, got error, target error, msgAndArgs ...any)
 ErrorIs requires that the specified error is assignable to the target.
 
 <a name="False"></a>
-## func [False](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L33>)
+## func [False](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L34>)
 
 ```go
 func False(t testingT, value bool, msgAndArgs ...any)
@@ -126,7 +132,7 @@ func False(t testingT, value bool, msgAndArgs ...any)
 False requires that the specified value is false.
 
 <a name="Greater"></a>
-## func [Greater](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L139>)
+## func [Greater](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L140>)
 
 ```go
 func Greater[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any)
@@ -135,7 +141,7 @@ func Greater[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any)
 Greater requires that the first element is greater than the second.
 
 <a name="GreaterOrEqual"></a>
-## func [GreaterOrEqual](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L149>)
+## func [GreaterOrEqual](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L150>)
 
 ```go
 func GreaterOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any)
@@ -144,7 +150,7 @@ func GreaterOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ..
 GreaterOrEqual requires that the first element is greater than or equal to the second.
 
 <a name="InDelta"></a>
-## func [InDelta](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L231>)
+## func [InDelta](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L232>)
 
 ```go
 func InDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAndArgs ...any)
@@ -153,7 +159,7 @@ func InDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAndAr
 InDelta requires that the specified values are within the delta of each other.
 
 <a name="Len"></a>
-## func [Len](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L107>)
+## func [Len](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L108>)
 
 ```go
 func Len(t testingT, data any, expectedLen int, msgAndArgs ...any)
@@ -162,7 +168,7 @@ func Len(t testingT, data any, expectedLen int, msgAndArgs ...any)
 Len requires that the specified object has the specified length. Len also fails if the object has a type that len\(\) not accept.
 
 <a name="Less"></a>
-## func [Less](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L159>)
+## func [Less](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L160>)
 
 ```go
 func Less[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any)
@@ -171,7 +177,7 @@ func Less[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any)
 Less requires that the first element is less than the second.
 
 <a name="LessOrEqual"></a>
-## func [LessOrEqual](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L169>)
+## func [LessOrEqual](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L170>)
 
 ```go
 func LessOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any)
@@ -180,7 +186,7 @@ func LessOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...an
 LessOrEqual requires that the first element is less than or equal to the second.
 
 <a name="Negative"></a>
-## func [Negative](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L189>)
+## func [Negative](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L190>)
 
 ```go
 func Negative[T cmp.Ordered](t testingT, got T, msgAndArgs ...any)
@@ -189,7 +195,7 @@ func Negative[T cmp.Ordered](t testingT, got T, msgAndArgs ...any)
 Negative requires that the specified value is negative.
 
 <a name="Nil"></a>
-## func [Nil](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L297>)
+## func [Nil](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L298>)
 
 ```go
 func Nil(t testingT, data any, msgAndArgs ...any)
@@ -198,7 +204,7 @@ func Nil(t testingT, data any, msgAndArgs ...any)
 Nil requires that the specified object is nil.
 
 <a name="NoError"></a>
-## func [NoError](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L265>)
+## func [NoError](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L266>)
 
 ```go
 func NoError(t testingT, got error, msgAndArgs ...any)
@@ -207,7 +213,7 @@ func NoError(t testingT, got error, msgAndArgs ...any)
 NoError requires that the specified err is nil.
 
 <a name="NotContains"></a>
-## func [NotContains](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L55>)
+## func [NotContains](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L56>)
 
 ```go
 func NotContains(t testingT, collection any, element any, msgAndArgs ...any)
@@ -216,7 +222,7 @@ func NotContains(t testingT, collection any, element any, msgAndArgs ...any)
 NotContains requires that the specified list\(array, slice...\) does not contain the specified element.
 
 <a name="NotContainsKey"></a>
-## func [NotContainsKey](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L75>)
+## func [NotContainsKey](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L76>)
 
 ```go
 func NotContainsKey[K comparable, V any](t testingT, m map[K]V, key K, msgAndArgs ...any)
@@ -225,7 +231,7 @@ func NotContainsKey[K comparable, V any](t testingT, m map[K]V, key K, msgAndArg
 NotContainsKey requires that the specified map does not contain the specified key.
 
 <a name="NotEmpty"></a>
-## func [NotEmpty](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L97>)
+## func [NotEmpty](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L98>)
 
 ```go
 func NotEmpty(t testingT, data any, msgAndArgs ...any)
@@ -234,7 +240,7 @@ func NotEmpty(t testingT, data any, msgAndArgs ...any)
 NotEmpty requires that the specified object is not empty. Objects considered empty are nil, "", false, 0, or a channel, slice, array or map with len == 0.
 
 <a name="NotEqual"></a>
-## func [NotEqual](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L221>)
+## func [NotEqual](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L222>)
 
 ```go
 func NotEqual[T any](t testingT, got T, want T, msgAndArgs ...any)
@@ -243,7 +249,7 @@ func NotEqual[T any](t testingT, got T, want T, msgAndArgs ...any)
 NotEqual requires that the specified values are not equal.
 
 <a name="NotInDelta"></a>
-## func [NotInDelta](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L242>)
+## func [NotInDelta](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L243>)
 
 ```go
 func NotInDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAndArgs ...any)
@@ -252,7 +258,7 @@ func NotInDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAn
 NotInDelta requires that the specified values are not within the delta of each other. It fails if |got \- want| \<= |delta|.
 
 <a name="NotNil"></a>
-## func [NotNil](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L307>)
+## func [NotNil](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L308>)
 
 ```go
 func NotNil(t testingT, data any, msgAndArgs ...any)
@@ -261,7 +267,7 @@ func NotNil(t testingT, data any, msgAndArgs ...any)
 NotNil requires that the specified object is not nil.
 
 <a name="NotPanics"></a>
-## func [NotPanics](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L329>)
+## func [NotPanics](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L332>)
 
 ```go
 func NotPanics(t testingT, f func(), msgAndArgs ...any)
@@ -270,7 +276,7 @@ func NotPanics(t testingT, f func(), msgAndArgs ...any)
 NotPanics requires that the code inside the specified PanicTestFunc does not panic.
 
 <a name="NotZero"></a>
-## func [NotZero](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L129>)
+## func [NotZero](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L130>)
 
 ```go
 func NotZero(t testingT, data any, msgAndArgs ...any)
@@ -279,16 +285,16 @@ func NotZero(t testingT, data any, msgAndArgs ...any)
 NotZero requires that the specified value is not the zero value for its type.
 
 <a name="Panics"></a>
-## func [Panics](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L319>)
+## func [Panics](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L320>)
 
 ```go
-func Panics(t testingT, f func(), msgAndArgs ...any)
+func Panics(t testingT, f func(), msgAndArgs ...any) (didPanic bool, panicValue any)
 ```
 
 Panics requires that the code inside the specified PanicTestFunc panics.
 
 <a name="Positive"></a>
-## func [Positive](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L179>)
+## func [Positive](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L180>)
 
 ```go
 func Positive[T cmp.Ordered](t testingT, got T, msgAndArgs ...any)
@@ -296,8 +302,44 @@ func Positive[T cmp.Ordered](t testingT, got T, msgAndArgs ...any)
 
 Positive requires that the specified value is positive.
 
+<a name="TimeAfter"></a>
+## func [TimeAfter](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L342>)
+
+```go
+func TimeAfter(t testingT, got, threshold time.Time, msgAndArgs ...any)
+```
+
+TimeAfter requires that a time is after a threshold time
+
+<a name="TimeBefore"></a>
+## func [TimeBefore](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L352>)
+
+```go
+func TimeBefore(t testingT, got, threshold time.Time, msgAndArgs ...any)
+```
+
+TimeBefore requires that a time is before a threshold time
+
+<a name="TimeEqual"></a>
+## func [TimeEqual](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L362>)
+
+```go
+func TimeEqual(t testingT, got, want time.Time, msgAndArgs ...any)
+```
+
+TimeEqual requires that two times represent the same instant
+
+<a name="TimeEqualWithPrecision"></a>
+## func [TimeEqualWithPrecision](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L382>)
+
+```go
+func TimeEqualWithPrecision(t testingT, got, want time.Time, precision time.Duration, msgAndArgs ...any)
+```
+
+TimeEqualWithPrecision requires that two times are equal within a certain precision
+
 <a name="True"></a>
-## func [True](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L23>)
+## func [True](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L24>)
 
 ```go
 func True(t testingT, value bool, msgAndArgs ...any)
@@ -305,8 +347,26 @@ func True(t testingT, value bool, msgAndArgs ...any)
 
 True requires that the specified value is true.
 
+<a name="WithinDuration"></a>
+## func [WithinDuration](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L372>)
+
+```go
+func WithinDuration(t testingT, got, want time.Time, delta time.Duration, msgAndArgs ...any)
+```
+
+WithinDuration requires that two times are within a certain duration of each other
+
+<a name="WithinTime"></a>
+## func [WithinTime](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L392>)
+
+```go
+func WithinTime(t testingT, got time.Time, start, end time.Time, msgAndArgs ...any)
+```
+
+WithinTime requires that a time is within a given time window
+
 <a name="Zero"></a>
-## func [Zero](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L119>)
+## func [Zero](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L120>)
 
 ```go
 func Zero(t testingT, data any, msgAndArgs ...any)

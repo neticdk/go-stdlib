@@ -197,7 +197,7 @@ func TestNotInDelta(t *testing.T) {
 		{"outside delta", 5.3, 5.0, 0.2, true, ""},
 		{"barely outside delta", 5.21, 5.0, 0.2, true, ""},
 		{"within delta", 5.1, 5.0, 0.2, false, "Values are within delta"},
-		{"equal to delta boundary", 5.2, 5.0, 0.2, true, ""}, // Due to floating-point precision, diff is slightly > delta
+		{"equal to delta boundary", 5.2, 5.0, 0.2, false, ""},
 		{"equal values", 5.0, 5.0, 0.2, false, "Values are within delta"},
 		{"negative outside delta", -5.3, -5.0, 0.2, true, ""},
 		{"negative within delta", -5.1, -5.0, 0.2, false, "Values are within delta"},

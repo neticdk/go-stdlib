@@ -10,8 +10,10 @@ func Nil(t testingT, data any, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if !isNilInternal(data) {
-		t.Errorf("Expected nil, got: %#v", data)
+		reportError(t, ctx, "Expected nil, got: %#v", data)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -25,8 +27,10 @@ func NotNil(t testingT, data any, msgAndArgs ...any) bool {
 		h.Helper()
 	}
 
+	ctx := NewAssertionContext(1)
+
 	if isNilInternal(data) {
-		t.Errorf("Expected not nil, got nil")
+		reportError(t, ctx, "Expected not nil, got nil")
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}

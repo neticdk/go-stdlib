@@ -27,7 +27,7 @@ func TestPanics(t *testing.T) {
 		if mockT.Failed() {
 			if len(mockT.errorMessages) == 0 {
 				t.Errorf("Expected error message, got none")
-			} else if mockT.errorMessages[0] != "Expected panic, but code did not panic" {
+			} else if !strings.Contains(mockT.errorMessages[0], "Expected panic, but code did not panic") {
 				t.Errorf("Expected 'Expected panic, but code did not panic', got: %v", mockT.errorMessages[0])
 			}
 		} else {

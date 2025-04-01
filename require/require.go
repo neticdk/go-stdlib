@@ -2,6 +2,7 @@ package require
 
 import (
 	"cmp"
+	"time"
 
 	"github.com/neticdk/go-stdlib/assert"
 )
@@ -333,6 +334,66 @@ func NotPanics(t testingT, f func(), msgAndArgs ...any) {
 		h.Helper()
 	}
 	if !assert.NotPanics(t, f, msgAndArgs...) {
+		t.FailNow()
+	}
+}
+
+// TimeAfter requires that a time is after a threshold time
+func TimeAfter(t testingT, got, threshold time.Time, msgAndArgs ...any) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if !assert.TimeAfter(t, got, threshold, msgAndArgs...) {
+		t.FailNow()
+	}
+}
+
+// TimeBefore requires that a time is before a threshold time
+func TimeBefore(t testingT, got, threshold time.Time, msgAndArgs ...any) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if !assert.TimeBefore(t, got, threshold, msgAndArgs...) {
+		t.FailNow()
+	}
+}
+
+// TimeEqual requires that two times represent the same instant
+func TimeEqual(t testingT, got, want time.Time, msgAndArgs ...any) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if !assert.TimeEqual(t, got, want, msgAndArgs...) {
+		t.FailNow()
+	}
+}
+
+// WithinDuration requires that two times are within a certain duration of each other
+func WithinDuration(t testingT, got, want time.Time, delta time.Duration, msgAndArgs ...any) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if !assert.WithinDuration(t, got, want, delta, msgAndArgs...) {
+		t.FailNow()
+	}
+}
+
+// TimeEqualWithPrecision requires that two times are equal within a certain precision
+func TimeEqualWithPrecision(t testingT, got, want time.Time, precision time.Duration, msgAndArgs ...any) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if !assert.TimeEqualWithPrecision(t, got, want, precision, msgAndArgs...) {
+		t.FailNow()
+	}
+}
+
+// WithinTime requires that a time is within a given time window
+func WithinTime(t testingT, got time.Time, start, end time.Time, msgAndArgs ...any) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if !assert.WithinTime(t, got, start, end, msgAndArgs...) {
 		t.FailNow()
 	}
 }

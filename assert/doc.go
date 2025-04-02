@@ -117,5 +117,3 @@
 // A companion package 'require' provides the same assertions, but calls t.FailNow()
 // to stop test execution immediately on failure.
 package assert
-
-//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md

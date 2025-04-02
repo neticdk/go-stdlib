@@ -48,8 +48,6 @@ Do *NOT* add exceptions to this list without peer review.
 ```go
 // Package mypkg does ...
 package mypkg
-
-//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md
 ```
 
 ## Packages

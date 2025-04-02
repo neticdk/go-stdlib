@@ -283,11 +283,11 @@ func ErrorIs(t testingT, got error, target error, msgAndArgs ...any) {
 }
 
 // ErrorAs requires that the specified error is assignable to the target.
-func ErrorAs(t testingT, got error, target any, msgAndArgs ...any) {
+func ErrorAs(t testingT, got error, targetPtr any, msgAndArgs ...any) {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
 	}
-	if !assert.ErrorAs(t, got, target, msgAndArgs...) {
+	if !assert.ErrorAs(t, got, targetPtr, msgAndArgs...) {
 		t.FailNow()
 	}
 }

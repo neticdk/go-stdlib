@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -15,7 +14,7 @@ const (
 )
 
 // Equal asserts that the given values are equal.
-// It does not not create advanced diff output for complex types. Use something
+// It doesn't create advanced diff output for complex types. Use something
 // like github.com/google/go-cmp/cmp for more advanced diff output.
 func Equal[T any](t testingT, got T, want T, msgAndArgs ...any) bool {
 	if h, ok := t.(tHelper); ok {
@@ -25,21 +24,23 @@ func Equal[T any](t testingT, got T, want T, msgAndArgs ...any) bool {
 	ctx := NewAssertionContext(1)
 
 	if !equalInternal(got, want) {
-		var details []string
+		err := &AssertionError{
+			Message: "Values are not equal",
+			PrimaryValue: assertionValue{
+				Label: "Got",
+				Value: got,
+			},
+			ComparisonValue: assertionValue{
+				Label: "Want",
+				Value: want,
+			},
+		}
+
 		if DiffsEnabled && shouldGenerateDiff(got, want) {
 			diff := computeDiff(got, want)
-			if diff != "" {
-				// Add the diff with proper indentation
-				diffLines := strings.Split(diff, "\n")
-				if len(diffLines) > 0 {
-					details = append(details, "Diff:")
-					for _, line := range diffLines {
-						details = append(details, "  "+line)
-					}
-				}
-			}
+			err.Diff = diff
 		}
-		reportEqualityError(t, ctx, "equal", got, want, details...)
+		reportAssertionError(t, ctx, err)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -47,7 +48,7 @@ func Equal[T any](t testingT, got T, want T, msgAndArgs ...any) bool {
 }
 
 // NotEqual asserts that the given values are not equal.
-// It does not not create advanced diff output for complex types. Use something
+// It doesn't create advanced diff output for complex types. Use something
 // like github.com/google/go-cmp/cmp for more advanced diff output.
 // Opposite of Equal.
 func NotEqual[T any](t testingT, got T, want T, msgAndArgs ...any) bool {
@@ -58,7 +59,7 @@ func NotEqual[T any](t testingT, got T, want T, msgAndArgs ...any) bool {
 	ctx := NewAssertionContext(1)
 
 	if equalInternal(got, want) {
-		reportEqualityError(t, ctx, "not equal", got, want)
+		reportInequalityError(t, ctx, got, want)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -79,10 +80,32 @@ func InDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAndAr
 	epsilon := calculateEpsilon(got, want, diff, absDelta)
 
 	if diff > (absDelta + epsilon) {
-		reportEqualityError(t, ctx, "within delta", got, want,
-			fmt.Sprintf("Delta: %g", delta),
-			fmt.Sprintf("Difference: %g", diff),
-			fmt.Sprintf("Allowed difference: %g", absDelta))
+		err := &AssertionError{
+			Message: "Values are not within delta",
+			PrimaryValue: assertionValue{
+				Label: "Got",
+				Value: got,
+			},
+			ComparisonValue: assertionValue{
+				Label: "Expected",
+				Value: want,
+			},
+			ExtraValues: []assertionValue{
+				{
+					Label: "Delta",
+					Value: delta,
+				},
+				{
+					Label: "Difference",
+					Value: diff,
+				},
+				{
+					Label: "Allowed difference",
+					Value: absDelta,
+				},
+			},
+		}
+		reportAssertionError(t, ctx, err)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -105,10 +128,32 @@ func NotInDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAn
 	epsilon := calculateEpsilon(got, want, diff, absDelta)
 
 	if diff <= (absDelta + epsilon) {
-		reportEqualityError(t, ctx, "not within delta", got, want,
-			fmt.Sprintf("Delta: %g", delta),
-			fmt.Sprintf("Difference: %.6g", diff),
-			fmt.Sprintf("Allowed difference: %g", absDelta))
+		err := &AssertionError{
+			Message: "Values are within delta",
+			PrimaryValue: assertionValue{
+				Label: "Got",
+				Value: got,
+			},
+			ComparisonValue: assertionValue{
+				Label: "Expected",
+				Value: want,
+			},
+			ExtraValues: []assertionValue{
+				{
+					Label: "Delta",
+					Value: delta,
+				},
+				{
+					Label: "Difference",
+					Value: diff,
+				},
+				{
+					Label: "Allowed difference",
+					Value: absDelta,
+				},
+			},
+		}
+		reportAssertionError(t, ctx, err)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -135,8 +180,8 @@ func equalInternal[T any](got T, want T) bool {
 		return true
 	}
 
-	// Special handling for time.Time using its Equal method, as DeepEqual
-	// compares unexported fields like loc which can differ spuriously.
+	// Special handling for `time.Time` using its Equal method, as DeepEqual
+	// compares unexported fields like `loc` which can differ spuriously.
 	// We need to check AFTER DeepEqual fails, as two nil times are DeepEqual.
 	vGot := reflect.ValueOf(got)
 	vWant := reflect.ValueOf(want)
@@ -154,50 +199,8 @@ func equalInternal[T any](got T, want T) bool {
 	return false
 }
 
-// reportEqualityError reports errors for equality assertions (Equal, NotEqual, etc.)
-func reportEqualityError(t testingT, ctx *AssertionContext, assertion string, got, want any, details ...string) { //revive:disable-line:argument-limit
-	if h, ok := t.(tHelper); ok {
-		h.Helper()
-	}
-
-	// Start building parts of the message
-	parts := []string{
-		fmt.Sprintf("Got: %#v", got),
-		fmt.Sprintf("Want: %#v", want),
-	}
-
-	// Add any additional details
-	if len(details) > 0 {
-		parts = append(parts, "Details:")
-		for _, detail := range details {
-			parts = append(parts, "  "+detail) // Add indentation to details
-		}
-	}
-
-	// Create a message based on the assertion type
-	var messageHeading string
-	switch assertion {
-	case "equal":
-		messageHeading = "Values are not equal"
-	case "not equal":
-		messageHeading = "Values should not be equal"
-	case "within delta":
-		messageHeading = "Values are not within delta"
-	case "not within delta":
-		messageHeading = "Values are within delta"
-	case "same":
-		messageHeading = "Values do not reference the same object"
-	default:
-		messageHeading = fmt.Sprintf("Equality assertion '%s' failed", assertion)
-	}
-
-	messageBody := strings.Join(parts, "\n  ") // Consistent indentation
-	message := fmt.Sprintf("%s:\n  %s", messageHeading, messageBody)
-
-	reportError(t, ctx, "%s", message)
-}
-
 // calculateEpsilon determines an appropriate epsilon based on the magnitude of values
+// Epsilon is scaled to handle varying magnitudes of floats.
 func calculateEpsilon[T ~float32 | ~float64](got, want, diff, absDelta T) T {
 	// Default epsilon based on type
 	var baseEpsilon T
@@ -220,4 +223,48 @@ func calculateEpsilon[T ~float32 | ~float64](got, want, diff, absDelta T) T {
 	}
 
 	return baseEpsilon
+}
+
+// Helper function for equality assertions
+func reportEqualityError(t testingT, ctx *AssertionContext, got, want any, details ...string) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
+	err := &AssertionError{
+		Message: "Values are not equal",
+		PrimaryValue: assertionValue{
+			Label: "Got",
+			Value: fmt.Sprintf("%#v", got),
+		},
+		ComparisonValue: assertionValue{
+			Label: "Want",
+			Value: fmt.Sprintf("%#v", want),
+		},
+		Details: details,
+	}
+
+	reportAssertionError(t, ctx, err)
+}
+
+// Helper function for inequality assertions
+func reportInequalityError(t testingT, ctx *AssertionContext, got, want any, details ...string) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
+	err := &AssertionError{
+		Message: "Values should not be equal",
+		PrimaryValue: assertionValue{
+			Label: "Got",
+			Value: got,
+		},
+		ComparisonValue: assertionValue{
+			Label: "Want",
+			Value: want,
+		},
+		Details: details,
+	}
+
+	reportAssertionError(t, ctx, err)
 }

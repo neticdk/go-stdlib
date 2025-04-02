@@ -23,14 +23,17 @@ func Panics(t testingT, f func(), msgAndArgs ...any) (didPanic bool, panicValue 
 	f()
 
 	if !didPanic {
-		reportError(t, ctx, "Expected panic, but code did not panic")
+		err := &AssertionError{
+			Message: "Expected panic, but code did not panic",
+		}
+		reportAssertionError(t, ctx, err)
 		logOptionalMessage(t, msgAndArgs...)
 	}
 
 	return
 }
 
-// NotPanics asserts that the code inside the specified function does NOT panic.
+// NotPanics asserts that the code inside the specified function doesn't panic.
 func NotPanics(t testingT, f func(), msgAndArgs ...any) bool {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
@@ -38,22 +41,34 @@ func NotPanics(t testingT, f func(), msgAndArgs ...any) bool {
 
 	ctx := NewAssertionContext(1)
 
+	didPanic := false
+
 	defer func() {
 		if r := recover(); r != nil {
-			// Get stack trace
-			stackTrace := make([]byte, 4096)
-			n := runtime.Stack(stackTrace, false)
-			stackString := string(stackTrace[:n])
-			//
-			// Format error message with panic value and type
-			panicType := fmt.Sprintf("%T", r)
+			didPanic = true
+			// Format panic value for clear reporting
+			panicValueStr := fmt.Sprintf("[%T]: %v", r, r)
 
-			reportError(t, ctx, "Unexpected panic [%s]: %v\n\nStack trace:\n%s", panicType, r, stackString)
+			err := &AssertionError{
+				Message: "Unexpected panic",
+				ExtraValues: []assertionValue{
+					{Label: "Panic Value", Value: panicValueStr},
+				},
+			}
+
+			// Always capture stack trace on unexpected panic
+			const size = maxPanicStackDepth
+			buf := make([]byte, size)
+			n := runtime.Stack(buf, false)
+			err.Stack = filterStackTrace(string(buf[:n]))
+
+			reportAssertionError(t, ctx, err)
+
 			logOptionalMessage(t, msgAndArgs...)
 		}
 	}()
 
 	f()
 
-	return true
+	return !didPanic
 }

@@ -34,7 +34,7 @@ func TestContains(t *testing.T) {
 				t.Errorf("assert.Contains() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 
@@ -99,7 +99,7 @@ func TestNotContains(t *testing.T) {
 				t.Errorf("assert.NotContains() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 
@@ -188,7 +188,7 @@ func TestContainsKey(t *testing.T) {
 				t.Errorf("assert.ContainsKey() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 

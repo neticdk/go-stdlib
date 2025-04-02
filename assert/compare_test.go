@@ -15,7 +15,7 @@ func TestGreater(t *testing.T) {
 		threshold any
 		wantPass  bool
 	}{
-		// Ints
+		// Integers
 		{"int: 5 > 3", 5, 3, true},
 		{"int: 3 > 5", 3, 5, false},
 		{"int: 5 > 5", 5, 5, false},
@@ -59,7 +59,7 @@ func TestGreaterOrEqual(t *testing.T) {
 		threshold any
 		wantPass  bool
 	}{
-		// Ints
+		// Integers
 		{"int: 5 >= 3", 5, 3, true},
 		{"int: 3 >= 5", 3, 5, false},
 		{"int: 5 >= 5", 5, 5, true},
@@ -94,7 +94,7 @@ func TestGreaterOrEqual(t *testing.T) {
 				t.Errorf("assert.Greater() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 
@@ -123,7 +123,7 @@ func TestLess(t *testing.T) {
 		threshold any
 		wantPass  bool
 	}{
-		// Ints
+		// Integers
 		{"int: 3 < 5", 3, 5, true},
 		{"int: 5 < 3", 5, 3, false},
 		{"int: 5 < 5", 5, 5, false},
@@ -158,7 +158,7 @@ func TestLess(t *testing.T) {
 				t.Errorf("assert.Less() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 
@@ -187,7 +187,7 @@ func TestLessOrEqual(t *testing.T) {
 		threshold any
 		wantPass  bool
 	}{
-		// Ints
+		// Integers
 		{"int: 3 <= 5", 3, 5, true},
 		{"int: 5 <= 3", 5, 3, false},
 		{"int: 5 <= 5", 5, 5, true},
@@ -222,7 +222,7 @@ func TestLessOrEqual(t *testing.T) {
 				t.Errorf("assert.LessOrEqual() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 
@@ -250,7 +250,7 @@ func TestPositive(t *testing.T) {
 		got      any
 		wantPass bool
 	}{
-		// Ints
+		// Integers
 		{"int: 5", 5, true},
 		{"int: 0", 0, false},
 		{"int: -5", -5, false},
@@ -287,7 +287,7 @@ func TestNegative(t *testing.T) {
 		got      any
 		wantPass bool
 	}{
-		// Ints
+		// Integers
 		{"int: -5", -5, true},
 		{"int: 0", 0, false},
 		{"int: 5", 5, false},

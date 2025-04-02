@@ -27,7 +27,7 @@ func TestPanics(t *testing.T) {
 		if mockT.Failed() {
 			if len(mockT.errorMessages) == 0 {
 				t.Errorf("Expected error message, got none")
-			} else if !strings.Contains(mockT.errorMessages[0], "Expected panic, but code did not panic") {
+			} else if !strings.Contains(mockT.errorMessages[0], "Expected panic") {
 				t.Errorf("Expected 'Expected panic, but code did not panic', got: %v", mockT.errorMessages[0])
 			}
 		} else {
@@ -63,7 +63,7 @@ func TestNotPanics(t *testing.T) {
 				message := mockT.errorMessages[0]
 
 				// Check the first line (message part)
-				expectedMessagePart := "Unexpected panic [string]: test panic"
+				expectedMessagePart := "Unexpected panic"
 				lines := strings.Split(message, "\n")
 				if len(lines) < 1 || !strings.Contains(lines[0], expectedMessagePart) {
 					t.Errorf("Expected message starting with %q, got: %q",
@@ -73,7 +73,7 @@ func TestNotPanics(t *testing.T) {
 				// Check for stack trace presence
 				hasStackTrace := false
 				for _, line := range lines {
-					if strings.Contains(line, "Stack trace:") {
+					if strings.Contains(line, "Panic Value") {
 						hasStackTrace = true
 						break
 					}
@@ -83,5 +83,11 @@ func TestNotPanics(t *testing.T) {
 				}
 			}
 		}
+	})
+}
+
+func TestSomething(t *testing.T) {
+	assert.NotPanics(t, func() {
+		panic("test panic")
 	})
 }

@@ -70,7 +70,7 @@ It draws inspiration from:
 
 Assertions accept a testing.T interface, the value\(s\) being tested, and optional message arguments. They report failures using t.Errorf.
 
-The package also includes detailed error reporting with file and line information for easy debugging when assertions fail.
+The package also includes detailed error reporting with file and line information for debugging when assertions fail.
 
 A companion package 'require' provides the same assertions, but calls t.FailNow\(\) to stop test execution immediately on failure.
 
@@ -128,6 +128,8 @@ Key features include:
 - [type AssertionContext](<#AssertionContext>)
   - [func NewAssertionContext\(skip int\) \*AssertionContext](<#NewAssertionContext>)
   - [func \(ctx \*AssertionContext\) FileInfo\(\) string](<#AssertionContext.FileInfo>)
+- [type AssertionError](<#AssertionError>)
+  - [func \(ae \*AssertionError\) Format\(ctx \*AssertionContext\) string](<#AssertionError.Format>)
 
 
 ## Variables
@@ -157,7 +159,7 @@ func ContainsKey[K comparable, V any](t testingT, m map[K]V, key K, msgAndArgs .
 ContainsKey asserts that a map contains a specific key.
 
 <a name="ElementsMatch"></a>
-## func [ElementsMatch](<https://github.com/neticdk/go-stdlib/blob/main/assert/compare.go#L177>)
+## func [ElementsMatch](<https://github.com/neticdk/go-stdlib/blob/main/assert/compare.go#L191>)
 
 ```go
 func ElementsMatch[T comparable](t testingT, listA []T, listB []T, msgAndArgs ...any) bool
@@ -177,16 +179,16 @@ func Empty(t testingT, data any, msgAndArgs ...any) bool
 Empty asserts that a value is considered "empty". True for: nil pointers/interfaces/slices/maps/channels/funcs, zero values \(0, "", false, zero structs\), and zero\-length slices/maps/arrays/strings/channels.
 
 <a name="Equal"></a>
-## func [Equal](<https://github.com/neticdk/go-stdlib/blob/main/assert/equality.go#L20>)
+## func [Equal](<https://github.com/neticdk/go-stdlib/blob/main/assert/equality.go#L19>)
 
 ```go
 func Equal[T any](t testingT, got T, want T, msgAndArgs ...any) bool
 ```
 
-Equal asserts that the given values are equal. It does not not create advanced diff output for complex types. Use something like github.com/google/go\-cmp/cmp for more advanced diff output.
+Equal asserts that the given values are equal. It doesn't create advanced diff output for complex types. Use something like github.com/google/go\-cmp/cmp for more advanced diff output.
 
 <a name="Error"></a>
-## func [Error](<https://github.com/neticdk/go-stdlib/blob/main/assert/error.go#L9>)
+## func [Error](<https://github.com/neticdk/go-stdlib/blob/main/assert/error.go#L10>)
 
 ```go
 func Error(t testingT, got error, msgAndArgs ...any) bool
@@ -195,16 +197,16 @@ func Error(t testingT, got error, msgAndArgs ...any) bool
 Error asserts that the given error is not nil.
 
 <a name="ErrorAs"></a>
-## func [ErrorAs](<https://github.com/neticdk/go-stdlib/blob/main/assert/error.go#L70>)
+## func [ErrorAs](<https://github.com/neticdk/go-stdlib/blob/main/assert/error.go#L71>)
 
 ```go
 func ErrorAs(t testingT, got error, targetPtr any, msgAndArgs ...any) bool
 ```
 
-ErrorAs asserts that the error 'got' can be assigned to the type pointed to by 'targetPtr'using errors.As. It follows the chain of wrapped errors and assigns the matching error to \*targetPtr if found. 'targetPtr' must be a non\-nil pointer to either an interface type or a concrete type that implements error.
+ErrorAs asserts that the error 'got' can be assigned to the type pointed to by \`targetPtr\`using \`errors.As\`. It follows the chain of wrapped errors and assigns the matching error to \`\*targetPtr\` if found. \`targetPtr\` must be a non\-nil pointer to either an interface type or a concrete type that implements error.
 
 <a name="ErrorIs"></a>
-## func [ErrorIs](<https://github.com/neticdk/go-stdlib/blob/main/assert/error.go#L43>)
+## func [ErrorIs](<https://github.com/neticdk/go-stdlib/blob/main/assert/error.go#L44>)
 
 ```go
 func ErrorIs(t testingT, got error, target error, msgAndArgs ...any) bool
@@ -222,7 +224,7 @@ func False(t testingT, got bool, msgAndArgs ...any) bool
 False asserts that the given boolean value is false.
 
 <a name="Greater"></a>
-## func [Greater](<https://github.com/neticdk/go-stdlib/blob/main/assert/compare.go#L68>)
+## func [Greater](<https://github.com/neticdk/go-stdlib/blob/main/assert/compare.go#L69>)
 
 ```go
 func Greater[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any) bool
@@ -240,7 +242,7 @@ func GreaterOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ..
 GreaterOrEqual asserts that 'got' is greater than or equal to 'threshold'. Requires types compatible with cmp.Ordered.
 
 <a name="InDelta"></a>
-## func [InDelta](<https://github.com/neticdk/go-stdlib/blob/main/assert/equality.go#L69>)
+## func [InDelta](<https://github.com/neticdk/go-stdlib/blob/main/assert/equality.go#L70>)
 
 ```go
 func InDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAndArgs ...any) bool
@@ -276,7 +278,7 @@ func LessOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...an
 LessOrEqual asserts that 'got' is less than or equal to 'threshold'. Requires types compatible with cmp.Ordered.
 
 <a name="Negative"></a>
-## func [Negative](<https://github.com/neticdk/go-stdlib/blob/main/assert/compare.go#L155>)
+## func [Negative](<https://github.com/neticdk/go-stdlib/blob/main/assert/compare.go#L162>)
 
 ```go
 func Negative[T cmp.Ordered](t testingT, got T, msgAndArgs ...any) bool
@@ -294,7 +296,7 @@ func Nil(t testingT, data any, msgAndArgs ...any) bool
 Nil asserts that the given value is nil.
 
 <a name="NoError"></a>
-## func [NoError](<https://github.com/neticdk/go-stdlib/blob/main/assert/error.go#L26>)
+## func [NoError](<https://github.com/neticdk/go-stdlib/blob/main/assert/error.go#L27>)
 
 ```go
 func NoError(t testingT, got error, msgAndArgs ...any) bool
@@ -330,16 +332,16 @@ func NotEmpty(t testingT, data any, msgAndArgs ...any) bool
 NotEmpty asserts that a value is not considered "empty". Opposite of Empty.
 
 <a name="NotEqual"></a>
-## func [NotEqual](<https://github.com/neticdk/go-stdlib/blob/main/assert/equality.go#L53>)
+## func [NotEqual](<https://github.com/neticdk/go-stdlib/blob/main/assert/equality.go#L54>)
 
 ```go
 func NotEqual[T any](t testingT, got T, want T, msgAndArgs ...any) bool
 ```
 
-NotEqual asserts that the given values are not equal. It does not not create advanced diff output for complex types. Use something like github.com/google/go\-cmp/cmp for more advanced diff output. Opposite of Equal.
+NotEqual asserts that the given values are not equal. It doesn't create advanced diff output for complex types. Use something like github.com/google/go\-cmp/cmp for more advanced diff output. Opposite of Equal.
 
 <a name="NotInDelta"></a>
-## func [NotInDelta](<https://github.com/neticdk/go-stdlib/blob/main/assert/equality.go#L95>)
+## func [NotInDelta](<https://github.com/neticdk/go-stdlib/blob/main/assert/equality.go#L118>)
 
 ```go
 func NotInDelta[T ~float32 | ~float64](t testingT, got T, want T, delta T, msgAndArgs ...any) bool
@@ -357,13 +359,13 @@ func NotNil(t testingT, data any, msgAndArgs ...any) bool
 NotNil asserts that the given value is not nil. Opposite of Nil.
 
 <a name="NotPanics"></a>
-## func [NotPanics](<https://github.com/neticdk/go-stdlib/blob/main/assert/panic.go#L34>)
+## func [NotPanics](<https://github.com/neticdk/go-stdlib/blob/main/assert/panic.go#L37>)
 
 ```go
 func NotPanics(t testingT, f func(), msgAndArgs ...any) bool
 ```
 
-NotPanics asserts that the code inside the specified function does NOT panic.
+NotPanics asserts that the code inside the specified function doesn't panic.
 
 <a name="NotZero"></a>
 ## func [NotZero](<https://github.com/neticdk/go-stdlib/blob/main/assert/compare.go#L41>)
@@ -393,7 +395,7 @@ func Positive[T cmp.Ordered](t testingT, got T, msgAndArgs ...any) bool
 Positive asserts that 'got' is greater than zero. Requires types compatible with cmp.Ordered.
 
 <a name="TimeAfter"></a>
-## func [TimeAfter](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L10>)
+## func [TimeAfter](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L9>)
 
 ```go
 func TimeAfter(t testingT, got, threshold time.Time, msgAndArgs ...any) bool
@@ -402,7 +404,7 @@ func TimeAfter(t testingT, got, threshold time.Time, msgAndArgs ...any) bool
 TimeAfter asserts that a time is after a threshold time
 
 <a name="TimeBefore"></a>
-## func [TimeBefore](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L34>)
+## func [TimeBefore](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L33>)
 
 ```go
 func TimeBefore(t testingT, got, threshold time.Time, msgAndArgs ...any) bool
@@ -411,7 +413,7 @@ func TimeBefore(t testingT, got, threshold time.Time, msgAndArgs ...any) bool
 TimeBefore asserts that a time is before a threshold time
 
 <a name="TimeEqual"></a>
-## func [TimeEqual](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L59>)
+## func [TimeEqual](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L58>)
 
 ```go
 func TimeEqual(t testingT, got, want time.Time, msgAndArgs ...any) bool
@@ -420,7 +422,7 @@ func TimeEqual(t testingT, got, want time.Time, msgAndArgs ...any) bool
 TimeEqual asserts that two times represent the same instant
 
 <a name="TimeEqualWithPrecision"></a>
-## func [TimeEqualWithPrecision](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L110>)
+## func [TimeEqualWithPrecision](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L109>)
 
 ```go
 func TimeEqualWithPrecision(t testingT, got, want time.Time, precision time.Duration, msgAndArgs ...any) bool
@@ -438,7 +440,7 @@ func True(t testingT, got bool, msgAndArgs ...any) bool
 True asserts that the given boolean value is true.
 
 <a name="WithinDuration"></a>
-## func [WithinDuration](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L83>)
+## func [WithinDuration](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L82>)
 
 ```go
 func WithinDuration(t testingT, got, want time.Time, delta time.Duration, msgAndArgs ...any) bool
@@ -447,7 +449,7 @@ func WithinDuration(t testingT, got, want time.Time, delta time.Duration, msgAnd
 WithinDuration asserts that two times are within a certain duration of each other
 
 <a name="WithinTime"></a>
-## func [WithinTime](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L136>)
+## func [WithinTime](<https://github.com/neticdk/go-stdlib/blob/main/assert/time.go#L135>)
 
 ```go
 func WithinTime(t testingT, got time.Time, start, end time.Time, msgAndArgs ...any) bool
@@ -456,7 +458,7 @@ func WithinTime(t testingT, got time.Time, start, end time.Time, msgAndArgs ...a
 WithinTime asserts that a time is within a given time window
 
 <a name="Zero"></a>
-## func [Zero](<https://github.com/neticdk/go-stdlib/blob/main/assert/compare.go#L14>)
+## func [Zero](<https://github.com/neticdk/go-stdlib/blob/main/assert/compare.go#L13>)
 
 ```go
 func Zero(t testingT, data any, msgAndArgs ...any) bool
@@ -465,7 +467,7 @@ func Zero(t testingT, data any, msgAndArgs ...any) bool
 Zero asserts that a value is the zero value for its type. Uses reflect.Value.IsZero\(\). Note this differs slightly from Empty for collections.e.g., Zero is false for an empty non\-nil slice, but Empty is true.
 
 <a name="AssertionContext"></a>
-## type [AssertionContext](<https://github.com/neticdk/go-stdlib/blob/main/assert/is.go#L22-L30>)
+## type [AssertionContext](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L22-L30>)
 
 AssertionContext holds information about the context of an assertion
 
@@ -482,7 +484,7 @@ type AssertionContext struct {
 ```
 
 <a name="NewAssertionContext"></a>
-### func [NewAssertionContext](<https://github.com/neticdk/go-stdlib/blob/main/assert/is.go#L45>)
+### func [NewAssertionContext](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L45>)
 
 ```go
 func NewAssertionContext(skip int) *AssertionContext
@@ -491,12 +493,61 @@ func NewAssertionContext(skip int) *AssertionContext
 NewAssertionContext creates a new context by capturing the current call site
 
 <a name="AssertionContext.FileInfo"></a>
-### func \(\*AssertionContext\) [FileInfo](<https://github.com/neticdk/go-stdlib/blob/main/assert/is.go#L32>)
+### func \(\*AssertionContext\) [FileInfo](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L32>)
 
 ```go
 func (ctx *AssertionContext) FileInfo() string
 ```
 
 
+
+<a name="AssertionError"></a>
+## type [AssertionError](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L75-L90>)
+
+AssertionError represents an assertion error.
+
+filename.go:line\_number \(function\_name\): \<Assertion Type\>: \<Primary Message\>
+
+```
+<Primary Value Label>: <Primary Value Representation>
+<Comparison Value Label>: <Comparison Value Representation>
+Error: <Error Message>
+ExtraValues:
+  <Extra Value Label>: <Extra Value Representation>
+Diff:
+  <Diff Line 1>
+  <Diff Line 2>
+Details:
+  <Detail Line 1>
+  <Detail Line 2>
+```
+
+```go
+type AssertionError struct {
+    // Message is the error message.
+    Message string
+    // PrimaryValue is the primary value being compared.
+    PrimaryValue assertionValue
+    // ComparisonValue is the value being compared against.
+    ComparisonValue assertionValue
+    // Error is the (optional) error that occurred during the assertion.
+    Error error
+    // ExtraValues are values that may be useful for debugging.
+    ExtraValues []assertionValue
+    // Diff is the (optional) difference between the primary and comparison values.
+    Diff string
+    // Details are details about the assertion error.
+    Details []string
+}
+```
+
+<a name="AssertionError.Format"></a>
+### func \(\*AssertionError\) [Format](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L98>)
+
+```go
+func (ae *AssertionError) Format(ctx *AssertionContext) string
+```
+
+Format handles all components of the message
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)

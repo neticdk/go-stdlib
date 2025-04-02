@@ -2,6 +2,7 @@ package assert
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 )
 
@@ -14,7 +15,7 @@ func Error(t testingT, got error, msgAndArgs ...any) bool {
 	ctx := NewAssertionContext(1)
 
 	if got == nil {
-		reportError(t, ctx, "Expected error, got nil")
+		reportEqualityError(t, ctx, got, "<error>")
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -31,7 +32,7 @@ func NoError(t testingT, got error, msgAndArgs ...any) bool {
 	ctx := NewAssertionContext(1)
 
 	if got != nil {
-		reportError(t, ctx, "Expected no error, got: %v", got)
+		reportEqualityError(t, ctx, got, "<no error>")
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -48,13 +49,13 @@ func ErrorIs(t testingT, got error, target error, msgAndArgs ...any) bool {
 	ctx := NewAssertionContext(1)
 
 	if got == nil {
-		reportError(t, ctx, "Expected error matching %v, but got nil error", target)
+		reportEqualityError(t, ctx, got, target)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
 	if !errors.Is(got, target) {
-		reportError(t, ctx, "Error is not the target type:\n Got error: %v\n Want target: %v", got, target)
+		reportEqualityError(t, ctx, got, target)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -62,10 +63,10 @@ func ErrorIs(t testingT, got error, target error, msgAndArgs ...any) bool {
 }
 
 // ErrorAs asserts that the error 'got' can be assigned to the type pointed to
-// by 'targetPtr'using errors.As.
+// by `targetPtr`using `errors.As`.
 // It follows the chain of wrapped errors and assigns the matching error to
-// *targetPtr if found.
-// 'targetPtr' must be a non-nil pointer to either an interface type or a
+// `*targetPtr` if found.
+// `targetPtr` must be a non-nil pointer to either an interface type or a
 // concrete type that implements error.
 func ErrorAs(t testingT, got error, targetPtr any, msgAndArgs ...any) bool {
 	if h, ok := t.(tHelper); ok {
@@ -83,30 +84,33 @@ func ErrorAs(t testingT, got error, targetPtr any, msgAndArgs ...any) bool {
 				targetType = ptrType.Elem().String()
 			}
 		}
-		reportError(t, ctx, "Expected error of type %q, but got nil error", targetType)
+		reportEqualityError(t, ctx, got, fmt.Sprintf("%q", targetType))
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
 	if targetPtr == nil {
-		reportError(t, ctx, "Target pointer for ErrorAs cannot be nil")
+		details := []string{"Target pointer for ErrorAs cannot be nil"}
+		reportEqualityError(t, ctx, got, nil, details...)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
 	ptrType := reflect.TypeOf(targetPtr)
 	if ptrType.Kind() != reflect.Ptr {
-		reportError(t, ctx, "Target for ErrorAs must be a pointer, got %T", targetPtr)
+		details := []string{"Target for ErrorAs must be a pointer"}
+		reportEqualityError(t, ctx, got, fmt.Sprintf("%T", targetPtr), details...)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
-	// We don't strictly need to check if targetPtr points to an error type here,
-	// as errors.As will panic if it doesn't, but it could be a pre-check.
-	// Let errors.As handle the check for simplicity for now.
+	// We don't strictly need to check if `targetPtr` points to an error type
+	// here, as `errors.As` will panic if it doesn't, but it could be a
+	// pre-check. Let `errors.As` handle the check for simplicity for now.
 
 	if !errors.As(got, targetPtr) {
-		reportError(t, ctx, "Error cannot be assigned to target type %T:\n Got error: %v", targetPtr, got)
+		details := []string{"Error cannot be assigned to target"}
+		reportEqualityError(t, ctx, got, targetPtr, details...)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}

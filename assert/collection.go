@@ -10,7 +10,7 @@ import (
 // Supports:
 // - string: checks for substring presence.
 // - slice/array: checks for element presence using the internal 'equal' comparison.
-// - map: checks for value presence using the internal 'equal' comparison.
+// - map: checks for value presence using the internal 'equal' comparison (unlike ContainsKey which checks for keys).
 func Contains(t testingT, collection any, element any, msgAndArgs ...any) bool {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
@@ -117,7 +117,7 @@ func Empty(t testingT, data any, msgAndArgs ...any) bool {
 	ctx := NewAssertionContext(1)
 
 	if !isEmptyInternal(data) {
-		reportError(t, ctx, "Expected empty/zero value, got %#v", data)
+		reportEqualityError(t, ctx, data, "<empty/zero value>")
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -134,7 +134,7 @@ func NotEmpty(t testingT, data any, msgAndArgs ...any) bool {
 	ctx := NewAssertionContext(1)
 
 	if isEmptyInternal(data) {
-		reportError(t, ctx, "Expected non-empty/zero value, got empty/zero: %#v", data)
+		reportEqualityError(t, ctx, data, "<non-empty/zero value>")
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -156,13 +156,17 @@ func Len(t testingT, data any, expectedLen int, msgAndArgs ...any) bool {
 	case reflect.Slice, reflect.Map, reflect.String, reflect.Chan, reflect.Array:
 		actualLen = v.Len()
 	default:
-		reportError(t, ctx, "Cannot get length of type %T, value: %#v", data, data)
+		err := &AssertionError{
+			Message: fmt.Sprintf("Cannot get length of type %T, value: %#v", data, data),
+		}
+		reportAssertionError(t, ctx, err)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
 
 	if actualLen != expectedLen {
-		reportError(t, ctx, "Length mismatch:\n Expected: %d\n Got: %d\n Value: %#v", expectedLen, actualLen, data)
+		details := []string{"Length mismatch"}
+		reportEqualityError(t, ctx, actualLen, expectedLen, details...)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -236,22 +240,32 @@ func containsElementInternal(collection any, element any) (bool, error) {
 	}
 }
 
-func reportCollectionError(t testingT, ctx *AssertionContext, errType string, collection, element any, err error) { //revive:disable-line:argument-limit
+// reportCollectionError reports errors for collection assertions (Contains, NotContains, etc.)
+// nolint: unparam
+func reportCollectionError(t testingT, ctx *AssertionContext, errType string, collection, element any, err error, details ...string) { //revive:disable-line:argument-limit
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
 	}
 
-	parts := []string{
-		fmt.Sprintf("Collection: %#v", collection),
-		fmt.Sprintf("Element: %#v", element),
+	assertErr := &AssertionError{
+		Message: errType,
+		PrimaryValue: assertionValue{
+			Label: "Collection",
+			Value: collection,
+		},
+		ComparisonValue: assertionValue{
+			Label: "Element",
+			Value: element,
+		},
 	}
 
 	if err != nil {
-		parts = append(parts, fmt.Sprintf("Error: %v", err))
+		assertErr.Error = err
 	}
 
-	messageBody := strings.Join(parts, "\n  ")
-	message := fmt.Sprintf("%s:\n  %s", errType, messageBody)
+	if len(details) > 0 {
+		assertErr.Details = details
+	}
 
-	reportError(t, ctx, "%s", message)
+	reportAssertionError(t, ctx, assertErr)
 }

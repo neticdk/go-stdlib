@@ -11,10 +11,10 @@ func TestTrue(t *testing.T) {
 	tests := []struct {
 		name            string
 		value           bool
-		wantPass        bool   // Expected return value from assert.True
-		wantErrorMsg    string // Substring expected in Errorf message if wantPass is false
-		optionalMsg     []any  // Optional message to pass to assert.True
-		wantOptionalLog string // Expected substring in Logf/Log if optionalMsg provided on failure
+		wantPass        bool   // Expected return value from `assert.True`
+		wantErrorMsg    string // Substring expected in `Errorf` message if `wantPass` is false
+		optionalMsg     []any  // Optional message to pass to `assert.True`
+		wantOptionalLog string // Expected substring in `Logf`/`Log` if `optionalMsg` provided on failure
 	}{
 		{
 			name:         "true passes",
@@ -26,13 +26,13 @@ func TestTrue(t *testing.T) {
 			name:         "false fails",
 			value:        false,
 			wantPass:     false,
-			wantErrorMsg: "Expected true, got false",
+			wantErrorMsg: "Values are not equal",
 		},
 		{
 			name:            "false fails with custom message",
 			value:           false,
 			wantPass:        false,
-			wantErrorMsg:    "Expected true, got false",
+			wantErrorMsg:    "Values are not equal",
 			optionalMsg:     []any{"custom reason %d", 123},
 			wantOptionalLog: "custom reason 123",
 		},
@@ -40,9 +40,9 @@ func TestTrue(t *testing.T) {
 			name:            "false fails with unformatted custom message",
 			value:           false,
 			wantPass:        false,
-			wantErrorMsg:    "Expected true, got false",
+			wantErrorMsg:    "Values are not equal",
 			optionalMsg:     []any{"another", "reason"},
-			wantOptionalLog: "another reason",
+			wantOptionalLog: "another%!(EXTRA string=reason)",
 		},
 	}
 
@@ -57,9 +57,9 @@ func TestTrue(t *testing.T) {
 				t.Errorf("assert.True() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
-			expectedFailure := !tt.wantPass // Failure expected if wantPass is false
+			expectedFailure := !tt.wantPass // Failure expected if `wantPass` is false
 
 			if reportedFailure != expectedFailure {
 				t.Errorf("assert.True() called Errorf? = %v, expected? %v", reportedFailure, expectedFailure)
@@ -101,10 +101,10 @@ func TestFalse(t *testing.T) {
 	tests := []struct {
 		name            string
 		value           bool
-		wantPass        bool   // Expected return value from assert.False
-		wantErrorMsg    string // Substring expected in Errorf message if wantPass is false
-		optionalMsg     []any  // Optional message to pass to assert.False
-		wantOptionalLog string // Expected substring in Logf/Log if optionalMsg provided on failure
+		wantPass        bool   // Expected return value from `assert.False`
+		wantErrorMsg    string // Substring expected in `Errorf` message if `wantPass` is false
+		optionalMsg     []any  // Optional message to pass to `assert.False`
+		wantOptionalLog string // Expected substring in Logf/Log if `optionalMsg` provided on failure
 	}{
 		{
 			name:         "false passes",
@@ -116,13 +116,13 @@ func TestFalse(t *testing.T) {
 			name:         "true fails",
 			value:        true,
 			wantPass:     false,
-			wantErrorMsg: "Expected false, got true",
+			wantErrorMsg: "Values are not equal",
 		},
 		{
 			name:            "true fails with custom message",
 			value:           true,
 			wantPass:        false,
-			wantErrorMsg:    "Expected false, got true",
+			wantErrorMsg:    "Values are not equal",
 			optionalMsg:     []any{"custom reason for true %s", "value"},
 			wantOptionalLog: "custom reason for true value",
 		},
@@ -130,7 +130,7 @@ func TestFalse(t *testing.T) {
 			name:            "true fails with unformatted custom message",
 			value:           true,
 			wantPass:        false,
-			wantErrorMsg:    "Expected false, got true",
+			wantErrorMsg:    "Values are not equal",
 			optionalMsg:     []any{"another reason"},
 			wantOptionalLog: "another reason",
 		},
@@ -148,9 +148,9 @@ func TestFalse(t *testing.T) {
 				t.Errorf("assert.False() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
-			expectedFailure := !tt.wantPass // Failure expected if wantPass is false
+			expectedFailure := !tt.wantPass // Failure expected if `wantPass` is false
 
 			if reportedFailure != expectedFailure {
 				t.Errorf("assert.False() called Errorf? = %v, expected? %v", reportedFailure, expectedFailure)

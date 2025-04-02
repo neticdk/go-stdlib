@@ -13,7 +13,7 @@ func Nil(t testingT, data any, msgAndArgs ...any) bool {
 	ctx := NewAssertionContext(1)
 
 	if !isNilInternal(data) {
-		reportError(t, ctx, "Expected nil, got: %#v", data)
+		reportEqualityError(t, ctx, data, nil)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -30,7 +30,7 @@ func NotNil(t testingT, data any, msgAndArgs ...any) bool {
 	ctx := NewAssertionContext(1)
 
 	if isNilInternal(data) {
-		reportError(t, ctx, "Expected not nil, got nil")
+		reportEqualityError(t, ctx, nil, data)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}

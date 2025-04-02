@@ -9,7 +9,7 @@ func True(t testingT, got bool, msgAndArgs ...any) bool { //revive:disable-line:
 	ctx := NewAssertionContext(1)
 
 	if !got {
-		reportError(t, ctx, "Expected true, got false")
+		reportEqualityError(t, ctx, got, true)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}
@@ -25,7 +25,7 @@ func False(t testingT, got bool, msgAndArgs ...any) bool { //revive:disable-line
 	ctx := NewAssertionContext(1)
 
 	if got {
-		reportError(t, ctx, "Expected false, got true")
+		reportEqualityError(t, ctx, got, false)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
 	}

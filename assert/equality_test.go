@@ -49,7 +49,7 @@ func TestEqual(t *testing.T) {
 				t.Errorf("assert.Equal() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 
@@ -110,7 +110,7 @@ func TestNotEqual(t *testing.T) {
 				t.Errorf("assert.NotEqual() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 
@@ -163,7 +163,7 @@ func TestInDelta(t *testing.T) {
 				t.Errorf("assert.InDelta() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 

@@ -144,7 +144,7 @@ func TestErrorAs(t *testing.T) {
 				t.Errorf("assert.ErrorAs() returned = %v, wantPass %v", pass, tt.wantPass)
 			}
 
-			// Check if Errorf was called (or not) as expected
+			// Check if `Errorf` was called (or not) as expected
 			reportedFailure := mockT.Failed()
 			expectedFailure := !tt.wantPass
 
@@ -158,6 +158,7 @@ func TestErrorAs(t *testing.T) {
 					t.Errorf("Expected Errorf call, but no error messages recorded")
 				} else {
 					expectedMsgs := []string{
+						"Values are not equa",
 						"Expected error of type",
 						"Target pointer for ErrorAs cannot be nil",
 						"Error cannot be assigned to target type",

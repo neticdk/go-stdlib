@@ -8,6 +8,33 @@ import "github.com/neticdk/go-stdlib/assert"
 
 Package assert provides a collection of assertion helpers designed to integrate seamlessly with the Go standard testing package. It aims to improve the readability and expressiveness of test code.
 
+It has been written as an alternative to the testify package but it is not a drop\-in replacement:
+
+- it supports most basic assertions
+- it is type\-safe
+- it has far less features than testify
+- it does not support advanced diffs \- use github.com/google/go\-cmp for that
+
+Key features include:
+
+- Type\-safe comparisons using generics \(e.g., assert.Greater, assert.Equal\).
+- Checks for nil, errors, boolean conditions.
+- Collection assertions \(Contains, Empty, Len, ElementsMatch\).
+- Panic detection \(Panics, NotPanics\).
+- Time assertions \(TimeEqual, TimeBefore, TimeAfter, WithinDuration\).
+- Floating\-point comparisons with delta for handling precision issues.
+- Support for custom failure messages with optional formatting.
+- Integration with t.Helper\(\) for cleaner test failure reporting.
+- Consistent error formatting with file and line information.
+- Optional stack traces on failure for debugging complex call paths.
+
+It draws inspiration from:
+
+- testify \- https://github.com/stretchr/testify
+- is \- https://github.com/matryer/is
+
+### Examples
+
 Basic usage:
 
 ```
@@ -56,35 +83,40 @@ Floating\-Point Comparisons:
 assert.InDelta(t, calculatedValue, expectedValue, 0.001)
 ```
 
-It has been written as an alternative to the testify package but it is not a drop\-in replacement:
+### Diffs
 
-- it supports most basic assertions
-- it is type\-safe
-- it has far less features than testify
-- it does not support advanced diffs \- use github.com/google/go\-cmp for that
+The \`Equal\` function supports diffs when the \`DiffsEnabled\` global variable is set to true \(default\). This feature can be useful for debugging and understanding the differences between expected and actual values. However the implementation is very basic and does not support complex types or nested structures. It is based on JSON serialization and comparison and thus might fail for unexported fields, channels or functions.
 
-It draws inspiration from:
+To disable diffs, set the \`DiffsEnabled\` global variable to false.
 
-- testify \- https://github.com/stretchr/testify
-- is \- https://github.com/matryer/is
+### Stack Traces
+
+On assertion failure, an optional stack trace can be included in the error output. This is controlled by the \`StackTracesEnabled\` global variable, which defaults to \`false\`.
+
+Capturing stack traces incurs a performance cost due to the use of \`runtime.Stack\`. Therefore, it is recommended to enable this feature primarily during debugging sessions when the additional context of the call path is needed to understand a complex failure.
+
+```
+// Example: Enable stack traces (e.g., in TestMain or a specific test)
+assert.StackTracesEnabled = true
+assert.Equal(t, someComplexResult(), expectedValue) // Stack trace printed if this fails
+assert.StackTracesEnabled = false // Optionally disable afterwards
+```
+
+\*\*Special Case: \`NotPanics\`\*\* Because unexpected panics are critical failures where the stack trace is essential for debugging, \`assert.NotPanics\` \(and consequently \`require.NotPanics\`\) will \*\*always\*\* include a filtered stack trace in the error output when a panic occurs, regardless of the \`StackTracesEnabled\` setting.
+
+The generated stack trace is filtered to remove internal frames from the Go runtime, testing framework, and the assertion library itself, focusing on the user's test code.
+
+### Assertions
 
 Assertions accept a testing.T interface, the value\(s\) being tested, and optional message arguments. They report failures using t.Errorf.
 
-The package also includes detailed error reporting with file and line information for debugging when assertions fail.
+### Error reporting
+
+The package leverages \`t.Helper\(\)\` and includes detailed error reporting with file and line information for debugging when assertions fail. Failed assertions will include details about the values compared, specific error messages, optional diffs, and optional stack traces.
+
+### Halting on failure
 
 A companion package 'require' provides the same assertions, but calls t.FailNow\(\) to stop test execution immediately on failure.
-
-Key features include:
-
-- Type\-safe comparisons using generics \(e.g., assert.Greater, assert.Equal\).
-- Checks for nil, errors, boolean conditions.
-- Collection assertions \(Contains, Empty, Len, ElementsMatch\).
-- Panic detection \(Panics, NotPanics\).
-- Time assertions \(TimeEqual, TimeBefore, TimeAfter, WithinDuration\).
-- Floating\-point comparisons with delta for handling precision issues.
-- Support for custom failure messages with optional formatting.
-- Integration with t.Helper\(\) for cleaner test failure reporting.
-- Consistent error formatting with file and line information.
 
 ## Index
 
@@ -140,6 +172,12 @@ Key features include:
 var DiffsEnabled = true
 ```
 
+<a name="StackTracesEnabled"></a>StackTracesEnabled indicates whether stack traces are enabled for assertion errors.
+
+```go
+var StackTracesEnabled = false
+```
+
 <a name="Contains"></a>
 ## func [Contains](<https://github.com/neticdk/go-stdlib/blob/main/assert/collection.go#L14>)
 
@@ -147,7 +185,7 @@ var DiffsEnabled = true
 func Contains(t testingT, collection any, element any, msgAndArgs ...any) bool
 ```
 
-Contains asserts that a collection contains a specific element/substring. Supports: \- string: checks for substring presence. \- slice/array: checks for element presence using the internal 'equal' comparison. \- map: checks for value presence using the internal 'equal' comparison.
+Contains asserts that a collection contains a specific element/substring. Supports: \- string: checks for substring presence. \- slice/array: checks for element presence using the internal 'equal' comparison. \- map: checks for value presence using the internal 'equal' comparison \(unlike ContainsKey which checks for keys\).
 
 <a name="ContainsKey"></a>
 ## func [ContainsKey](<https://github.com/neticdk/go-stdlib/blob/main/assert/collection.go#L74>)
@@ -467,7 +505,7 @@ func Zero(t testingT, data any, msgAndArgs ...any) bool
 Zero asserts that a value is the zero value for its type. Uses reflect.Value.IsZero\(\). Note this differs slightly from Empty for collections.e.g., Zero is false for an empty non\-nil slice, but Empty is true.
 
 <a name="AssertionContext"></a>
-## type [AssertionContext](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L22-L30>)
+## type [AssertionContext](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L24-L29>)
 
 AssertionContext holds information about the context of an assertion
 
@@ -477,14 +515,11 @@ type AssertionContext struct {
     File     string
     Line     int
     Function string
-
-    // Stack trace (can be lazy-loaded if needed)
-    Stack []byte
 }
 ```
 
 <a name="NewAssertionContext"></a>
-### func [NewAssertionContext](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L45>)
+### func [NewAssertionContext](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L44>)
 
 ```go
 func NewAssertionContext(skip int) *AssertionContext
@@ -493,7 +528,7 @@ func NewAssertionContext(skip int) *AssertionContext
 NewAssertionContext creates a new context by capturing the current call site
 
 <a name="AssertionContext.FileInfo"></a>
-### func \(\*AssertionContext\) [FileInfo](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L32>)
+### func \(\*AssertionContext\) [FileInfo](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L31>)
 
 ```go
 func (ctx *AssertionContext) FileInfo() string
@@ -502,7 +537,7 @@ func (ctx *AssertionContext) FileInfo() string
 
 
 <a name="AssertionError"></a>
-## type [AssertionError](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L75-L90>)
+## type [AssertionError](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L74-L91>)
 
 AssertionError represents an assertion error.
 
@@ -538,11 +573,13 @@ type AssertionError struct {
     Diff string
     // Details are details about the assertion error.
     Details []string
+    // Stack trace - only populated when tests fail
+    Stack string
 }
 ```
 
 <a name="AssertionError.Format"></a>
-### func \(\*AssertionError\) [Format](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L98>)
+### func \(\*AssertionError\) [Format](<https://github.com/neticdk/go-stdlib/blob/main/assert/assert.go#L99>)
 
 ```go
 func (ae *AssertionError) Format(ctx *AssertionContext) string

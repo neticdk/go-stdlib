@@ -18,7 +18,7 @@ This is useful when a test cannot proceed meaningfully after a specific assertio
 - [func Empty\(t testingT, data any, msgAndArgs ...any\)](<#Empty>)
 - [func Equal\[T any\]\(t testingT, got T, want T, msgAndArgs ...any\)](<#Equal>)
 - [func Error\(t testingT, got error, msgAndArgs ...any\)](<#Error>)
-- [func ErrorAs\(t testingT, got error, target any, msgAndArgs ...any\)](<#ErrorAs>)
+- [func ErrorAs\(t testingT, got error, targetPtr any, msgAndArgs ...any\)](<#ErrorAs>)
 - [func ErrorIs\(t testingT, got error, target error, msgAndArgs ...any\)](<#ErrorIs>)
 - [func False\(t testingT, value bool, msgAndArgs ...any\)](<#False>)
 - [func Greater\[T cmp.Ordered\]\(t testingT, got T, threshold T, msgAndArgs ...any\)](<#Greater>)
@@ -108,7 +108,7 @@ Error requires that the specified err is not nil.
 ## func [ErrorAs](<https://github.com/neticdk/go-stdlib/blob/main/require/require.go#L286>)
 
 ```go
-func ErrorAs(t testingT, got error, target any, msgAndArgs ...any)
+func ErrorAs(t testingT, got error, targetPtr any, msgAndArgs ...any)
 ```
 
 ErrorAs requires that the specified error is assignable to the target.

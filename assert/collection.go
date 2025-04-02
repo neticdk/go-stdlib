@@ -27,9 +27,10 @@ func Contains(t testingT, collection any, element any, msgAndArgs ...any) bool {
 	if !found {
 		colKind := reflect.ValueOf(collection).Kind()
 		errMsg := "Collection does not contain element"
-		if colKind == reflect.String {
+		switch colKind {
+		case reflect.String:
 			errMsg = "String does not contain substring"
-		} else if colKind == reflect.Map {
+		case reflect.Map:
 			errMsg = "Map does not contain value"
 		}
 		reportCollectionError(t, ctx, errMsg, collection, element, nil)
@@ -58,9 +59,10 @@ func NotContains(t testingT, collection any, element any, msgAndArgs ...any) boo
 	if found {
 		colKind := reflect.ValueOf(collection).Kind()
 		errMsg := "Collection should not contain element"
-		if colKind == reflect.String {
+		switch colKind {
+		case reflect.String:
 			errMsg = "String should not contain substring"
-		} else if colKind == reflect.Map {
+		case reflect.Map:
 			errMsg = "Map should not contain value"
 		}
 		reportCollectionError(t, ctx, errMsg, collection, element, nil)

@@ -73,7 +73,7 @@ func Greater[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any) b
 
 	ctx := NewAssertionContext(1)
 
-	if !(got > threshold) { // Check !(a > b) which is a <= b
+	if got <= threshold {
 		reportComparisonError(t, ctx, "Value is not greater than threshold", got, threshold, nil)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
@@ -90,7 +90,7 @@ func GreaterOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ..
 
 	ctx := NewAssertionContext(1)
 
-	if !(got >= threshold) { // Check !(a >= b) which is a < b
+	if got < threshold {
 		reportComparisonError(t, ctx, "Value is not greater than or equal to threshold", got, threshold, nil)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
@@ -107,7 +107,7 @@ func Less[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...any) bool
 
 	ctx := NewAssertionContext(1)
 
-	if !(got < threshold) { // Check !(a < b) which is a >= b
+	if got >= threshold {
 		reportComparisonError(t, ctx, "Value is not less than threshold", got, threshold, nil)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
@@ -124,7 +124,7 @@ func LessOrEqual[T cmp.Ordered](t testingT, got T, threshold T, msgAndArgs ...an
 
 	ctx := NewAssertionContext(1)
 
-	if !(got <= threshold) { // Check !(a <= b) which is a > b
+	if got > threshold {
 		reportComparisonError(t, ctx, "Value is not less than or equal to threshold", got, threshold, nil)
 		logOptionalMessage(t, msgAndArgs...)
 		return false
@@ -141,8 +141,8 @@ func Positive[T cmp.Ordered](t testingT, got T, msgAndArgs ...any) bool {
 
 	ctx := NewAssertionContext(1)
 
-	var zero T         // Get the zero value for the type T
-	if !(got > zero) { // Check if got <= 0
+	var zero T // Get the zero value for the type T
+	if got <= zero {
 		err := &AssertionError{
 			Message: "Value not positive",
 			PrimaryValue: assertionValue{
@@ -166,8 +166,8 @@ func Negative[T cmp.Ordered](t testingT, got T, msgAndArgs ...any) bool {
 
 	ctx := NewAssertionContext(1)
 
-	var zero T         // Get the zero value for the type T
-	if !(got < zero) { // Check if got >= 0
+	var zero T       // Get the zero value for the type T
+	if got >= zero { // Check if got >= 0
 		err := &AssertionError{
 			Message: "Value not negative",
 			PrimaryValue: assertionValue{

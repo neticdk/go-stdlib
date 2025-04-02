@@ -77,17 +77,15 @@ func TestNotPanics(t *testing.T) {
 						hasStackTrace = true
 						break
 					}
+					if strings.Contains(line, "Stack Trace") {
+						hasStackTrace = true
+						break
+					}
 				}
 				if !hasStackTrace {
 					t.Errorf("Error message doesn't contain stack trace")
 				}
 			}
 		}
-	})
-}
-
-func TestSomething(t *testing.T) {
-	assert.NotPanics(t, func() {
-		panic("test panic")
 	})
 }

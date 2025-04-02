@@ -161,19 +161,45 @@ func (ae *AssertionError) Format(ctx *AssertionContext) string {
 }
 
 // logOptionalMessage logs the optional message and arguments if provided.
-// func logOptionalMessage(t *testing.T, msgAndArgs ...any) {
+// It uses a heuristic (containsVerbs) to detect if the first argument is likely
+// a format string intended for t.Logf when multiple arguments are present.
+// Otherwise, it uses t.Log to print arguments space-separated.
 func logOptionalMessage(t testingT, msgAndArgs ...any) {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
 	}
 
-	if len(msgAndArgs) > 0 {
-		if format, ok := msgAndArgs[0].(string); ok && len(msgAndArgs) > 1 {
-			t.Logf(format, msgAndArgs[1:]...)
-		} else {
-			t.Log(msgAndArgs...)
+	if len(msgAndArgs) == 0 {
+		return
+	}
+
+	if format, ok := msgAndArgs[0].(string); ok && len(msgAndArgs) > 1 && containsVerbs(format) {
+		// Likely a format string with arguments, use Logf.
+		// fmt will handle literal %% correctly.
+		// fmt will produce %!verb(MISSING) or %!(EXTRA) if args mismatch verbs.
+		t.Logf(format, msgAndArgs[1:]...)
+	} else {
+		// Either:
+		// - Only one argument was provided.
+		// - The first argument was not a string.
+		// - The first argument was a string but contained no '%' (or had no args).
+		// Treat all arguments as individual values to be logged space-separated.
+		t.Log(msgAndArgs...)
+	}
+}
+
+// containsVerbs checks if a string contains a '%' character
+// that is likely part of a format verb (i.e., not '%%').
+func containsVerbs(s string) bool {
+	for i := range len(s) {
+		if s[i] == '%' {
+			if i+1 >= len(s) || s[i+1] != '%' {
+				return true // Found unescaped '%'
+			}
+			// Found '%%', skip the second '%'
 		}
 	}
+	return false // No unescaped '%' found
 }
 
 // DiffsEnabled indicates whether diffing is enabled for assertion errors.

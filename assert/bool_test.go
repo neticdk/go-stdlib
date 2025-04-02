@@ -42,7 +42,7 @@ func TestTrue(t *testing.T) {
 			wantPass:        false,
 			wantErrorMsg:    "Values are not equal",
 			optionalMsg:     []any{"another", "reason"},
-			wantOptionalLog: "another%!(EXTRA string=reason)",
+			wantOptionalLog: "another reason",
 		},
 	}
 

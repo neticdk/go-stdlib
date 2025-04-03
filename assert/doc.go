@@ -70,7 +70,8 @@
 // the differences between expected and actual values. However the
 // implementation is very basic and does not support complex types or nested
 // structures. It is based on JSON serialization and comparison and thus might
-// fail for unexported fields, channels or functions.
+// fail for unexported fields, channels or functions. Diff output uses the Myers
+// diff algorithm.
 //
 // To disable diffs, set the `DiffsEnabled` global variable to false.
 //

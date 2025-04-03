@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+
+	"github.com/neticdk/go-stdlib/diff/myers"
 )
 
 const maxPanicStackDepth = 8192
@@ -266,40 +268,12 @@ func computeDiff(got, want any) string {
 	gotLines := strings.Split(string(gotJSON), "\n")
 	wantLines := strings.Split(string(wantJSON), "\n")
 
-	return generateLineDiff(gotLines, wantLines)
-}
-
-// generateLineDiff creates a line-by-line diff with +/- markers
-func generateLineDiff(gotLines, wantLines []string) string {
-	maxLines := max(len(gotLines), len(wantLines))
-	diffLines := make([]string, 0, maxLines)
-
-	maxLineCount := max(len(gotLines), len(wantLines))
-
-	for i := range maxLineCount {
-		var gotLine, wantLine string
-		if i < len(gotLines) {
-			gotLine = gotLines[i]
-		}
-		if i < len(wantLines) {
-			wantLine = wantLines[i]
-		}
-
-		if gotLine == wantLine {
-			// Lines match, show without markers
-			diffLines = append(diffLines, "  "+gotLine)
-		} else {
-			// Lines differ
-			if gotLine != "" {
-				diffLines = append(diffLines, "- "+gotLine)
-			}
-			if wantLine != "" {
-				diffLines = append(diffLines, "+ "+wantLine)
-			}
-		}
+	diff, err := myers.DiffStrings(gotLines, wantLines)
+	if err != nil {
+		return fmt.Sprintf("Error generating diff: %v", err)
 	}
 
-	return strings.Join(diffLines, "\n")
+	return diff
 }
 
 // StackTracesEnabled indicates whether stack traces are enabled for assertion errors.

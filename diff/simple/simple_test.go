@@ -47,9 +47,9 @@ func TestDiff(t *testing.T) {
 				"   3    3   world\n",
 		},
 		{
-			name: "empty strings",
-			a:    "",
-			b:    "",
+			name:     "empty strings",
+			a:        "",
+			b:        "",
 			expected: "",
 		},
 		{
@@ -112,9 +112,9 @@ func TestDiffStrings(t *testing.T) {
 				"   3    2   world\n",
 		},
 		{
-			name: "empty slices",
-			a:    []string{},
-			b:    []string{},
+			name:     "empty slices",
+			a:        []string{},
+			b:        []string{},
 			expected: "",
 		},
 	}
@@ -162,23 +162,23 @@ func TestLongTextDiff(t *testing.T) {
 	// Test with a large number of lines to ensure the algorithm handles it efficiently
 	aLines := make([]string, 100)
 	bLines := make([]string, 100)
-	
-	for i := 0; i < 100; i++ {
-		aLines[i] = "Line A " + string(rune(i % 26 + 'a'))
-		bLines[i] = "Line B " + string(rune(i % 26 + 'a'))
+
+	for i := range 100 {
+		aLines[i] = "Line A " + string(rune(i%26+'a'))
+		bLines[i] = "Line B " + string(rune(i%26+'a'))
 	}
-	
+
 	// Make a few lines identical
 	bLines[10] = aLines[10]
 	bLines[50] = aLines[50]
 	bLines[90] = aLines[90]
-	
+
 	// Run the diff
 	_, err := simple.DiffStrings(aLines, bLines)
 	if err != nil {
 		t.Fatalf("Error running DiffStrings on long text: %v", err)
 	}
-	
+
 	// Success if it completes without error
 }
 
@@ -224,26 +224,26 @@ func BenchmarkSimpleDiff(b *testing.B) {
 	// Create two different texts to diff
 	aLines := make([]string, 50)
 	bLines := make([]string, 60)
-	
-	for i := 0; i < 50; i++ {
-		aLines[i] = "Line A " + string(rune(i % 26 + 'a'))
+
+	for i := range 50 {
+		aLines[i] = "Line A " + string(rune(i%26+'a'))
 	}
-	
-	for i := 0; i < 60; i++ {
-		bLines[i] = "Line B " + string(rune(i % 26 + 'a'))
+
+	for i := range 60 {
+		bLines[i] = "Line B " + string(rune(i%26+'a'))
 	}
-	
+
 	// Make some lines the same to create a realistic diff scenario
-	for i := 0; i < 20; i++ {
+	for i := range 20 {
 		pos := i * 2
 		if pos < 50 && pos < 60 {
 			bLines[pos] = aLines[pos]
 		}
 	}
-	
+
 	// Run the benchmark
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := simple.DiffStrings(aLines, bLines)
 		if err != nil {
 			b.Fatalf("Error in benchmark: %v", err)

@@ -213,7 +213,7 @@ func TestLongTextDiff(t *testing.T) {
 	aLines := make([]string, 500)
 	bLines := make([]string, 500)
 
-	for i := 0; i < 500; i++ {
+	for i := range 500 {
 		aLines[i] = "Line A " + string(rune(i%26+'a'))
 		bLines[i] = "Line B " + string(rune(i%26+'a'))
 	}
@@ -268,6 +268,37 @@ func TestCombinedOptions(t *testing.T) {
 			!strings.HasPrefix(line, "+ ") &&
 			!strings.HasPrefix(line, "- ") {
 			t.Errorf("Expected line to start with '  ', '+ ', or '- ', got: %s", line)
+		}
+	}
+}
+
+func BenchmarkMyersDiff(b *testing.B) {
+	// Create two different texts to diff
+	aLines := make([]string, 50)
+	bLines := make([]string, 60)
+
+	for i := range 50 {
+		aLines[i] = "Line A " + string(rune(i%26+'a'))
+	}
+
+	for i := range 60 {
+		bLines[i] = "Line B " + string(rune(i%26+'a'))
+	}
+
+	// Make some lines the same to create a realistic diff scenario
+	for i := range 20 {
+		pos := i * 2
+		if pos < 50 && pos < 60 {
+			bLines[pos] = aLines[pos]
+		}
+	}
+
+	// Run the benchmark
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := myers.DiffStrings(aLines, bLines)
+		if err != nil {
+			b.Fatalf("Error in benchmark: %v", err)
 		}
 	}
 }

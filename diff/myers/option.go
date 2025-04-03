@@ -9,18 +9,21 @@ func WithContextLines(n int) Option {
 	}
 }
 
+// WithShowLineNumbers sets whether to show line numbers
 func WithShowLineNumbers(show bool) Option {
 	return func(o *options) {
 		o.showLineNumbers = show
 	}
 }
 
+// WithMaxEditDistance sets the maximum edit distance
 func WithMaxEditDistance(n int) Option {
 	return func(o *options) {
 		o.maxEditDistance = n
 	}
 }
 
+// WithLinearSpace sets whether to use linear space algorithm
 func WithLinearSpace(linear bool) Option {
 	return func(o *options) {
 		o.linearSpace = linear

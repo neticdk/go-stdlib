@@ -412,13 +412,12 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 
 	// Ensure the initial reverse position is within bounds
 	reverseIndex := offset + delta
-	if reverseIndex >= 0 && reverseIndex < vectorSize {
-		vr[reverseIndex] = n
-	} else {
-		// If we can't properly initialize the reverse search,
-		// fall back to simpler diff algorithm
+	// If we can't properly initialize the reverse search,
+	// fall back to simpler diff algorithm
+	if reverseIndex < 0 || reverseIndex > vectorSize {
 		return snake{aStart, bStart, aStart, bStart, 0}
 	}
+	vr[reverseIndex] = n
 
 	// Add bounds checking for vector updates
 	safeVectorUpdate := func(v []int, index, value int) bool {

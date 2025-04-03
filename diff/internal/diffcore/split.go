@@ -1,9 +1,9 @@
-package lines
+package diffcore
 
 import "strings"
 
-// Split splits a string into lines, handling empty strings and trailing newlines
-func Split(s string) []string {
+// SplitLines splits a string into lines, handling empty strings and trailing newlines
+func SplitLines(s string) []string {
 	if s == "" {
 		return []string{}
 	}

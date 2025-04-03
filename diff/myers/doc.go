@@ -5,6 +5,10 @@
 // provides both string-based and string slice-based diff functions with
 // various configuration options.
 //
+// For large inputs, a linear space variant of Myers algorithm is used to reduce
+// memory consumption.  A fallback to a simpler LCS-based algorithm is also
+// employed for extremely large inputs or when recursion depth limits are reached.
+//
 // # Basic Usage
 //
 // To compare two strings using the default settings:
@@ -34,7 +38,7 @@
 //
 // # Configuration Options
 //
-// Several options can be used to customize the diff output:
+// Several options can be used to customize the diff output and algorithm behavior:
 //
 //	// Create a custom differ with 5 context lines surrounding changes
 //	differ := myers.NewCustomDiffer(myers.WithContextLines(5))
@@ -62,13 +66,18 @@
 //
 // # Algorithm Details
 //
-// This implementation uses:
-// 1. Myers' greedy algorithm for finding the shortest edit script
-// 2. A fallback to a simpler LCS-based algorithm for very large edit distances
-// 3. Context-aware output formatting similar to unified diff format
+// This implementation uses the following strategies:
+//   - Myers' greedy algorithm for finding the shortest edit script.
+//   - A linear space variant of Myers' algorithm (Hirschberg's algorithm principle) to reduce memory usage for large inputs.
+//   - A fallback to a simpler LCS-based algorithm (implemented in the internal/diffcore package) for extremely large edit distances,
+//     very large inputs, or when linear space recursion depth limits are reached.
+//   - Context-aware output formatting similar to unified diff format.
 //
-// The time complexity is O(ND) where N is the sum of input lengths and D is the
-// size of the minimum edit script. Space complexity is O(N) or O(D^2)
-// depending on the chosen algorithm variant.
-
+// The time complexity is typically O(ND) where N is the sum of input lengths and D is the
+// size of the minimum edit script. However, the fallback to the LCS-based algorithm
+// results in O(N*M) time complexity in certain cases.
+//
+// Space complexity varies depending on the chosen algorithm variant:
+//   - O(N) for the linear space algorithm.
+//   - O(V) for the standard Myers algorithm (V is the length of the `v` vector).
 package myers

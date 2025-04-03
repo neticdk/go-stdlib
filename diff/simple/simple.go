@@ -5,8 +5,7 @@ import (
 	"strings"
 
 	"github.com/neticdk/go-stdlib/diff"
-	"github.com/neticdk/go-stdlib/diff/internal/lcs"
-	"github.com/neticdk/go-stdlib/diff/internal/lines"
+	"github.com/neticdk/go-stdlib/diff/internal/diffcore" // Import the new internal package
 )
 
 // Diff computes differences between two strings using a simple diff algorithm.
@@ -16,8 +15,8 @@ func Diff(a, b string, opts ...Option) (string, error) {
 		return "", nil
 	}
 
-	aLines := lines.Split(a)
-	bLines := lines.Split(b)
+	aLines := diffcore.SplitLines(a)
+	bLines := diffcore.SplitLines(b)
 	return DiffStrings(aLines, bLines, opts...)
 }
 
@@ -26,8 +25,8 @@ func Diff(a, b string, opts ...Option) (string, error) {
 func DiffStrings(a, b []string, opts ...Option) (string, error) {
 	options := applyOptions(opts...)
 
-	// Compute edit script using simple diff algorithm
-	edits := computeEditScript(a, b)
+	// Compute edit script using the shared simple LCS-based diff algorithm
+	edits := diffcore.ComputeEditsLCS(a, b)
 
 	// Format the diff output
 	var sb strings.Builder
@@ -70,46 +69,4 @@ func DiffStrings(a, b []string, opts ...Option) (string, error) {
 	}
 
 	return sb.String(), nil
-}
-
-// computeEditScript implements a simple diff algorithm based on longest common subsequence
-func computeEditScript(a, b []string) []diff.Line {
-	edits := []diff.Line{}
-
-	// Use a simple longest common subsequence approach
-	longest := lcs.LongestCommonSubsequence(a, b)
-	aIndex, bIndex := 0, 0
-
-	for _, item := range longest {
-		// Add deletions for unmatched items in a
-		for aIndex < item.AIndex {
-			edits = append(edits, diff.Line{Kind: diff.Delete, Text: a[aIndex]})
-			aIndex++
-		}
-
-		// Add insertions for unmatched items in b
-		for bIndex < item.BIndex {
-			edits = append(edits, diff.Line{Kind: diff.Insert, Text: b[bIndex]})
-			bIndex++
-		}
-
-		// Add the matching item
-		edits = append(edits, diff.Line{Kind: diff.Equal, Text: a[aIndex]})
-		aIndex++
-		bIndex++
-	}
-
-	// Handle remaining items in a
-	for aIndex < len(a) {
-		edits = append(edits, diff.Line{Kind: diff.Delete, Text: a[aIndex]})
-		aIndex++
-	}
-
-	// Handle remaining items in b
-	for bIndex < len(b) {
-		edits = append(edits, diff.Line{Kind: diff.Insert, Text: b[bIndex]})
-		bIndex++
-	}
-
-	return edits
 }

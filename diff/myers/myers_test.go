@@ -10,10 +10,6 @@ import (
 	"github.com/neticdk/go-stdlib/diff/myers"
 )
 
-const (
-	smallInputThreshold = 100
-)
-
 func TestMyersDifferInterface(t *testing.T) {
 	// Test data for both string and string slice inputs
 	stringTests := []struct {
@@ -299,16 +295,23 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 		desc string
 	}{
 		{
+			name: "very small input to force n=1 or m=1 in findMiddleSnake and use linear space",
+			a:    []string{"a"},
+			b:    []string{"b", "a"},
+			opts: []myers.Option{myers.WithLinearSpace(true), myers.WithMaxEditDistance(100), myers.WithShowLineNumbers(false)}, // Force use of linear space algorithm, and allow a reasonable edit distance
+			desc: "should use linear space algorithm and reach n=1||m=1 in findMiddleSnake",
+		},
+		{
 			name: "small input (should use standard algorithm)",
-			a:    make([]string, smallInputThreshold-1),
-			b:    make([]string, smallInputThreshold-1),
+			a:    make([]string, myers.SmallInputThreshold-1),
+			b:    make([]string, myers.SmallInputThreshold-1),
 			opts: []myers.Option{myers.WithLinearSpace(true)},
 			desc: "small input should use standard algorithm",
 		},
 		{
 			name: "max edit distance constraint",
-			a:    make([]string, smallInputThreshold+10),
-			b:    make([]string, smallInputThreshold+10),
+			a:    make([]string, myers.SmallInputThreshold+10),
+			b:    make([]string, myers.SmallInputThreshold+10),
 			opts: []myers.Option{
 				myers.WithLinearSpace(true),
 				myers.WithMaxEditDistance(50),
@@ -317,8 +320,8 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 		},
 		{
 			name: "large input (should use linear space)",
-			a:    make([]string, smallInputThreshold+1),
-			b:    make([]string, smallInputThreshold+1),
+			a:    make([]string, myers.SmallInputThreshold+1),
+			b:    make([]string, myers.SmallInputThreshold+1),
 			opts: []myers.Option{myers.WithLinearSpace(true)},
 			desc: "should use linear space algorithm",
 		},
@@ -333,6 +336,20 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Skip the generic checks for the "very small input" test case. We are now testing for this directly.
+			if tt.name == "very small input to force n=1 or m=1 in findMiddleSnake and use linear space" {
+				result, err := myers.DiffStrings(tt.a, tt.b, tt.opts...)
+				if err != nil {
+					t.Fatalf("Error running diff: %v", err)
+				}
+
+				expected := "+ b\n  a\n" // Expected output
+				if result != expected {
+					t.Errorf("Diff = %q, want %q", result, expected)
+				}
+				return
+			}
+
 			// Fill arrays with some predictable differences
 			for i := range tt.a {
 				if i%5 == 0 {
@@ -550,7 +567,7 @@ func TestEditScriptAlgorithmSelection(t *testing.T) {
 
 func TestLinearSpaceRecursionDepth(t *testing.T) {
 	// Create input that will test recursion depth
-	size := smallInputThreshold + 50 // Large enough to use linear space
+	size := myers.SmallInputThreshold + 50 // Large enough to use linear space
 	a := make([]string, size)
 	b := make([]string, size)
 

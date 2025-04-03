@@ -27,3 +27,14 @@ type Line struct {
 	Kind OpKind // Op is the operation performed on the line
 	Text string // Text is the content of the line
 }
+
+// The Differ interface defines the contract for diffing two slices of strings
+// Use the factory functions from each package to create a Differ implementation
+type Differ interface {
+	// Diff returns a string representation of the differences between two
+	// strings
+	Diff(a, b string) (string, error)
+	// DiffStrings returns a string representation of the differences between
+	// two slices of strings
+	DiffStrings(a, b []string) (string, error)
+}

@@ -1,18 +1,25 @@
 // Package myers implements the Myers' diff algorithm.
 //
 // The Myers algorithm is an efficient method for computing the shortest edit
-// script between/ two sequences (typically lines of text). This implementation
-// provides both string-based/ and string slice-based diff functions with
+// script between two sequences (typically lines of text). This implementation
+// provides both string-based and string slice-based diff functions with
 // various configuration options.
 //
 // # Basic Usage
 //
-// To compare two strings:
+// To compare two strings using the default settings:
 //
-//	diff, err := myers.Diff("hello\nworld", "hello\nthere\nworld")
+//	differ := myers.NewDiffer()
+//	diff, err := differ.Diff("hello\nworld", "hello\nthere\nworld")
 //
 // To compare slices of strings directly:
 //
+//	differ := myers.NewDiffer()
+//	diff, err := differ.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
+//
+// Alternatively, you can use the Diff or DiffStrings functions directly:
+//
+//	diff, err := myers.Diff("hello\nworld", "hello\nthere\nworld")
 //	diff, err := myers.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
 //
 // # Output Format
@@ -29,22 +36,29 @@
 //
 // Several options can be used to customize the diff output:
 //
-//	// Show 5 context lines surrounding changes
-//	diff, err := myers.Diff(a, b, myers.WithContextLines(5))
+//	// Create a custom differ with 5 context lines surrounding changes
+//	differ := myers.NewCustomDiffer(myers.WithContextLines(5))
 //
-//	// Hide line numbers
-//	diff, err := myers.Diff(a, b, myers.WithShowLineNumbers(false))
+//	// Create a custom differ that hides line numbers
+//	differ := myers.NewCustomDiffer(myers.WithShowLineNumbers(false))
 //
-//	// Set maximum edit distance (for performance on large inputs)
-//	diff, err := myers.Diff(a, b, myers.WithMaxEditDistance(100))
+//	// Create a custom differ with a maximum edit distance (for performance on large inputs)
+//	differ := myers.NewCustomDiffer(myers.WithMaxEditDistance(100))
 //
-//	// Use linear space algorithm variant
-//	diff, err := myers.Diff(a, b, myers.WithLinearSpace(true))
+//	// Create a custom differ that uses the linear space algorithm variant
+//	differ := myers.NewCustomDiffer(myers.WithLinearSpace(true))
 //
 //	// Combine multiple options
-//	diff, err := myers.Diff(a, b,
-//	            myers.WithContextLines(3),
-//	            myers.WithShowLineNumbers(false))
+//	differ := myers.NewCustomDiffer(
+//	       myers.WithContextLines(3),
+//	       myers.WithShowLineNumbers(false))
+//
+// Alternatively, you can use the Diff or DiffStrings functions directly with options:
+//
+//	diff, err := myers.Diff("hello\nworld", "hello\nthere\nworld",
+//	       myers.WithContextLines(3), myers.WithShowLineNumbers(false))
+//	diff, err := myers.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"},
+//	       myers.WithContextLines(3), myers.WithShowLineNumbers(false))
 //
 // # Algorithm Details
 //
@@ -54,7 +68,7 @@
 // 3. Context-aware output formatting similar to unified diff format
 //
 // The time complexity is O(ND) where N is the sum of input lengths and D is the
-// size of/ the minimum edit script. Space complexity is O(N) or O(D^2)
+// size of the minimum edit script. Space complexity is O(N) or O(D^2)
 // depending on the chosen algorithm variant.
 
 package myers

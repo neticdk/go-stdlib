@@ -5,20 +5,24 @@ import (
 	"strings"
 
 	"github.com/neticdk/go-stdlib/diff"
+	"github.com/neticdk/go-stdlib/diff/internal/lcs"
+	"github.com/neticdk/go-stdlib/diff/internal/lines"
 )
 
 // Diff computes differences between two strings using a simple diff algorithm.
+// Currently never returns an error.
 func Diff(a, b string, opts ...Option) (string, error) {
 	if a == "" && b == "" {
 		return "", nil
 	}
 
-	aLines := splitLines(a)
-	bLines := splitLines(b)
+	aLines := lines.Split(a)
+	bLines := lines.Split(b)
 	return DiffStrings(aLines, bLines, opts...)
 }
 
 // DiffStrings computes differences between string slices using a simple diff algorithm.
+// Currently never returns an error.
 func DiffStrings(a, b []string, opts ...Option) (string, error) {
 	options := applyOptions(opts...)
 
@@ -73,10 +77,10 @@ func computeEditScript(a, b []string) []diff.Line {
 	edits := []diff.Line{}
 
 	// Use a simple longest common subsequence approach
-	lcs := longestCommonSubsequence(a, b)
+	longest := lcs.LongestCommonSubsequence(a, b)
 	aIndex, bIndex := 0, 0
 
-	for _, item := range lcs {
+	for _, item := range longest {
 		// Add deletions for unmatched items in a
 		for aIndex < item.AIndex {
 			edits = append(edits, diff.Line{Kind: diff.Delete, Text: a[aIndex]})
@@ -108,68 +112,4 @@ func computeEditScript(a, b []string) []diff.Line {
 	}
 
 	return edits
-}
-
-// MatchItem represents a matching item in two sequences
-type MatchItem struct {
-	AIndex, BIndex int
-}
-
-// longestCommonSubsequence finds the longest common subsequence between two string slices
-func longestCommonSubsequence(a, b []string) []MatchItem {
-	// Create a map of values to positions in B for faster lookup
-	bValues := make(map[string][]int)
-	for i, val := range b {
-		bValues[val] = append(bValues[val], i)
-	}
-
-	var lcs []MatchItem
-
-	// Find matches
-	for i, aVal := range a {
-		if positions, ok := bValues[aVal]; ok {
-			// Try to find the best match position
-			bestMatch := -1
-
-			for _, pos := range positions {
-				// Check if this match extends the current LCS
-				valid := true
-				for j := len(lcs) - 1; j >= 0; j-- {
-					if lcs[j].BIndex >= pos {
-						valid = false
-						break
-					}
-				}
-
-				if valid && (bestMatch == -1 || pos < bestMatch) {
-					bestMatch = pos
-				}
-			}
-
-			if bestMatch != -1 {
-				lcs = append(lcs, MatchItem{i, bestMatch})
-			}
-		}
-	}
-
-	return lcs
-}
-
-// splitLines splits a string into lines, handling empty strings and trailing newlines
-func splitLines(s string) []string {
-	// Special case for completely empty string
-	if s == "" {
-		return []string{}
-	}
-
-	// Split the string by newlines
-	lines := strings.Split(s, "\n")
-
-	// If the string ends with a newline, the split will produce an empty string
-	// at the end - we should remove it to avoid confusing diff output
-	if s[len(s)-1] == '\n' {
-		lines = lines[:len(lines)-1]
-	}
-
-	return lines
 }

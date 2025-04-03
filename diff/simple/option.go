@@ -1,7 +1,7 @@
 package simple
 
-// DefaultShowLineNumbers determines if line numbers are shown by default
-var DefaultShowLineNumbers = true
+// defaultShowLineNumbers determines if line numbers are shown by default
+const defaultShowLineNumbers = true
 
 // options configures the simple diff algorithm
 type options struct {
@@ -20,7 +20,7 @@ func WithShowLineNumbers(show bool) Option {
 
 func applyOptions(opts ...Option) options {
 	defaultOpts := options{
-		showLineNumbers: DefaultShowLineNumbers,
+		showLineNumbers: defaultShowLineNumbers,
 	}
 
 	for _, opt := range opts {

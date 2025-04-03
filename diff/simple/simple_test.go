@@ -7,6 +7,127 @@ import (
 	"github.com/neticdk/go-stdlib/diff/simple"
 )
 
+func TestSimpleDifferInterface(t *testing.T) {
+	// Test data for both string and string slice inputs
+	stringTests := []struct {
+		name     string
+		a        string
+		b        string
+		expected string
+	}{
+		{
+			name: "identical strings",
+			a:    "hello\nworld",
+			b:    "hello\nworld",
+			expected: "   1    1   hello\n" +
+				"   2    2   world\n",
+		},
+		{
+			name: "insert line",
+			a:    "hello\nworld",
+			b:    "hello\nmiddle\nworld",
+			expected: "   1    1   hello\n" +
+				"        2 + middle\n" +
+				"   2    3   world\n",
+		},
+		{
+			name:     "empty strings",
+			a:        "",
+			b:        "",
+			expected: "",
+		},
+	}
+
+	sliceTests := []struct {
+		name     string
+		a        []string
+		b        []string
+		expected string
+	}{
+		{
+			name: "identical slices",
+			a:    []string{"hello", "world"},
+			b:    []string{"hello", "world"},
+			expected: "   1    1   hello\n" +
+				"   2    2   world\n",
+		},
+		{
+			name: "insert element",
+			a:    []string{"hello", "world"},
+			b:    []string{"hello", "middle", "world"},
+			expected: "   1    1   hello\n" +
+				"        2 + middle\n" +
+				"   2    3   world\n",
+		},
+		{
+			name:     "empty slices",
+			a:        []string{},
+			b:        []string{},
+			expected: "",
+		},
+	}
+
+	// Test default differ
+	differ := simple.NewDiffer()
+
+	// Test string input
+	for _, tt := range stringTests {
+		t.Run("Default/String/"+tt.name, func(t *testing.T) {
+			result, err := differ.Diff(tt.a, tt.b)
+			if err != nil {
+				t.Fatalf("Error running Diff with default differ: %v", err)
+			}
+			if result != tt.expected {
+				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
+			}
+		})
+	}
+
+	// Test string slice input
+	for _, tt := range sliceTests {
+		t.Run("Default/Slice/"+tt.name, func(t *testing.T) {
+			result, err := differ.DiffStrings(tt.a, tt.b)
+			if err != nil {
+				t.Fatalf("Error running DiffStrings with default differ: %v", err)
+			}
+			if result != tt.expected {
+				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
+			}
+		})
+	}
+
+	// Test custom differ with options
+	customDiffer := simple.NewCustomDiffer(
+		simple.WithShowLineNumbers(false),
+	)
+
+	// Custom expected results for options
+	customExpected := "  hello\n+ middle\n  world\n"
+
+	t.Run("Custom/String", func(t *testing.T) {
+		result, err := customDiffer.Diff("hello\nworld", "hello\nmiddle\nworld")
+		if err != nil {
+			t.Fatalf("Error running Diff with custom differ: %v", err)
+		}
+		if result != customExpected {
+			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
+		}
+	})
+
+	t.Run("Custom/Slice", func(t *testing.T) {
+		result, err := customDiffer.DiffStrings(
+			[]string{"hello", "world"},
+			[]string{"hello", "middle", "world"},
+		)
+		if err != nil {
+			t.Fatalf("Error running DiffStrings with custom differ: %v", err)
+		}
+		if result != customExpected {
+			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
+		}
+	})
+}
+
 func TestDiff(t *testing.T) {
 	tests := []struct {
 		name     string

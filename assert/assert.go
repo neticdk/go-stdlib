@@ -271,10 +271,12 @@ func computeDiff(got, want any) string {
 
 // generateLineDiff creates a line-by-line diff with +/- markers
 func generateLineDiff(gotLines, wantLines []string) string {
-	var diffLines []string
 	maxLines := max(len(gotLines), len(wantLines))
+	diffLines := make([]string, 0, maxLines)
 
-	for i := range maxLines {
+	maxLineCount := max(len(gotLines), len(wantLines))
+
+	for i := range maxLineCount {
 		var gotLine, wantLine string
 		if i < len(gotLines) {
 			gotLine = gotLines[i]

@@ -2,8 +2,6 @@ package xslices
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestIntersectionOfTwoSlices(t *testing.T) {
@@ -59,7 +57,9 @@ func TestIntersectionOfTwoSlices(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := Intersect(tt.a, tt.b)
-			assert.Equal(t, tt.expected, result)
+			if !equal(result, tt.expected) {
+				t.Errorf("expected %v, got %v", tt.expected, result)
+			}
 		})
 	}
 }

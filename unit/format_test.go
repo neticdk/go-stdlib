@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 // Test custom unit registration and lookup
@@ -229,20 +229,20 @@ func TestFormatValueWithUnit(t *testing.T) {
 			value := formatValueWithUnit(tc.input, tc.unit, tc.options)
 
 			assert.Equal(t, tc.expectedValue, value.Scaled,
-				"Value mismatch for %s: expected %f, got %f (%s)",
-				tc.name, tc.expectedValue, value.Scaled, tc.description)
+				fmt.Sprintf("Value mismatch for %s: expected %f, got %f (%s)",
+					tc.name, tc.expectedValue, value.Scaled, tc.description))
 
 			assert.Equal(t, tc.expectedPrefix, value.Prefix,
-				"Prefix mismatch for %s: expected %v, got %v (%s)",
-				tc.name, tc.expectedPrefix, value.Prefix, tc.description)
+				fmt.Sprintf("Prefix mismatch for %s: expected %v, got %v (%s)",
+					tc.name, tc.expectedPrefix, value.Prefix, tc.description))
 
 			assert.Equal(t, tc.expectedUnit, value.Unit,
-				"Unit mismatch for %s: expected %v, got %v (%s)",
-				tc.name, tc.expectedUnit, value.Unit, tc.description)
+				fmt.Sprintf("Unit mismatch for %s: expected %v, got %v (%s)",
+					tc.name, tc.expectedUnit, value.Unit, tc.description))
 
 			assert.Equal(t, tc.expectedValueString, value.String(),
-				"Value mismatch for %s: expected %v, got %v (%s)",
-				tc.name, tc.expectedValue, value.String(), tc.description)
+				fmt.Sprintf("Value mismatch for %s: expected %v, got %v (%s)",
+					tc.name, tc.expectedValue, value.String(), tc.description))
 		})
 	}
 }

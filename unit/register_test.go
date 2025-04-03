@@ -3,9 +3,9 @@ package unit_test
 import (
 	"testing"
 
+	"github.com/neticdk/go-stdlib/assert"
+	"github.com/neticdk/go-stdlib/require"
 	"github.com/neticdk/go-stdlib/unit"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestRegister(t *testing.T) {

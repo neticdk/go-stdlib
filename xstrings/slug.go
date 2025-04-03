@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/neticdk/go-stdlib/xstrings/transliterate"
 )
 
 // Slugify converts a string to a slug.
@@ -22,7 +24,7 @@ func Slugify(s string, options ...TransformOption) string {
 	}
 
 	if opts.transliterate {
-		s = Transliterate(s)
+		s = transliterate.String(s)
 	}
 
 	if opts.decamelize {

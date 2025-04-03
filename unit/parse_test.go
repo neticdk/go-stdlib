@@ -3,8 +3,8 @@ package unit
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/neticdk/go-stdlib/assert"
+	"github.com/neticdk/go-stdlib/require"
 )
 
 func TestParse(t *testing.T) {

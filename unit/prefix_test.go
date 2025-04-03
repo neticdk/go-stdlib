@@ -3,7 +3,7 @@ package unit
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestPrefixFor(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestNewOrderedSet(t *testing.T) {

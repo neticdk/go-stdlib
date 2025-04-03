@@ -1,0 +1,13 @@
+nolint
+unparam
+[Ss]ubstring
+yaml
+YAML
+json
+JSON
+[Bb]ooleans?
+func
+[Uu]nexported
+[Ii]nvalid
+[Uu]ntyped
+[Mm]agnitude

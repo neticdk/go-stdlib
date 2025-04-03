@@ -36,7 +36,7 @@ func CopyDirectory(srcDir, dest string) error {
 
 // Copy copies a file from src to dest
 func Copy(srcFile, dstFile string) error {
-	in, err := SafeOpen(filepath.Dir(srcFile), srcFile)
+	in, err := SafeOpen(filepath.Dir(srcFile), filepath.Base(srcFile))
 	if err != nil {
 		return fmt.Errorf("opening file: %q, error: %q", srcFile, err.Error())
 	}
@@ -51,7 +51,7 @@ func Copy(srcFile, dstFile string) error {
 	if err == nil {
 		mode = int64(stat.Mode().Perm())
 	}
-	out, err := SafeCreate(filepath.Dir(dstFile), dstFile, mode)
+	out, err := SafeCreate(filepath.Dir(dstFile), filepath.Base(dstFile), mode)
 	if err != nil {
 		return fmt.Errorf("creating file: %q, error: %q", dstFile, err.Error())
 	}

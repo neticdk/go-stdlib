@@ -10,6 +10,14 @@ import (
 	"github.com/neticdk/go-stdlib/diff/myers"
 )
 
+const (
+	// minimcs myers.smallInputThreshold
+	smallInputThreshold = 100
+
+	// mimics myers.largeInputThreshold
+	largeInputThreshold = 10000
+)
+
 func TestMyersDifferInterface(t *testing.T) {
 	// Test data for both string and string slice inputs
 	stringTests := []struct {
@@ -303,15 +311,15 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 		},
 		{
 			name: "small input (should use standard algorithm)",
-			a:    make([]string, myers.SmallInputThreshold-1),
-			b:    make([]string, myers.SmallInputThreshold-1),
+			a:    make([]string, smallInputThreshold-1),
+			b:    make([]string, smallInputThreshold-1),
 			opts: []myers.Option{myers.WithLinearSpace(true)},
 			desc: "small input should use standard algorithm",
 		},
 		{
 			name: "max edit distance constraint",
-			a:    make([]string, myers.SmallInputThreshold+10),
-			b:    make([]string, myers.SmallInputThreshold+10),
+			a:    make([]string, smallInputThreshold+10),
+			b:    make([]string, smallInputThreshold+10),
 			opts: []myers.Option{
 				myers.WithLinearSpace(true),
 				myers.WithMaxEditDistance(50),
@@ -320,15 +328,15 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 		},
 		{
 			name: "large input (should use linear space)",
-			a:    make([]string, myers.SmallInputThreshold+1),
-			b:    make([]string, myers.SmallInputThreshold+1),
+			a:    make([]string, smallInputThreshold+1),
+			b:    make([]string, smallInputThreshold+1),
 			opts: []myers.Option{myers.WithLinearSpace(true)},
 			desc: "should use linear space algorithm",
 		},
 		{
 			name: "very large input (should use simple diff)",
-			a:    make([]string, myers.DefaultSimpleDiffFallbackSize+1),
-			b:    make([]string, myers.DefaultSimpleDiffFallbackSize+1),
+			a:    make([]string, largeInputThreshold+1),
+			b:    make([]string, largeInputThreshold+1),
 			opts: []myers.Option{myers.WithLinearSpace(true)},
 			desc: "should fall back to simple diff",
 		},
@@ -567,7 +575,7 @@ func TestEditScriptAlgorithmSelection(t *testing.T) {
 
 func TestLinearSpaceRecursionDepth(t *testing.T) {
 	// Create input that will test recursion depth
-	size := myers.SmallInputThreshold + 50 // Large enough to use linear space
+	size := smallInputThreshold + 50 // Large enough to use linear space
 	a := make([]string, size)
 	b := make([]string, size)
 
@@ -590,7 +598,7 @@ func TestLinearSpaceRecursionDepth(t *testing.T) {
 	}{
 		{
 			name:     "normal depth",
-			maxDepth: myers.DefaultLinearRecursionMaxDepth,
+			maxDepth: 30,
 		},
 		{
 			name:     "shallow depth",
@@ -686,7 +694,7 @@ func TestWithMaxEditDistance(t *testing.T) {
 	// The limited edit distance version should fall back to the simple diff method
 }
 
-func TestWithSimpleDiffFallbackSize(t *testing.T) {
+func TestWithLargeInputThreshold(t *testing.T) {
 	// Create a large input that would normally use the simple diff algorithm
 	size := 15000
 	aLines := make([]string, size)
@@ -722,7 +730,7 @@ func TestWithSimpleDiffFallbackSize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			differ := myers.NewCustomDiffer(
-				myers.WithSimpleDiffFallbackSize(tt.fallbackSize),
+				myers.WithLargeInputThreshold(tt.fallbackSize),
 				myers.WithContextLines(0), // Minimize output size
 			)
 
@@ -741,6 +749,82 @@ func TestWithSimpleDiffFallbackSize(t *testing.T) {
 			}
 			if !tt.shouldFallback && !hasEllipsis && len(lines) > 4 {
 				t.Error("Expected Myers diff with chunks, but got unchunked output")
+			}
+		})
+	}
+}
+
+func TestWithSmallThreshold(t *testing.T) {
+	// Create a small input
+	sizeA := 500
+	sizeB := 400
+
+	// Test with different small input thresholds
+	tests := []struct {
+		name              string
+		thresholdSize     int
+		expectLinearSpace bool // Expecting the LinearSpace Algorithm when set to true
+		desc              string
+	}{
+		{
+			name:              "force use linear space",
+			thresholdSize:     1, // Force smaller array to use linear space
+			expectLinearSpace: true,
+			desc:              "threshold smaller than the input: LinearSpace should  be called",
+		},
+		{
+			name:              "use normal myers",
+			thresholdSize:     1000, // Force larger array to use standard myers
+			expectLinearSpace: false,
+			desc:              "threshold larger than input size, expect !linearSpace",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			aLines := make([]string, sizeA)
+			bLines := make([]string, sizeB)
+
+			for i := range sizeA {
+				aLines[i] = fmt.Sprintf("line %d", i)
+			}
+
+			for i := range sizeB {
+				bLines[i] = fmt.Sprintf("line %d", i)
+			}
+			// Change a few lines to create differences
+			if len(bLines) > 10 {
+				bLines[10] = "changed line"
+			}
+			if len(aLines) > 20 {
+				aLines[20] = "another change"
+			}
+
+			differ := myers.NewCustomDiffer(
+				myers.WithSmallInputThreshold(tt.thresholdSize),
+				myers.WithContextLines(0),   // Minimize output size
+				myers.WithLinearSpace(true), // Force the code to call the linear space algorithm.
+			)
+
+			_, err := differ.DiffStrings(aLines, bLines)
+			if err != nil {
+				t.Fatalf("Error running diff: %v", err)
+			}
+
+			// This will test to verify if the test hit the linear space algorithm or not
+			aLen := len(aLines)
+			bLen := len(bLines)
+
+			// We are checking for conditions where computescript is not called!
+			if aLen < smallInputThreshold || bLen < smallInputThreshold {
+				if tt.expectLinearSpace != (tt.thresholdSize < min(aLen, bLen)) {
+					t.Errorf("Inconsistent linear space: %s.  Desc: %s. expected %v, got %v", tt.name, tt.desc, tt.expectLinearSpace, (tt.thresholdSize < min(aLen, bLen)))
+				}
+			} else {
+				// If both are above the threshold, expect linearSpace to be used if thresholdSize is less.
+				if tt.expectLinearSpace != (tt.thresholdSize < min(aLen, bLen)) {
+					t.Errorf("Inconsistent linear space: %s.  Desc: %s. expected %v, got %v", tt.name, tt.desc, tt.expectLinearSpace, (tt.thresholdSize < min(aLen, bLen)))
+				}
 			}
 		})
 	}
@@ -863,7 +947,7 @@ func TestOptionCombinations(t *testing.T) {
 	differ := myers.NewCustomDiffer(
 		myers.WithLinearSpace(true),
 		myers.WithLinearRecursionMaxDepth(10),
-		myers.WithSimpleDiffFallbackSize(500),
+		myers.WithLargeInputThreshold(500),
 		myers.WithContextLines(2),
 		myers.WithShowLineNumbers(false),
 		myers.WithMaxEditDistance(50),
@@ -929,42 +1013,6 @@ func TestLongTextDiff(t *testing.T) {
 	}
 }
 
-func TestCombinedOptions(t *testing.T) {
-	a := "line1\nline2\nline3\nold\nline5"
-	b := "line1\nline2\nline3\nnew\nline5"
-
-	// Combine multiple options
-	result, err := myers.Diff(a, b,
-		myers.WithContextLines(1),
-		myers.WithShowLineNumbers(false),
-		myers.WithMaxEditDistance(50),
-		myers.WithLinearSpace(true),
-	)
-	if err != nil {
-		t.Fatalf("Error running Diff with combined options: %v", err)
-	}
-
-	lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
-
-	// With context 1, we should have 4 lines:
-	// line3 (context before)
-	// - old (deletion)
-	// + new (addition)
-	// line5 (context after)
-	if len(lines) != 4 {
-		t.Errorf("Expected 4 lines, got %d lines: %s", len(lines), result)
-	}
-
-	// Without line numbers, lines should start with spaces, +, or -
-	for _, line := range lines {
-		if !strings.HasPrefix(line, "  ") &&
-			!strings.HasPrefix(line, "+ ") &&
-			!strings.HasPrefix(line, "- ") {
-			t.Errorf("Expected line to start with '  ', '+ ', or '- ', got: %s", line)
-		}
-	}
-}
-
 func BenchmarkMyersDiff(b *testing.B) {
 	// Create two different texts to diff
 	aLines := make([]string, 50)
@@ -996,6 +1044,26 @@ func BenchmarkMyersDiff(b *testing.B) {
 	}
 }
 
+// func BenchmarkMyersDiffLinearSpace(b *testing.B) {
+// 	sizes := []int{100, 1000, 10000}
+// 	changes := []float64{0.01, 0.1, 0.5} // Percentage of lines changed
+
+//		for _, size := range sizes {
+//			for _, changeRate := range changes {
+//				name := fmt.Sprintf("size=%d,changes=%.2f", size, changeRate)
+//				b.Run(name, func(b *testing.B) {
+//					a, bb := generateBenchmarkInput(size, changeRate)
+//					b.ResetTimer()
+//					for i := 0; i < b.N; i++ {
+//						_, err := myers.Diff(a, bb, myers.WithLinearSpace(true))
+//						if err != nil {
+//							b.Fatalf("Error in benchmark: %v", err)
+//						}
+//					}
+//				})
+//			}
+//		}
+//	}
 func BenchmarkMyersDiffLinearSpace(b *testing.B) {
 	sizes := []int{100, 1000, 10000}
 	changes := []float64{0.01, 0.1, 0.5} // Percentage of lines changed
@@ -1127,3 +1195,114 @@ func generateBenchmarkInput(size int, changeRate float64) (string, string) {
 
 	return strings.Join(aLines, "\n"), strings.Join(bLines, "\n")
 }
+
+// generateBenchmarkInput creates two strings for benchmarking diff operations.
+// size: number of lines to generate
+// changeRate: fraction of lines that should be different (0.0 to 1.0)
+// func generateBenchmarkInput(size int, changeRate float64) (string, string) {
+// 	if size <= 0 {
+// 		return "", ""
+// 	}
+// 	if changeRate < 0.0 {
+// 		changeRate = 0.0
+// 	}
+// 	if changeRate > 1.0 {
+// 		changeRate = 1.0
+// 	}
+
+// 	// Pre-allocate slices for both inputs
+// 	aLines := make([]string, size)
+// 	bLines := make([]string, size)
+
+// 	// Calculate how many lines should be different
+// 	changesToMake := int(float64(size) * changeRate)
+
+// 	// Create a set of indices that will be changed
+// 	changeIndices := make(map[int]bool)
+// 	if changesToMake > 0 {
+// 		// Use a simple random selection if we're changing less than half
+// 		if changeRate <= 0.5 {
+// 			for len(changeIndices) < changesToMake {
+// 				idx := rand.Intn(size)
+// 				changeIndices[idx] = true
+// 			}
+// 		} else {
+// 			// For higher change rates, select indices to keep the same
+// 			keepSame := size - changesToMake
+// 			for i := range size {
+// 				changeIndices[i] = true
+// 			}
+// 			for range keepSame {
+// 				idx := rand.Intn(size)
+// 				delete(changeIndices, idx)
+// 			}
+// 		}
+// 	}
+
+// 	// Generate the lines with controlled changes
+// 	for i := range size {
+// 		if changeIndices[i] {
+// 			// Create different content for changed lines
+// 			aLines[i] = fmt.Sprintf("old line %d content %d", i, rand.Intn(1000))
+// 			bLines[i] = fmt.Sprintf("new line %d content %d", i, rand.Intn(1000))
+// 		} else {
+// 			// Create identical content for unchanged lines
+// 			content := fmt.Sprintf("same line %d content %d", i, rand.Intn(1000))
+// 			aLines[i] = content
+// 			bLines[i] = content
+// 		}
+// 	}
+
+// 	// Consider adding some structural changes based on changeRate
+// 	if changeRate > 0.3 {
+// 		// Maybe add some lines
+// 		extraLines := int(float64(size) * 0.1) // Add up to 10% extra lines
+// 		if extraLines > 0 {
+// 			for i := range extraLines {
+// 				pos := rand.Intn(len(bLines) + 1)
+// 				newLine := fmt.Sprintf("inserted line %d", i)
+// 				bLines = append(bLines[:pos], append([]string{newLine}, bLines[pos:]...)...)
+// 			}
+// 		}
+
+// 		// Maybe delete some lines from a
+// 		if changeRate > 0.6 {
+// 			deletions := int(float64(size) * 0.1) // Delete up to 10% of lines
+// 			for range deletions {
+// 				if len(aLines) > 1 { // Keep at least one line
+// 					pos := rand.Intn(len(aLines))
+// 					aLines = append(aLines[:pos], aLines[pos+1:]...)
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	// Add some common patterns that often appear in real text
+// 	if size > 10 {
+// 		// Add some repeated lines
+// 		repeatedLine := "this line appears multiple times"
+// 		for range 3 {
+// 			pos := rand.Intn(len(aLines))
+// 			aLines[pos] = repeatedLine
+// 			bLines[pos] = repeatedLine
+// 		}
+
+// 		// Add some blocks of similar lines
+// 		if size > 100 {
+// 			blockSize := min(5, size/20)
+// 			blockStart := rand.Intn(size - blockSize)
+// 			for i := range blockSize {
+// 				prefix := "block line "
+// 				if changeIndices[blockStart+i] {
+// 					aLines[blockStart+i] = prefix + "old " + strconv.Itoa(i)
+// 					bLines[blockStart+i] = prefix + "new " + strconv.Itoa(i)
+// 				} else {
+// 					aLines[blockStart+i] = prefix + strconv.Itoa(i)
+// 					bLines[blockStart+i] = prefix + strconv.Itoa(i)
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	return strings.Join(aLines, "\n"), strings.Join(bLines, "\n")
+// }

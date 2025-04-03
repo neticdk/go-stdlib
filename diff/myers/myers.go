@@ -8,8 +8,6 @@ import (
 	"github.com/neticdk/go-stdlib/diff/internal/diffcore" // Import the new internal package
 )
 
-const SmallInputThreshold = 100
-
 // Diff computes differences between two values using the Myers diff algorithm.
 // Currently never returns an error.
 func Diff(a, b string, opts ...Option) (string, error) {
@@ -32,7 +30,7 @@ func myersDiffStrings(a, b []string, opts options) (string, error) {
 	// Compute edit script using appropriate algorithm
 	var script []diff.Line
 	if opts.linearSpace {
-		script = computeEditScriptLinearSpace(a, b, opts.maxEditDistance, opts.simpleDiffFallbackSize, opts.linearRecursionMaxDepth)
+		script = computeEditScriptLinearSpace(a, b, opts)
 	} else {
 		script = computeEditScript(a, b, opts.maxEditDistance)
 	}
@@ -179,32 +177,34 @@ func computeEditScript(a, b []string, maxEditDistance int) []diff.Line {
 // computeEditScriptLinearSpace implements Myers' algorithm with O(N) space complexity.
 // It selects the diff algorithm based on input size and constraints:
 //
-//  1. For small inputs (less than SmallInputThreshold) or when maxEditDistance is constrained,
-//     it uses the standard Myers algorithm (computeEditScript) which may be faster.
+//  1. For small inputs (less than opts.smallInputThreshold) or when
+//     opts.maxEditDistance is constrained, it uses the standard Myers algorithm
+//     (computeEditScript) which may be faster.
 //
-//  2. For very large inputs (exceeding simpleDiffFallbackSize), it falls back to the simpler
-//     LCS-based diff algorithm (diffcore.ComputeEditsLCS) to avoid excessive memory usage.
+//  2. For very large inputs (exceeding opts.largeInputThreshold), it falls back
+//     to the simpler LCS-based diff algorithm (diffcore.ComputeEditsLCS) to avoid
+//     excessive memory usage.
 //
 //  3. Otherwise, it uses the linear space Myers algorithm (linearSpaceMyersRecWithIndices).
-func computeEditScriptLinearSpace(a, b []string, maxEditDistance int, simpleDiffFallbackSize int, linearRecursionMaxDepth int) []diff.Line {
+func computeEditScriptLinearSpace(a, b []string, opts options) []diff.Line {
 	n := len(a)
 	m := len(b)
 
 	// Use standard algorithm (computeEditScript) for small inputs or when a tight maxEditDistance is set.
 	// The standard algorithm might be faster for small N or small D.
-	if n < SmallInputThreshold || m < SmallInputThreshold ||
-		(maxEditDistance > 0 && maxEditDistance < n+m) { // Use > 0 to allow disabling constraint with -1
-		return computeEditScript(a, b, maxEditDistance)
+	if n < opts.smallInputThreshold || m < opts.smallInputThreshold ||
+		(opts.maxEditDistance > 0 && opts.maxEditDistance < n+m) { // Use > 0 to allow disabling constraint with -1
+		return computeEditScript(a, b, opts.maxEditDistance)
 	}
 
 	// If inputs are very large, fall back to the simpler LCS-based diff (diffcore.ComputeEditsLCS)
 	// to avoid potential performance issues or excessive memory with Myers variants.
-	if n > simpleDiffFallbackSize || m > simpleDiffFallbackSize {
+	if n > opts.largeInputThreshold || m > opts.largeInputThreshold {
 		return diffcore.ComputeEditsLCS(a, b)
 	}
 
 	// Otherwise, proceed with the linear space recursive approach using indices.
-	return linearSpaceMyersRecWithIndices(a, b, 0, n, 0, m, 0, linearRecursionMaxDepth)
+	return linearSpaceMyersRecWithIndices(a, b, 0, n, 0, m, 0, opts.linearRecursionMaxDepth)
 }
 
 // linearSpaceMyersRecWithIndices is the recursive helper for the linear space algorithm,
@@ -222,6 +222,10 @@ func computeEditScriptLinearSpace(a, b []string, maxEditDistance int, simpleDiff
 func linearSpaceMyersRecWithIndices(a, b []string, aStart, aEnd, bStart, bEnd, depth, maxDepth int) []diff.Line { //revive:disable-line:argument-limit
 	n := aEnd - aStart
 	m := bEnd - bStart
+
+	if n < 0 || m < 0 {
+		return []diff.Line{}
+	}
 
 	// Base cases: If one subsequence (defined by the index range) is empty,
 	// return pure insertions or deletions for the other subsequence's range.
@@ -257,6 +261,11 @@ func linearSpaceMyersRecWithIndices(a, b []string, aStart, aEnd, bStart, bEnd, d
 		prefix++
 	}
 
+	// Early return to avoid recursion issues
+	if aStart+prefix > aEnd || bStart+prefix > bEnd {
+		return []diff.Line{}
+	}
+
 	suffix := 0
 	for suffix < n-prefix && a[aEnd-1-suffix] == b[bEnd-1-suffix] {
 		suffix++
@@ -264,6 +273,10 @@ func linearSpaceMyersRecWithIndices(a, b []string, aStart, aEnd, bStart, bEnd, d
 
 	// If we found prefix/suffix, handle them separately
 	if prefix > 0 || suffix > 0 {
+		if aStart+prefix > aEnd || bStart+prefix > bEnd {
+			return []diff.Line{}
+		}
+
 		prefixLines := make([]diff.Line, prefix)
 		for i := range prefix {
 			prefixLines[i] = diff.Line{Kind: diff.Equal, Text: a[aStart+i]}
@@ -338,6 +351,10 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 		return snake{aStart, bStart, aStart, bStart, 0}
 	}
 
+	if aStart < 0 || aEnd > len(a) || bStart < 0 || bEnd > len(b) {
+		return snake{aStart, bStart, aStart, bStart, 0}
+	}
+
 	// Optimization: Handle trivial cases where one sequence is very small.
 	// This might avoid unnecessary allocation/computation for the vectors below.
 	if n == 1 || m == 1 {
@@ -372,6 +389,9 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 	// vr: Reverse search (from bottom-right)
 	// Size needs to accommodate k ranging from -maxDiff to +maxDiff.
 	vectorSize := 2*maxDiff + 1
+	if delta > 0 {
+		vectorSize += delta // Ensure space for reverse search diagonals
+	}
 	// offset: Used to map diagonal k (which can be negative) to non-negative array indices.
 	offset := maxDiff
 
@@ -389,9 +409,25 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 	// Forward search starts at (0,0) relative to the subproblem, which is diagonal k=0.
 	// vf[offset + 0] = 0 (x=0 for k=0)
 	vf[offset] = 0
-	// Reverse search starts at (n,m) relative to the subproblem, which is diagonal k = n-m = delta.
-	// vr[offset + delta] = n (x=n for k=delta)
-	vr[offset+delta] = n
+
+	// Ensure the initial reverse position is within bounds
+	reverseIndex := offset + delta
+	if reverseIndex >= 0 && reverseIndex < vectorSize {
+		vr[reverseIndex] = n
+	} else {
+		// If we can't properly initialize the reverse search,
+		// fall back to simpler diff algorithm
+		return snake{aStart, bStart, aStart, bStart, 0}
+	}
+
+	// Add bounds checking for vector updates
+	safeVectorUpdate := func(v []int, index, value int) bool {
+		if index < 0 || index >= len(v) {
+			return false
+		}
+		v[index] = value
+		return true
+	}
 
 	// Helper to check if we can follow a diagonal (match) safely within bounds.
 	// This now uses the aStart, bStart, aEnd, bEnd indices
@@ -409,7 +445,7 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 			idx := offset + k // Array index for diagonal k
 			if idx < 0 || idx >= vectorSize {
 				continue
-			} // Bounds check
+			}
 
 			// Determine the starting x for this step on diagonal k.
 			// We prioritize moving down (from k+1) if it reaches further than moving right (from k-1).
@@ -445,35 +481,27 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 				y++
 			}
 
+			if !safeVectorUpdate(vf, idx, x) {
+				continue
+			}
+
 			// Update the furthest reaching x for this diagonal k
 			vf[idx] = x
 
-			// --- Overlap Check ---
+			//  Overlap Check
+			// Overlap check
 			if delta%2 != 0 && k >= delta-(d-1) && k <= delta+(d-1) {
-				rvk := offset + k - delta
-				if rvk >= 0 && rvk < vectorSize && vr[rvk] >= 0 && x >= vr[rvk] {
-					// Overlap detected!
-					if startX < x {
-						// Return the snake found (coordinates are absolute)
+				reverseIdx := offset + (delta - k)
+				if reverseIdx >= 0 && reverseIdx < vectorSize {
+					reverseX := vr[reverseIdx]
+					if reverseX >= 0 && x >= reverseX {
 						return snake{
 							startX: aStart + startX,
 							startY: bStart + startY,
 							endX:   aStart + x,
 							endY:   bStart + y,
-							length: x - startX, // Length of the diagonal run
+							length: x - startX,
 						}
-					}
-					// Overlap occurred right at the start point of this step's exploration
-					// for diagonal k. We need to find the snake ending here from the *previous* step.
-					// The snake effectively has length 0 for *this* D-path step,
-					// but the overlap point itself is the 'middle'.
-					// We return the point (startX, startY) as a zero-length snake.
-					return snake{
-						startX: aStart + startX,
-						startY: bStart + startY,
-						endX:   aStart + startX,
-						endY:   bStart + startY,
-						length: 0,
 					}
 				}
 			}
@@ -513,13 +541,18 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 				y--
 			}
 
+			if !safeVectorUpdate(vr, idx, x) {
+				continue
+			}
+
 			vr[idx] = x
 
 			// --- Overlap Check ---
 			if delta%2 == 0 && k >= -d && k <= d {
-				fk := offset + k
-				if fk >= 0 && fk < vectorSize && vf[fk] >= 0 && vf[fk] >= x {
-					if x < endX {
+				forwardIdx := offset + k
+				if forwardIdx >= 0 && forwardIdx < vectorSize {
+					forwardX := vf[forwardIdx]
+					if forwardX >= 0 && forwardX >= x {
 						return snake{
 							startX: aStart + x,
 							startY: bStart + y,
@@ -527,13 +560,6 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 							endY:   bStart + endY,
 							length: endX - x,
 						}
-					}
-					return snake{
-						startX: aStart + x,
-						startY: bStart + y,
-						endX:   aStart + x,
-						endY:   bStart + y,
-						length: 0,
 					}
 				}
 			}

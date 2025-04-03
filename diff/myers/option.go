@@ -6,23 +6,37 @@ const (
 	defaultShowLineNumbers = true
 	defaultMaxEditDistance = -1 // no constraint
 
-	// DefaultLinearRecursionMaxDepth specifies the maximum depth of recursion
+	// defaultLinearRecursionMaxDepth specifies the maximum depth of recursion
 	// for the linear space algorithm.
-	DefaultLinearRecursionMaxDepth = 30
+	defaultLinearRecursionMaxDepth = 30
 
-	// DefaultSimpleDiffFallbackSize specifies the maximum size of input for which the
-	// simple diff algorithm is used.
-	DefaultSimpleDiffFallbackSize = 10000
+	// defaultSmallInputThreshold specifies the size of input (in number of
+	// lines/string slice elements) below which the Myers algorithm is used.
+	defaultSmallInputThreshold = 100
+
+	// defaultLargeInputThreshold specifies the size of input (in number of
+	// lines/string slice elements) above which the simple diff algorithm is
+	// used as a fallback.
+	defaultLargeInputThreshold = 10000
 )
 
 type Option func(*options)
 
 // options configures the myers diff algorithm
 type options struct {
-	maxEditDistance         int  // MaxEditDistance specifies the maximum edit distance to consider.
-	linearSpace             bool // LinearSpace specifies whether to use linear space algorithm.
-	linearRecursionMaxDepth int  // LinearRecursionMaxDepth specifies the maximum depth of recursion for the linear space algorithm.
-	simpleDiffFallbackSize  int  // SimpleDiffFallbackSize specifies the maximum size of input for which the simple diff algorithm is used.
+	// maxEditDistance specifies the maximum edit distance to consider.
+	maxEditDistance int
+	// linearSpace specifies whether to use linear space algorithm.
+	linearSpace bool
+	// linearRecursionMaxDepth specifies the maximum depth of recursion for the
+	// linear space algorithm.
+	linearRecursionMaxDepth int
+	// smallInputThreshold specifies the size of input (in number of
+	// lines/string slice elements) below which the Myers algorithm is used.
+	smallInputThreshold int
+	// largeInputThreshold specifies the maximum size of input for which the
+	// simple diff algorithm is used.
+	largeInputThreshold int
 
 	// Formatting options
 	contextLines    int
@@ -57,11 +71,19 @@ func WithLinearSpace(linear bool) Option {
 	}
 }
 
-// WithSimpleDiffFallbackSize sets the maximum size of input for which the
-// simple diff algorithm is used
-func WithSimpleDiffFallbackSize(size int) Option {
+// WithSmallInputThreshold sets the size of input (in number of lines/string
+// slice elements) below which the Myers algorithm is used.
+func WithSmallInputThreshold(size int) Option {
 	return func(o *options) {
-		o.simpleDiffFallbackSize = size
+		o.smallInputThreshold = size
+	}
+}
+
+// WithLargeInputThreshold sets the maximum size of input for which the simple
+// diff algorithm is used.
+func WithLargeInputThreshold(size int) Option {
+	return func(o *options) {
+		o.largeInputThreshold = size
 	}
 }
 
@@ -79,8 +101,9 @@ func applyOptions(opts ...Option) options {
 		contextLines:            defaultContextLines,
 		showLineNumbers:         defaultShowLineNumbers,
 		maxEditDistance:         defaultMaxEditDistance,
-		simpleDiffFallbackSize:  DefaultSimpleDiffFallbackSize,
-		linearRecursionMaxDepth: DefaultLinearRecursionMaxDepth,
+		largeInputThreshold:     defaultLargeInputThreshold,
+		smallInputThreshold:     defaultSmallInputThreshold,
+		linearRecursionMaxDepth: defaultLinearRecursionMaxDepth,
 	}
 
 	for _, opt := range opts {

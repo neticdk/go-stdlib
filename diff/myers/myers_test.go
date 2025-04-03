@@ -84,10 +84,7 @@ func TestMyersDifferInterface(t *testing.T) {
 	// Test string input
 	for _, tt := range stringTests {
 		t.Run("Default/String/"+tt.name, func(t *testing.T) {
-			result, err := differ.Diff(tt.a, tt.b)
-			if err != nil {
-				t.Fatalf("Error running Diff with default differ: %v", err)
-			}
+			result := differ.Diff(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
 			}
@@ -97,10 +94,7 @@ func TestMyersDifferInterface(t *testing.T) {
 	// Test string slice input
 	for _, tt := range sliceTests {
 		t.Run("Default/Slice/"+tt.name, func(t *testing.T) {
-			result, err := differ.DiffStrings(tt.a, tt.b)
-			if err != nil {
-				t.Fatalf("Error running DiffStrings with default differ: %v", err)
-			}
+			result := differ.DiffStrings(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
 			}
@@ -117,23 +111,17 @@ func TestMyersDifferInterface(t *testing.T) {
 	customExpected := "  hello\n+ middle\n  world\n"
 
 	t.Run("Custom/String", func(t *testing.T) {
-		result, err := customDiffer.Diff("hello\nworld", "hello\nmiddle\nworld")
-		if err != nil {
-			t.Fatalf("Error running Diff with custom differ: %v", err)
-		}
+		result := customDiffer.Diff("hello\nworld", "hello\nmiddle\nworld")
 		if result != customExpected {
 			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
 		}
 	})
 
 	t.Run("Custom/Slice", func(t *testing.T) {
-		result, err := customDiffer.DiffStrings(
+		result := customDiffer.DiffStrings(
 			[]string{"hello", "world"},
 			[]string{"hello", "middle", "world"},
 		)
-		if err != nil {
-			t.Fatalf("Error running DiffStrings with custom differ: %v", err)
-		}
 		if result != customExpected {
 			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
 		}
@@ -203,10 +191,7 @@ func TestDiff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := myers.Diff(tt.a, tt.b)
-			if err != nil {
-				t.Fatalf("Error running Diff: %v", err)
-			}
+			result := myers.Diff(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
 			}
@@ -254,10 +239,7 @@ func TestDiffStrings(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := myers.DiffStrings(tt.a, tt.b)
-			if err != nil {
-				t.Fatalf("Error running DiffStrings: %v", err)
-			}
+			result := myers.DiffStrings(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
 			}
@@ -281,10 +263,7 @@ func TestWithContextLines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := myers.Diff(a, b, myers.WithContextLines(tt.contextLines))
-			if err != nil {
-				t.Fatalf("Error running Diff: %v", err)
-			}
+			result := myers.Diff(a, b, myers.WithContextLines(tt.contextLines))
 
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
 			if len(lines) != tt.expectLines {
@@ -346,10 +325,7 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Skip the generic checks for the "very small input" test case. We are now testing for this directly.
 			if tt.name == "very small input to force n=1 or m=1 in findMiddleSnake and use linear space" {
-				result, err := myers.DiffStrings(tt.a, tt.b, tt.opts...)
-				if err != nil {
-					t.Fatalf("Error running diff: %v", err)
-				}
+				result := myers.DiffStrings(tt.a, tt.b, tt.opts...)
 
 				expected := "+ b\n  a\n" // Expected output
 				if result != expected {
@@ -370,10 +346,7 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 			}
 
 			// Run diff with the specified options
-			result, err := myers.DiffStrings(tt.a, tt.b, tt.opts...)
-			if err != nil {
-				t.Fatalf("Error running diff: %v", err)
-			}
+			result := myers.DiffStrings(tt.a, tt.b, tt.opts...)
 
 			// Verify we got a valid diff
 			if result == "" {
@@ -469,10 +442,7 @@ func TestLinearSpaceBaseConditions(t *testing.T) {
 				myers.WithShowLineNumbers(false), // Disable line numbers for easier comparison
 			)
 
-			result, err := differ.DiffStrings(fullA, fullB)
-			if err != nil {
-				t.Fatalf("Error running diff: %v", err)
-			}
+			result := differ.DiffStrings(fullA, fullB)
 
 			// Extract the relevant part of the diff (the middle section)
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
@@ -562,13 +532,10 @@ func TestEditScriptAlgorithmSelection(t *testing.T) {
 				opts = append(opts, myers.WithMaxEditDistance(tt.maxEditDist))
 			}
 
-			_, err := myers.DiffStrings(tt.a, tt.b, opts...)
-			if err != nil {
-				t.Fatalf("Error running diff: %v", err)
+			result := myers.DiffStrings(tt.a, tt.b, opts...)
+			if !strings.Contains(result, "common") {
+				t.Errorf("Expected 'common' in result, got %q", result)
 			}
-
-			// Check logs to verify which algorithm was used
-			// (We might need to modify the implementation to expose this information)
 		})
 	}
 }
@@ -612,13 +579,10 @@ func TestLinearSpaceRecursionDepth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := myers.DiffStrings(a, b,
+			result := myers.DiffStrings(a, b,
 				myers.WithLinearSpace(true),
 				myers.WithLinearRecursionMaxDepth(tt.maxDepth),
 			)
-			if err != nil {
-				t.Fatalf("Error running diff: %v", err)
-			}
 
 			// Verify we got a valid diff
 			if result == "" {
@@ -652,19 +616,13 @@ func TestWithShowLineNumbers(t *testing.T) {
 	b := "hello\neveryone"
 
 	// With line numbers (default)
-	withNumbers, err := myers.Diff(a, b)
-	if err != nil {
-		t.Fatalf("Error running Diff with line numbers: %v", err)
-	}
+	withNumbers := myers.Diff(a, b)
 	if !strings.Contains(withNumbers, "   1    1   hello") {
 		t.Errorf("Expected line numbers, got: %s", withNumbers)
 	}
 
 	// Without line numbers
-	withoutNumbers, err := myers.Diff(a, b, myers.WithShowLineNumbers(false))
-	if err != nil {
-		t.Fatalf("Error running Diff without line numbers: %v", err)
-	}
+	withoutNumbers := myers.Diff(a, b, myers.WithShowLineNumbers(false))
 	if strings.Contains(withoutNumbers, "   1    1") {
 		t.Errorf("Did not expect line numbers, got: %s", withoutNumbers)
 	}
@@ -679,19 +637,23 @@ func TestWithMaxEditDistance(t *testing.T) {
 	b := strings.Repeat("b\n", 100)
 
 	// With unlimited edit distance
-	_, err := myers.Diff(a, b)
-	if err != nil {
-		t.Fatalf("Error running Diff with default max edit distance: %v", err)
+	result := myers.Diff(a, b)
+
+	if !strings.Contains(result, "1      - a") {
+		t.Errorf("Expected content with %s , got: %s", "1      - a", result)
 	}
 
-	// With very limited edit distance
-	_, err = myers.Diff(a, b, myers.WithMaxEditDistance(5))
-	if err != nil {
-		t.Fatalf("Error running Diff with limited max edit distance: %v", err)
+	if !strings.Contains(result, "100      - a") {
+		t.Errorf("Expected content with %s , got: %s", "100      - a", result)
 	}
 
-	// The test is successful if both calls complete without errors
-	// The limited edit distance version should fall back to the simple diff method
+	if !strings.Contains(result, "1 + b") {
+		t.Errorf("Expected content with %s , got: %s", "1 + b", result)
+	}
+
+	if !strings.Contains(result, "100 + b") {
+		t.Errorf("Expected content with %s , got: %s", "100 + b", result)
+	}
 }
 
 func TestWithLargeInputThreshold(t *testing.T) {
@@ -734,10 +696,7 @@ func TestWithLargeInputThreshold(t *testing.T) {
 				myers.WithContextLines(0), // Minimize output size
 			)
 
-			result, err := differ.DiffStrings(aLines, bLines)
-			if err != nil {
-				t.Fatalf("Error running diff: %v", err)
-			}
+			result := differ.DiffStrings(aLines, bLines)
 
 			// The simple diff algorithm will include all changes in a single chunk
 			// while the Myers algorithm with context will show them separately
@@ -806,10 +765,7 @@ func TestWithSmallThreshold(t *testing.T) {
 				myers.WithLinearSpace(true), // Force the code to call the linear space algorithm.
 			)
 
-			_, err := differ.DiffStrings(aLines, bLines)
-			if err != nil {
-				t.Fatalf("Error running diff: %v", err)
-			}
+			_ = differ.DiffStrings(aLines, bLines)
 
 			// This will test to verify if the test hit the linear space algorithm or not
 			aLen := len(aLines)
@@ -869,10 +825,7 @@ func TestWithLinearRecursionMaxDepth(t *testing.T) {
 				myers.WithContextLines(0), // No context to make changes clearer
 			)
 
-			result, err := differ.DiffStrings(aLines, bLines)
-			if err != nil {
-				t.Fatalf("Error running diff: %v", err)
-			}
+			result := differ.DiffStrings(aLines, bLines)
 
 			// Count the actual changes
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
@@ -953,10 +906,7 @@ func TestOptionCombinations(t *testing.T) {
 		myers.WithMaxEditDistance(50),
 	)
 
-	result, err := differ.DiffStrings(a, b)
-	if err != nil {
-		t.Fatalf("Error running diff with combined options: %v", err)
-	}
+	result := differ.DiffStrings(a, b)
 
 	// Verify that line numbers are hidden
 	if strings.Contains(result, "   1    1") {
@@ -1001,15 +951,15 @@ func TestLongTextDiff(t *testing.T) {
 	bLines[300] = aLines[300]
 
 	// With context
-	_, err := myers.DiffStrings(aLines, bLines, myers.WithContextLines(3))
-	if err != nil {
-		t.Fatalf("Error running DiffStrings on long text: %v", err)
+	result := myers.DiffStrings(aLines, bLines, myers.WithContextLines(3))
+	if !strings.Contains(result, "Line A a") {
+		t.Errorf("Expected content without line numbers, got: %s", result)
 	}
 
 	// Without context
-	_, err = myers.DiffStrings(aLines, bLines, myers.WithContextLines(0))
-	if err != nil {
-		t.Fatalf("Error running DiffStrings on long text without context: %v", err)
+	result = myers.DiffStrings(aLines, bLines)
+	if !strings.Contains(result, "Line A a") {
+		t.Errorf("Expected content without line numbers, got: %s", result)
 	}
 }
 
@@ -1037,33 +987,10 @@ func BenchmarkMyersDiff(b *testing.B) {
 	// Run the benchmark
 	b.ResetTimer()
 	for b.Loop() {
-		_, err := myers.DiffStrings(aLines, bLines)
-		if err != nil {
-			b.Fatalf("Error in benchmark: %v", err)
-		}
+		_ = myers.DiffStrings(aLines, bLines)
 	}
 }
 
-// func BenchmarkMyersDiffLinearSpace(b *testing.B) {
-// 	sizes := []int{100, 1000, 10000}
-// 	changes := []float64{0.01, 0.1, 0.5} // Percentage of lines changed
-
-//		for _, size := range sizes {
-//			for _, changeRate := range changes {
-//				name := fmt.Sprintf("size=%d,changes=%.2f", size, changeRate)
-//				b.Run(name, func(b *testing.B) {
-//					a, bb := generateBenchmarkInput(size, changeRate)
-//					b.ResetTimer()
-//					for i := 0; i < b.N; i++ {
-//						_, err := myers.Diff(a, bb, myers.WithLinearSpace(true))
-//						if err != nil {
-//							b.Fatalf("Error in benchmark: %v", err)
-//						}
-//					}
-//				})
-//			}
-//		}
-//	}
 func BenchmarkMyersDiffLinearSpace(b *testing.B) {
 	sizes := []int{100, 1000, 10000}
 	changes := []float64{0.01, 0.1, 0.5} // Percentage of lines changed
@@ -1075,10 +1002,7 @@ func BenchmarkMyersDiffLinearSpace(b *testing.B) {
 				a, bb := generateBenchmarkInput(size, changeRate)
 				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
-					_, err := myers.Diff(a, bb, myers.WithLinearSpace(true))
-					if err != nil {
-						b.Fatalf("Error in benchmark: %v", err)
-					}
+					_ = myers.Diff(a, bb, myers.WithLinearSpace(true))
 				}
 			})
 		}

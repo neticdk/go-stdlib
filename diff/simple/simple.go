@@ -10,9 +10,9 @@ import (
 
 // Diff computes differences between two strings using a simple diff algorithm.
 // Currently never returns an error.
-func Diff(a, b string, opts ...Option) (string, error) {
+func Diff(a, b string, opts ...Option) string {
 	if a == "" && b == "" {
-		return "", nil
+		return ""
 	}
 
 	aLines := diffcore.SplitLines(a)
@@ -22,7 +22,7 @@ func Diff(a, b string, opts ...Option) (string, error) {
 
 // DiffStrings computes differences between string slices using a simple diff algorithm.
 // Currently never returns an error.
-func DiffStrings(a, b []string, opts ...Option) (string, error) {
+func DiffStrings(a, b []string, opts ...Option) string {
 	options := applyOptions(opts...)
 
 	// Compute edit script using the shared simple LCS-based diff algorithm
@@ -68,5 +68,5 @@ func DiffStrings(a, b []string, opts ...Option) (string, error) {
 		}
 	}
 
-	return sb.String(), nil
+	return sb.String()
 }

@@ -33,8 +33,8 @@ type Line struct {
 type Differ interface {
 	// Diff returns a string representation of the differences between two
 	// strings
-	Diff(a, b string) (string, error)
+	Diff(a, b string) string
 	// DiffStrings returns a string representation of the differences between
 	// two slices of strings
-	DiffStrings(a, b []string) (string, error)
+	DiffStrings(a, b []string) string
 }

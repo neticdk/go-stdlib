@@ -10,17 +10,17 @@
 // To compare two strings using the default settings:
 //
 //	differ := simple.NewDiffer()
-//	diff, err := differ.Diff("hello\nworld", "hello\nthere\nworld")
+//	diff := differ.Diff("hello\nworld", "hello\nthere\nworld")
 //
 // To compare slices of strings directly:
 //
 //	differ := simple.NewDiffer()
-//	diff, err := differ.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
+//	diff := differ.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
 //
 // Alternatively, you can use the Diff or DiffStrings functions directly:
 //
-//	diff, err := simple.Diff("hello\nworld", "hello\nthere\nworld")
-//	diff, err := simple.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
+//	diff := simple.Diff("hello\nworld", "hello\nthere\nworld")
+//	diff := simple.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
 //
 // # Output Format
 //
@@ -40,9 +40,9 @@
 //
 // Alternatively, you can use the Diff or DiffStrings functions directly with options:
 //
-//	diff, err := simple.Diff("hello\nworld", "hello\nthere\nworld",
+//	diff := simple.Diff("hello\nworld", "hello\nthere\nworld",
 //	       simple.WithShowLineNumbers(false))
-//	diff, err := simple.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"},
+//	diff := simple.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"},
 //	       simple.WithShowLineNumbers(false))
 //
 // # Algorithm Characteristics

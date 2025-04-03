@@ -73,10 +73,7 @@ func TestSimpleDifferInterface(t *testing.T) {
 	// Test string input
 	for _, tt := range stringTests {
 		t.Run("Default/String/"+tt.name, func(t *testing.T) {
-			result, err := differ.Diff(tt.a, tt.b)
-			if err != nil {
-				t.Fatalf("Error running Diff with default differ: %v", err)
-			}
+			result := differ.Diff(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
 			}
@@ -86,10 +83,7 @@ func TestSimpleDifferInterface(t *testing.T) {
 	// Test string slice input
 	for _, tt := range sliceTests {
 		t.Run("Default/Slice/"+tt.name, func(t *testing.T) {
-			result, err := differ.DiffStrings(tt.a, tt.b)
-			if err != nil {
-				t.Fatalf("Error running DiffStrings with default differ: %v", err)
-			}
+			result := differ.DiffStrings(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
 			}
@@ -105,23 +99,17 @@ func TestSimpleDifferInterface(t *testing.T) {
 	customExpected := "  hello\n+ middle\n  world\n"
 
 	t.Run("Custom/String", func(t *testing.T) {
-		result, err := customDiffer.Diff("hello\nworld", "hello\nmiddle\nworld")
-		if err != nil {
-			t.Fatalf("Error running Diff with custom differ: %v", err)
-		}
+		result := customDiffer.Diff("hello\nworld", "hello\nmiddle\nworld")
 		if result != customExpected {
 			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
 		}
 	})
 
 	t.Run("Custom/Slice", func(t *testing.T) {
-		result, err := customDiffer.DiffStrings(
+		result := customDiffer.DiffStrings(
 			[]string{"hello", "world"},
 			[]string{"hello", "middle", "world"},
 		)
-		if err != nil {
-			t.Fatalf("Error running DiffStrings with custom differ: %v", err)
-		}
 		if result != customExpected {
 			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
 		}
@@ -191,10 +179,7 @@ func TestDiff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := simple.Diff(tt.a, tt.b)
-			if err != nil {
-				t.Fatalf("Error running Diff: %v", err)
-			}
+			result := simple.Diff(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
 			}
@@ -242,10 +227,7 @@ func TestDiffStrings(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := simple.DiffStrings(tt.a, tt.b)
-			if err != nil {
-				t.Fatalf("Error running DiffStrings: %v", err)
-			}
+			result := simple.DiffStrings(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
 			}
@@ -258,19 +240,13 @@ func TestWithShowLineNumbers(t *testing.T) {
 	b := "hello\neveryone"
 
 	// With line numbers (default)
-	withNumbers, err := simple.Diff(a, b)
-	if err != nil {
-		t.Fatalf("Error running Diff with line numbers: %v", err)
-	}
+	withNumbers := simple.Diff(a, b)
 	if !strings.Contains(withNumbers, "   1    1   hello") {
 		t.Errorf("Expected line numbers, got: %s", withNumbers)
 	}
 
 	// Without line numbers
-	withoutNumbers, err := simple.Diff(a, b, simple.WithShowLineNumbers(false))
-	if err != nil {
-		t.Fatalf("Error running Diff without line numbers: %v", err)
-	}
+	withoutNumbers := simple.Diff(a, b, simple.WithShowLineNumbers(false))
 	if strings.Contains(withoutNumbers, "   1    1") {
 		t.Errorf("Did not expect line numbers, got: %s", withoutNumbers)
 	}
@@ -295,47 +271,59 @@ func TestLongTextDiff(t *testing.T) {
 	bLines[90] = aLines[90]
 
 	// Run the diff
-	_, err := simple.DiffStrings(aLines, bLines)
-	if err != nil {
-		t.Fatalf("Error running DiffStrings on long text: %v", err)
+	result := simple.DiffStrings(aLines, bLines)
+	if !strings.Contains(result, "Line A a") {
+		t.Errorf("Expected content without line numbers, got: %s", result)
 	}
-
-	// Success if it completes without error
 }
 
 func TestEdgeCases(t *testing.T) {
 	testCases := []struct {
-		name string
-		a    []string
-		b    []string
+		name     string
+		a        []string
+		b        []string
+		expected string
 	}{
 		{
 			name: "identical content",
 			a:    []string{"same", "same", "same"},
 			b:    []string{"same", "same", "same"},
+			expected: "   1    1   same\n" +
+				"   2    2   same\n" +
+				"   3    3   same\n",
 		},
 		{
 			name: "completely different content",
 			a:    []string{"only", "in", "a"},
 			b:    []string{"only", "in", "b"},
+			expected: "   1    1   only\n" +
+				"   2    2   in\n" +
+				"   3      - a\n" +
+				"        3 + b\n",
 		},
 		{
 			name: "one empty, one with content",
 			a:    []string{},
 			b:    []string{"content", "here"},
+			expected: "        1 + content\n" +
+				"        2 + here\n",
 		},
 		{
 			name: "content with empty lines",
 			a:    []string{"line1", "", "line3"},
 			b:    []string{"line1", "line2", ""},
+			expected: "   1    1   line1\n" +
+				"        2 + line2\n" +
+				"   2    3   \n" +
+				"   3      - line3\n",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := simple.DiffStrings(tc.a, tc.b)
-			if err != nil {
-				t.Fatalf("Error running DiffStrings on edge case: %v", err)
+			result := simple.DiffStrings(tc.a, tc.b)
+			if result != tc.expected {
+				t.Errorf("Expected %s, got %s", tc.expected, result)
 			}
 		})
 	}
@@ -365,9 +353,6 @@ func BenchmarkSimpleDiff(b *testing.B) {
 	// Run the benchmark
 	b.ResetTimer()
 	for b.Loop() {
-		_, err := simple.DiffStrings(aLines, bLines)
-		if err != nil {
-			b.Fatalf("Error in benchmark: %v", err)
-		}
+		_ = simple.DiffStrings(aLines, bLines)
 	}
 }

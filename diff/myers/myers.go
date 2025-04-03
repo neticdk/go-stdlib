@@ -10,9 +10,9 @@ import (
 
 // Diff computes differences between two values using the Myers diff algorithm.
 // Currently never returns an error.
-func Diff(a, b string, opts ...Option) (string, error) {
+func Diff(a, b string, opts ...Option) string {
 	if a == "" && b == "" {
-		return "", nil
+		return ""
 	}
 
 	aLines := diffcore.SplitLines(a)
@@ -22,11 +22,11 @@ func Diff(a, b string, opts ...Option) (string, error) {
 
 // DiffStrings computes differences between string slices using the Myers diff algorithm.
 // Currently never returns an error.
-func DiffStrings(a, b []string, opts ...Option) (string, error) {
+func DiffStrings(a, b []string, opts ...Option) string {
 	return myersDiffStrings(a, b, applyOptions(opts...))
 }
 
-func myersDiffStrings(a, b []string, opts options) (string, error) {
+func myersDiffStrings(a, b []string, opts options) string {
 	// Compute edit script using appropriate algorithm
 	var script []diff.Line
 	if opts.linearSpace {
@@ -85,7 +85,7 @@ func myersDiffStrings(a, b []string, opts options) (string, error) {
 		}
 	}
 
-	return sb.String(), nil
+	return sb.String()
 }
 
 // computeEditScript implements Myers' diff algorithm to find the shortest edit script

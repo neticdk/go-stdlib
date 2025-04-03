@@ -36,14 +36,11 @@
 //		)
 //
 //		differ := simple.NewDiffer()
-//		diff, err := differ.Diff("hello\nworld", "hello\nthere\nworld")
-//		if err != nil {
-//			// Handle error
-//		}
+//		diff := differ.Diff("hello\nworld", "hello\nthere\nworld")
 //		fmt.Println(diff)
 //
 //	 	// Alternatively, use the Diff function directly
-//	 	simpleDiff, err := simple.Diff("hello\nworld", "hello\nthere\nworld")
+//	 	simpleDiff := simple.Diff("hello\nworld", "hello\nthere\nworld")
 //
 // Example using the myers subpackage:
 //
@@ -53,12 +50,9 @@
 //		)
 //
 //		differ := myers.NewDiffer()
-//		diff, err := differ.Diff("hello\nworld", "hello\nthere\nworld")
-//		if err != nil {
-//			// Handle error
-//		}
+//		diff := differ.Diff("hello\nworld", "hello\nthere\nworld")
 //		fmt.Println(diff)
 //
 //	 	// Alternatively, use the Diff function directly
-//	 	myersDiff, err := myers.Diff("hello\nworld", "hello\nthere\nworld")
+//	 	myersDiff := myers.Diff("hello\nworld", "hello\nthere\nworld")
 package diff

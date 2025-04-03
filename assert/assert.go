@@ -268,12 +268,7 @@ func computeDiff(got, want any) string {
 	gotLines := strings.Split(string(gotJSON), "\n")
 	wantLines := strings.Split(string(wantJSON), "\n")
 
-	diff, err := myers.DiffStrings(gotLines, wantLines)
-	if err != nil {
-		return fmt.Sprintf("Error generating diff: %v", err)
-	}
-
-	return diff
+	return myers.DiffStrings(gotLines, wantLines)
 }
 
 // StackTracesEnabled indicates whether stack traces are enabled for assertion errors.

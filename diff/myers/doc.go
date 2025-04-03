@@ -14,17 +14,17 @@
 // To compare two strings using the default settings:
 //
 //	differ := myers.NewDiffer()
-//	diff, err := differ.Diff("hello\nworld", "hello\nthere\nworld")
+//	diff := differ.Diff("hello\nworld", "hello\nthere\nworld")
 //
 // To compare slices of strings directly:
 //
 //	differ := myers.NewDiffer()
-//	diff, err := differ.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
+//	diff := differ.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
 //
 // Alternatively, you can use the Diff or DiffStrings functions directly:
 //
-//	diff, err := myers.Diff("hello\nworld", "hello\nthere\nworld")
-//	diff, err := myers.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
+//	diff := myers.Diff("hello\nworld", "hello\nthere\nworld")
+//	diff := myers.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
 //
 // # Output Format
 //
@@ -59,9 +59,9 @@
 //
 // Alternatively, you can use the Diff or DiffStrings functions directly with options:
 //
-//	diff, err := myers.Diff("hello\nworld", "hello\nthere\nworld",
+//	diff := myers.Diff("hello\nworld", "hello\nthere\nworld",
 //	       myers.WithContextLines(3), myers.WithShowLineNumbers(false))
-//	diff, err := myers.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"},
+//	diff := myers.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"},
 //	       myers.WithContextLines(3), myers.WithShowLineNumbers(false))
 //
 // # Algorithm Details

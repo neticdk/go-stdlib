@@ -10,11 +10,10 @@ import (
 
 func TestCopyFile(t *testing.T) {
 	testDir := "go-stdlib-test-copy"
-	err := os.MkdirAll(testDir, os.ModePerm)
-	if err != nil {
+	if err := os.MkdirAll(testDir, os.ModePerm); err != nil {
 		t.Error(err)
 	}
-	defer os.RemoveAll(testDir)
+	defer func() { _ = os.RemoveAll(testDir) }()
 
 	tests := []struct {
 		name       string

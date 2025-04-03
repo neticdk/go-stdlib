@@ -28,6 +28,7 @@ type AssertionContext struct {
 	Function string
 }
 
+// FileInfo returns a string representation of the file and line information
 func (ctx *AssertionContext) FileInfo() string {
 	fileInfo := ""
 	if ctx.File != "" {
@@ -216,36 +217,34 @@ func shouldGenerateDiff(got, want any) bool {
 	gotVal := reflect.ValueOf(got)
 	wantVal := reflect.ValueOf(want)
 
-	// Get types, handling the case where one or both might be nil
-	var gotType, wantType reflect.Type
-	if gotVal.IsValid() {
-		gotType = gotVal.Type()
+	// Skip invalid values
+	if !gotVal.IsValid() || !wantVal.IsValid() {
+		return false
 	}
-	if wantVal.IsValid() {
-		wantType = wantVal.Type()
-	}
+
+	// Get types
+	gotType := gotVal.Type()
+	wantType := wantVal.Type()
 
 	// If types don't match, diffing might be misleading
 	if gotType != wantType {
 		return false
 	}
 
-	// Only generate diffs for complex types where it's useful
-	if gotVal.IsValid() {
-		switch gotVal.Kind() {
-		case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
-			return true
-		case reflect.Ptr:
-			// For pointers, check what they point to
-			if gotVal.IsNil() || wantVal.IsNil() {
-				return false
-			}
-			return shouldGenerateDiff(gotVal.Elem().Interface(), wantVal.Elem().Interface())
+	// Process based on kind
+	switch gotVal.Kind() {
+	case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
+		return true
+	case reflect.Ptr:
+		// For pointers, check what they point to
+		if gotVal.IsNil() || wantVal.IsNil() {
+			return false
 		}
+		return shouldGenerateDiff(gotVal.Elem().Interface(), wantVal.Elem().Interface())
+	default:
+		// For simple types (numbers, booleans, etc.), diff isn't so useful
+		return false
 	}
-
-	// For simple types (numbers, booleans, etc.), diff isn't so useful
-	return false
 }
 
 // computeDiff generates a text-based diff between two values

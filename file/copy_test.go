@@ -46,20 +46,20 @@ func TestCopyFile(t *testing.T) {
 			srcFile := filepath.Join(testDir, tt.srcFile)
 			dstFile := filepath.Join(testDir, tt.dstFile)
 
-			if err = os.MkdirAll(filepath.Dir(srcFile), os.ModePerm); err != nil {
+			if err := os.MkdirAll(filepath.Dir(srcFile), os.ModePerm); err != nil {
 				t.Fatalf("creating source file: %v", err)
 			}
-			if err = os.MkdirAll(filepath.Dir(dstFile), os.ModePerm); err != nil {
+			if err := os.MkdirAll(filepath.Dir(dstFile), os.ModePerm); err != nil {
 				t.Fatalf("creating destination file: %v", err)
 			}
 
 			// Create source file
-			if err = os.WriteFile(srcFile, tt.srcContent, 0o640); err != nil {
+			if err := os.WriteFile(srcFile, tt.srcContent, 0o640); err != nil {
 				t.Fatalf("creating source file: %v", err)
 			}
 
 			// Copy file
-			if err = Copy(srcFile, dstFile); err != nil {
+			if err := Copy(srcFile, dstFile); err != nil {
 				t.Fatalf("copying file: %v", err)
 			}
 

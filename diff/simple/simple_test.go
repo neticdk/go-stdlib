@@ -1,7 +1,6 @@
 package simple_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/neticdk/go-stdlib/assert"
@@ -230,12 +229,12 @@ func TestWithShowLineNumbers(t *testing.T) {
 
 	// With line numbers (default)
 	withNumbers := simple.Diff(a, b)
-	assert.True(t, strings.Contains(withNumbers, "   1    1"), "Expected line numbers")
+	assert.Contains(t, withNumbers, "   1    1", "Expected line numbers")
 
 	// Without line numbers
 	withoutNumbers := simple.Diff(a, b, simple.WithShowLineNumbers(false))
-	assert.False(t, strings.Contains(withoutNumbers, "   1    1"), "Did not expect line numbers")
-	assert.False(t, strings.Contains(withoutNumbers, "   2    2"), "Did not expect line numbers")
+	assert.NotContains(t, withoutNumbers, "   1    1", "Did not expect line numbers")
+	assert.NotContains(t, withoutNumbers, "   2    2", "Did not expect line numbers")
 }
 
 func TestLongTextDiff(t *testing.T) {
@@ -255,7 +254,7 @@ func TestLongTextDiff(t *testing.T) {
 
 	// Run the diff
 	result := simple.DiffStrings(aLines, bLines)
-	assert.True(t, strings.Contains(result, "Line A a"), "Expected content with line numbers")
+	assert.Contains(t, result, "Line A a", "Expected content with line numbers")
 }
 
 func TestEdgeCases(t *testing.T) {

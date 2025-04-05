@@ -509,7 +509,7 @@ func TestEditScriptAlgorithmSelection(t *testing.T) {
 			}
 
 			result := myers.DiffStrings(tt.a, tt.b, opts...)
-			assert.True(t, strings.Contains(result, "common"), "DiffStrings/%q: Expected 'common' in result", tt.name)
+			assert.Contains(t, result, "common", "DiffStrings/%q", tt.name)
 		})
 	}
 }
@@ -585,12 +585,12 @@ func TestWithShowLineNumbers(t *testing.T) {
 
 	// With line numbers (default)
 	withNumbers := myers.Diff(a, b)
-	assert.True(t, strings.Contains(withNumbers, "   1    1"), "Expected line numbers in diff output")
+	assert.Contains(t, withNumbers, "   1    1")
 
 	// Without line numbers
 	withoutNumbers := myers.Diff(a, b, myers.WithShowLineNumbers(false))
-	assert.False(t, strings.Contains(withoutNumbers, "   1    1"), "Did not expect line numbers in diff output")
-	assert.False(t, strings.Contains(withoutNumbers, "   2    2"), "Did not expect line numbers in diff output")
+	assert.NotContains(t, withoutNumbers, "   1    1")
+	assert.NotContains(t, withoutNumbers, "   2    2")
 }
 
 func TestWithMaxEditDistance(t *testing.T) {
@@ -601,10 +601,10 @@ func TestWithMaxEditDistance(t *testing.T) {
 	// With unlimited edit distance
 	result := myers.Diff(a, b)
 
-	assert.True(t, strings.Contains(result, "1      - a"), "Expected content with 1 - a")
-	assert.True(t, strings.Contains(result, "100      - a"), "Expected content with 100 - a")
-	assert.True(t, strings.Contains(result, "1 + b"), "Expected content with 1 + b")
-	assert.True(t, strings.Contains(result, "100 + b"), "Expected content with 100 + b")
+	assert.Contains(t, result, "1      - a", "Expected content with 1 - a")
+	assert.Contains(t, result, "100      - a", "Expected content with 100 - a")
+	assert.Contains(t, result, "1 + b", "Expected content with 1 + b")
+	assert.Contains(t, result, "100 + b", "Expected content with 100 + b")
 }
 
 func TestWithLargeInputThreshold(t *testing.T) {
@@ -795,7 +795,8 @@ func TestWithLinearRecursionMaxDepth(t *testing.T) {
 			assert.True(t, tt.maxDepth <= 10 || changes >= minExpectedChanges, "DiffStrings/%q", tt.name)
 
 			// Verify specific changes are present
-			assert.True(t, strings.Contains(result, "a0") && strings.Contains(result, "b0"), "DiffStrings/%q", tt.name)
+			assert.Contains(t, result, "a0")
+			assert.Contains(t, result, "b0")
 		})
 	}
 }
@@ -833,7 +834,7 @@ func TestOptionCombinations(t *testing.T) {
 	result := differ.DiffStrings(a, b)
 
 	// Verify that line numbers are hidden
-	assert.False(t, strings.Contains(result, "   1    1"), "Line numbers should be hidden")
+	assert.NotContains(t, result, "   1    1", "Line numbers should be hidden")
 
 	// Verify context lines
 	lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
@@ -870,11 +871,11 @@ func TestLongTextDiff(t *testing.T) {
 
 	// With context
 	result := myers.DiffStrings(aLines, bLines, myers.WithContextLines(3))
-	assert.True(t, strings.Contains(result, "Line A a"), "Expected content with line numbers")
+	assert.Contains(t, result, "Line A a", "Expected content with line numbers")
 
 	// Without context
 	result = myers.DiffStrings(aLines, bLines)
-	assert.True(t, strings.Contains(result, "Line A a"), "Expected content with line numbers")
+	assert.Contains(t, result, "Line A a", "Expected content with line numbers")
 }
 
 func BenchmarkMyersDiff(b *testing.B) {

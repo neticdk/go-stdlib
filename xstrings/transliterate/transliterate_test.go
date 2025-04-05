@@ -3,6 +3,8 @@ package transliterate
 import (
 	"strings"
 	"testing"
+
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestTransliterate(t *testing.T) {
@@ -204,9 +206,7 @@ func TestTransliterate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := String(tt.input)
-			if result != tt.expected {
-				t.Errorf("Expected: %s, Got: %s", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "Transliteration mismatch/%q", tt.name)
 		})
 	}
 }
@@ -248,19 +248,11 @@ func TestWithLimit(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := WithLimit(tt.input)
 			if tt.expectError {
-				if err == nil {
-					t.Errorf("expected an error, but got nil")
-				}
-				if result != "" {
-					t.Errorf("expected empty result, but got %q", result)
-				}
+				assert.NotNil(t, err, "WithLimit/%q", tt.name)
+				assert.Empty(t, result, "WithLimit/%q", tt.name)
 			} else {
-				if err != nil {
-					t.Fatalf("unexpected error: %v", err)
-				}
-				if result != tt.expected {
-					t.Errorf("expected %q, got %q", tt.expected, result)
-				}
+				assert.NoError(t, err, "WithLimit/%q", tt.name)
+				assert.Equal(t, result, tt.expected, "WithLimit/%q", tt.name)
 			}
 		})
 	}

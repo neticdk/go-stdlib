@@ -3,6 +3,7 @@ package transliterate_test
 import (
 	"testing"
 
+	"github.com/neticdk/go-stdlib/assert"
 	"github.com/neticdk/go-stdlib/xstrings/transliterate"
 )
 
@@ -22,16 +23,12 @@ func TestConfiguration(t *testing.T) {
 		// Try with string just under default 1MB limit
 		text := string(make([]rune, 1<<20-1))
 		_, err := transliterate.WithLimit(text)
-		if err != nil {
-			t.Fatalf("should accept string under default limit: unexpected error: %v", err)
-		}
+		assert.NoError(t, err, "should accept string under default limit")
 
 		// Try with string over default 1MB limit
 		text = string(make([]rune, 1<<20+1))
 		_, err = transliterate.WithLimit(text)
-		if err == nil {
-			t.Fatal("should reject string over default limit: expected an error, but got nil")
-		}
+		assert.Error(t, err, "should reject string over default limit")
 	})
 
 	t.Run("configure max input length", func(t *testing.T) {
@@ -44,19 +41,13 @@ func TestConfiguration(t *testing.T) {
 		// Try with string under new limit
 		text := "Hello世界" // 11 bytes (5 + 3 + 3)
 		result, err := transliterate.WithLimit(text)
-		if err != nil {
-			t.Fatalf("should accept string under configured limit: unexpected error: %v", err)
-		}
-		if result == "" {
-			t.Fatal("expected non-empty result, but got empty string")
-		}
+		assert.NoError(t, err, "should accept string under configured limit")
+		assert.NotEmpty(t, result)
 
 		// Try with string over new limit
 		text = "Hello世界,SubsequentText"
 		_, err = transliterate.WithLimit(text)
-		if err == nil {
-			t.Fatal("should reject string over configured limit: expected an error, but got nil")
-		}
+		assert.Error(t, err, "should reject string over configured limit")
 	})
 
 	t.Run("configure cache size", func(t *testing.T) {
@@ -74,9 +65,7 @@ func TestConfiguration(t *testing.T) {
 
 		// Should have cleared cache and only have last character's entry
 		size := transliterate.GetCacheSize()
-		if size != 1 {
-			t.Fatalf("after exceeding max size, cache should be cleared and contain only last entry: expected %d, got %d", 1, size)
-		}
+		assert.Equal(t, 1, size, "cache should only contain last entry after exceeding max size")
 	})
 
 	t.Run("multiple configurations", func(t *testing.T) {
@@ -96,9 +85,7 @@ func TestConfiguration(t *testing.T) {
 		// Test input length limit
 		text := string(make([]rune, 101))
 		_, err := transliterate.WithLimit(text)
-		if err == nil {
-			t.Fatal("should respect configured input length: expected an error, but got nil")
-		}
+		assert.Error(t, err, "should reject string over configured limit")
 
 		// Test cache size (basic check)
 		transliterate.ClearCache()
@@ -106,9 +93,7 @@ func TestConfiguration(t *testing.T) {
 		transliterate.String(text)            // Prime cache
 		transliterate.String(text)            // Hit cache
 		hits := transliterate.GetCacheStats() // Assuming GetCacheStats returns only hits
-		if hits <= uint64(0) {                // Assuming hits is reset or low before this test
-			t.Fatalf("cache should be working with new size: expected hits (%d) to be greater than 0", hits)
-		}
+		assert.Greater(t, hits, uint64(0), "cache should be working with new size")
 	})
 
 	t.Run("invalid configurations", func(t *testing.T) {
@@ -136,15 +121,11 @@ func TestConfiguration(t *testing.T) {
 		transliterate.String(text) // Prime
 		transliterate.String(text) // Hit
 		hits := transliterate.GetCacheStats()
-		if hits <= oldHits {
-			t.Fatalf("cache should still work with old config: expected hits (%d) to be greater than oldHits (%d)", hits, oldHits)
-		}
+		assert.Greater(t, hits, uint64(oldHits), "cache should have more hits after reconfiguration")
 
 		// Test behavior implies old config: long text should still be rejected
 		text = string(make([]rune, currentMaxInputLength+1)) // Use known limit + 1
 		_, err := transliterate.WithLimit(text)
-		if err == nil {
-			t.Fatal("should maintain original input length limit: expected an error, but got nil")
-		}
+		assert.Error(t, err, "should reject string over configured limit")
 	})
 }

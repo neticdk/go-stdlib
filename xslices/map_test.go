@@ -45,7 +45,7 @@ func TestMap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := Map(tt.input, tt.fn)
-			assert.Equal(t, result, tt.expected)
+			assert.Equal(t, result, tt.expected, "Map/%q", tt.name)
 		})
 	}
 }

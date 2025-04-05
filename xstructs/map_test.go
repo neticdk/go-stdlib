@@ -1,9 +1,9 @@
 package xstructs_test
 
 import (
-	"reflect"
 	"testing"
 
+	"github.com/neticdk/go-stdlib/assert"
 	"github.com/neticdk/go-stdlib/xstructs"
 )
 
@@ -227,13 +227,10 @@ func TestToMap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := xstructs.ToMap(tt.data)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ToMap() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			if tt.wantErr {
+				assert.Error(t, err)
 			}
-			if !reflect.DeepEqual(got, tt.expected) {
-				t.Errorf("ToMap() got = %v, want %v", got, tt.expected)
-			}
+			assert.Equal(t, got, tt.expected)
 		})
 	}
 }

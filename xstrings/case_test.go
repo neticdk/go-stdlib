@@ -2,6 +2,8 @@ package xstrings
 
 import (
 	"testing"
+
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestToKebabCase(t *testing.T) {
@@ -95,9 +97,7 @@ func TestToKebabCase(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ToKebabCase(tt.input)
-			if result != tt.expected {
-				t.Errorf("ToKebabCase(%q) = %q; want %q", tt.input, result, tt.expected)
-			}
+			assert.Equal(t, result, tt.expected, "ToKebabCase/%q", tt.name)
 		})
 	}
 }
@@ -108,26 +108,73 @@ func TestToCamelCase(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"empty string", "", ""},
-		{"already camel case", "helloWorld", "helloWorld"},
-		{"snake case", "hello_world", "helloWorld"},
-		{"kebab case", "hello-world", "helloWorld"},
-		{"dot case", "hello.world", "helloWorld"},
-		{"space separated", "hello world", "helloWorld"},
-		{"mixed delimiters", "hello_world-example.test", "helloWorldExampleTest"},
-		{"consecutive delimiters", "hello__world--test", "helloWorldTest"},
-		{"uppercase", "HELLO_WORLD", "helloWorld"},
-		{"acronyms", "API_request", "apiRequest"},
-		{"with numbers", "user_123_name", "user123Name"},
-		{"starting with number", "123_test", "123Test"},
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "already camel case",
+			input:    "helloWorld",
+			expected: "helloWorld",
+		},
+
+		{
+			name:     "snake case",
+			input:    "hello_world",
+			expected: "helloWorld",
+		},
+		{
+			name:     "kebab case",
+			input:    "hello-world",
+			expected: "helloWorld",
+		},
+		{
+			name:     "dot case",
+			input:    "hello.world",
+			expected: "helloWorld",
+		},
+		{
+			name:     "space separated",
+			input:    "hello world",
+			expected: "helloWorld",
+		},
+		{
+			name:     "mixed delimiters",
+			input:    "hello_world-example.test",
+			expected: "helloWorldExampleTest",
+		},
+		{
+			name:     "consecutive delimiters",
+			input:    "hello__world--test",
+			expected: "helloWorldTest",
+		},
+		{
+			name:     "uppercase",
+			input:    "HELLO_WORLD",
+			expected: "helloWorld",
+		},
+		{
+			name:     "acronyms",
+			input:    "API_request",
+			expected: "apiRequest",
+		},
+		{
+			name:     "with numbers",
+			input:    "user_123_name",
+			expected: "user123Name",
+		},
+		{
+			name:     "starting with number",
+			input:    "123_test",
+			expected: "123Test",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ToCamelCase(tt.input)
-			if result != tt.expected {
-				t.Errorf("ToCamelCase(%q) = %q; want %q", tt.input, result, tt.expected)
-			}
+			assert.Equal(t, result, tt.expected, "ToCamelCase/%q", tt.name)
 		})
 	}
 }
@@ -138,27 +185,77 @@ func TestToPascalCase(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"empty string", "", ""},
-		{"already pascal case", "HelloWorld", "HelloWorld"},
-		{"camel case", "helloWorld", "HelloWorld"},
-		{"snake case", "hello_world", "HelloWorld"},
-		{"kebab case", "hello-world", "HelloWorld"},
-		{"dot case", "hello.world", "HelloWorld"},
-		{"space separated", "hello world", "HelloWorld"},
-		{"mixed delimiters", "hello_world-example.test", "HelloWorldExampleTest"},
-		{"consecutive delimiters", "hello__world--test", "HelloWorldTest"},
-		{"uppercase", "HELLO_WORLD", "HelloWorld"},
-		{"acronyms", "API_request", "ApiRequest"},
-		{"with numbers", "user_123_name", "User123Name"},
-		{"starting with number", "123_test", "123Test"},
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "already pascal case",
+			input:    "HelloWorld",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "camel case",
+			input:    "helloWorld",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "snake case",
+			input:    "hello_world",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "kebab case",
+			input:    "hello-world",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "dot case",
+			input:    "hello.world",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "space separated",
+			input:    "hello world",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "mixed delimiters",
+			input:    "hello_world-example.test",
+			expected: "HelloWorldExampleTest",
+		},
+		{
+			name:     "consecutive delimiters",
+			input:    "hello__world--test",
+			expected: "HelloWorldTest",
+		},
+		{
+			name:     "uppercase",
+			input:    "HELLO_WORLD",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "acronyms",
+			input:    "API_request",
+			expected: "ApiRequest",
+		},
+		{
+			name:     "with numbers",
+			input:    "user_123_name",
+			expected: "User123Name",
+		},
+		{
+			name:     "starting with number",
+			input:    "123_test",
+			expected: "123Test",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ToPascalCase(tt.input)
-			if result != tt.expected {
-				t.Errorf("ToPascalCase(%q) = %q; want %q", tt.input, result, tt.expected)
-			}
+			assert.Equal(t, result, tt.expected, "ToPascalCase/%q", tt.name)
 		})
 	}
 }
@@ -170,26 +267,84 @@ func TestToDelimited(t *testing.T) {
 		delimiter string
 		expected  string
 	}{
-		{"empty delimiter", "Hello World", "", "helloworld"},
-		{"empty string", "", "_", ""},
-		{"already snake case", "hello_world", "_", "hello_world"},
-		{"already kebab case", "hello-world", "_", "hello_world"},
-		{"already dot case", "hello.world", "_", "hello_world"},
-		{"already space separated", "hello world", "_", "hello_world"},
-		{"camel case", "helloWorld", "_", "hello_world"},
-		{"pascal case", "HelloWorld", "_", "hello_world"},
-		{"uppercase", "HELLO_WORLD", "-", "hello-world"},
-		{"acronyms", "APIRequest", "-", "api-request"},
-		{"with numbers", "user123Name", "-", "user-123-name"},
-		{"starting with number", "123Test", "-", "123-test"},
+		{
+			name:      "empty delimiter",
+			input:     "Hello World",
+			delimiter: "",
+			expected:  "helloworld",
+		},
+		{
+			name:      "empty string",
+			input:     "",
+			delimiter: "_",
+			expected:  "",
+		},
+		{
+			name:      "already snake case",
+			input:     "hello_world",
+			delimiter: "_",
+			expected:  "hello_world",
+		},
+		{
+			name:      "already kebab case",
+			input:     "hello-world",
+			delimiter: "_",
+			expected:  "hello_world",
+		},
+		{
+			name:      "already dot case",
+			input:     "hello.world",
+			delimiter: "_",
+			expected:  "hello_world",
+		},
+		{
+			name:      "already space separated",
+			input:     "hello world",
+			delimiter: "_",
+			expected:  "hello_world",
+		},
+		{
+			name:      "camel case",
+			input:     "helloWorld",
+			delimiter: "_",
+			expected:  "hello_world",
+		},
+		{
+			name:      "pascal case",
+			input:     "HelloWorld",
+			delimiter: "_",
+			expected:  "hello_world",
+		},
+		{
+			name:      "uppercase",
+			input:     "HELLO_WORLD",
+			delimiter: "-",
+			expected:  "hello-world",
+		},
+		{
+			name:      "acronyms",
+			input:     "APIRequest",
+			delimiter: "-",
+			expected:  "api-request",
+		},
+		{
+			name:      "with numbers",
+			input:     "user123Name",
+			delimiter: "-",
+			expected:  "user-123-name",
+		},
+		{
+			name:      "starting with number",
+			input:     "123Test",
+			delimiter: "-",
+			expected:  "123-test",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ToDelimited(tt.input, tt.delimiter)
-			if result != tt.expected {
-				t.Errorf("ToDelimited(%q, %q) = %q; want %q", tt.input, tt.delimiter, result, tt.expected)
-			}
+			assert.Equal(t, result, tt.expected, "ToDelimited/%q", tt.name)
 		})
 	}
 }

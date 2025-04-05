@@ -1,8 +1,9 @@
 package xslices
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestUnfold(t *testing.T) {
@@ -63,9 +64,7 @@ func TestUnfold(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			actual := Unfold(tt.acc, tt.f, tt.p, tt.opts...)
-			if !reflect.DeepEqual(actual, tt.expected) {
-				t.Errorf("expected %v but got %v", tt.expected, actual)
-			}
+			assert.Equal(t, actual, tt.expected, "Unfold/%q", tt.name)
 		})
 	}
 }
@@ -125,9 +124,7 @@ func TestUnfoldI(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			actual := UnfoldI(tt.acc, tt.f, tt.i, tt.opts...)
-			if !reflect.DeepEqual(actual, tt.expected) {
-				t.Errorf("expected %v but got %v", tt.expected, actual)
-			}
+			assert.Equal(t, actual, tt.expected, "UnfoldI/%q", tt.name)
 		})
 	}
 }

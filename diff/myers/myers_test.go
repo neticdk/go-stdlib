@@ -3,10 +3,12 @@ package myers_test
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/neticdk/go-stdlib/assert"
 	"github.com/neticdk/go-stdlib/diff/myers"
 )
 
@@ -85,9 +87,7 @@ func TestMyersDifferInterface(t *testing.T) {
 	for _, tt := range stringTests {
 		t.Run("Default/String/"+tt.name, func(t *testing.T) {
 			result := differ.Diff(tt.a, tt.b)
-			if result != tt.expected {
-				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "Diff/%q", tt.name)
 		})
 	}
 
@@ -95,9 +95,7 @@ func TestMyersDifferInterface(t *testing.T) {
 	for _, tt := range sliceTests {
 		t.Run("Default/Slice/"+tt.name, func(t *testing.T) {
 			result := differ.DiffStrings(tt.a, tt.b)
-			if result != tt.expected {
-				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "DiffStrings/%q", tt.name)
 		})
 	}
 
@@ -112,9 +110,7 @@ func TestMyersDifferInterface(t *testing.T) {
 
 	t.Run("Custom/String", func(t *testing.T) {
 		result := customDiffer.Diff("hello\nworld", "hello\nmiddle\nworld")
-		if result != customExpected {
-			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
-		}
+		assert.Equal(t, result, customExpected, "CustomDiff/%q", "String")
 	})
 
 	t.Run("Custom/Slice", func(t *testing.T) {
@@ -122,9 +118,7 @@ func TestMyersDifferInterface(t *testing.T) {
 			[]string{"hello", "world"},
 			[]string{"hello", "middle", "world"},
 		)
-		if result != customExpected {
-			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
-		}
+		assert.Equal(t, result, customExpected, "CustomDiffStrings/%q", "Slice")
 	})
 }
 
@@ -192,9 +186,7 @@ func TestDiff(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := myers.Diff(tt.a, tt.b)
-			if result != tt.expected {
-				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "Diff/%q", tt.name)
 		})
 	}
 }
@@ -240,9 +232,7 @@ func TestDiffStrings(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := myers.DiffStrings(tt.a, tt.b)
-			if result != tt.expected {
-				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "DiffStrings/%q", tt.name)
 		})
 	}
 }
@@ -266,9 +256,7 @@ func TestWithContextLines(t *testing.T) {
 			result := myers.Diff(a, b, myers.WithContextLines(tt.contextLines))
 
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
-			if len(lines) != tt.expectLines {
-				t.Errorf("Expected %d lines, got %d lines: %s", tt.expectLines, len(lines), result)
-			}
+			assert.Equal(t, len(lines), tt.expectLines, "Diff/%q", tt.name)
 		})
 	}
 }
@@ -328,9 +316,7 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 				result := myers.DiffStrings(tt.a, tt.b, tt.opts...)
 
 				expected := "+ b\n  a\n" // Expected output
-				if result != expected {
-					t.Errorf("Diff = %q, want %q", result, expected)
-				}
+				assert.Equal(t, result, expected, "DiffStrings/%q", tt.name)
 				return
 			}
 
@@ -349,9 +335,7 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 			result := myers.DiffStrings(tt.a, tt.b, tt.opts...)
 
 			// Verify we got a valid diff
-			if result == "" {
-				t.Error("Expected non-empty diff result")
-			}
+			assert.NotEmpty(t, result)
 
 			// Count changes to verify diff is working
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
@@ -368,18 +352,12 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 			}
 
 			// We should have an equal number of insertions and deletions
-			if deletions != insertions {
-				t.Errorf("Unbalanced changes: %d deletions, %d insertions", deletions, insertions)
-			}
+			assert.Equal(t, deletions, insertions, "Unbalanced changes: %d deletions, %d insertions", deletions, insertions)
 
 			// We should have some changes (every 5th line is different)
 			expectedChanges := len(tt.a) / 5
 			minExpectedChanges := expectedChanges / 2
-			if deletions < minExpectedChanges {
-				t.Errorf("Expected at least %d changes, got %d", minExpectedChanges, deletions)
-			}
-
-			t.Logf("Found %d changes in %s case", deletions, tt.desc)
+			assert.GreaterOrEqual(t, deletions, minExpectedChanges, "Expected at least %d changes, got %d", minExpectedChanges, deletions)
 		})
 	}
 }
@@ -467,9 +445,7 @@ func TestLinearSpaceBaseConditions(t *testing.T) {
 			if len(relevantLines) > 0 {
 				actual += "\n"
 			}
-			if actual != tt.expected {
-				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, actual)
-			}
+			assert.Equal(t, actual, tt.expected, "DiffStrings/%q", tt.name)
 		})
 	}
 }
@@ -533,9 +509,7 @@ func TestEditScriptAlgorithmSelection(t *testing.T) {
 			}
 
 			result := myers.DiffStrings(tt.a, tt.b, opts...)
-			if !strings.Contains(result, "common") {
-				t.Errorf("Expected 'common' in result, got %q", result)
-			}
+			assert.True(t, strings.Contains(result, "common"), "DiffStrings/%q: Expected 'common' in result", tt.name)
 		})
 	}
 }
@@ -585,9 +559,7 @@ func TestLinearSpaceRecursionDepth(t *testing.T) {
 			)
 
 			// Verify we got a valid diff
-			if result == "" {
-				t.Error("Expected non-empty diff result")
-			}
+			assert.NotEmpty(t, result, "DiffStrings/%q", tt.name)
 
 			// Count changes to verify diff is working
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
@@ -602,11 +574,7 @@ func TestLinearSpaceRecursionDepth(t *testing.T) {
 			// We should have some changes (every 3rd line is different)
 			expectedChanges := size / 3
 			minExpectedChanges := expectedChanges / 2
-			if changes < minExpectedChanges {
-				t.Errorf("Expected at least %d changes, got %d", minExpectedChanges, changes)
-			}
-
-			t.Logf("Found %d changes with max depth %d", changes, tt.maxDepth)
+			assert.GreaterOrEqual(t, changes, minExpectedChanges, "DiffStrings/%q: Expected at least %d changes, got %d", tt.name, minExpectedChanges, changes)
 		})
 	}
 }
@@ -617,18 +585,12 @@ func TestWithShowLineNumbers(t *testing.T) {
 
 	// With line numbers (default)
 	withNumbers := myers.Diff(a, b)
-	if !strings.Contains(withNumbers, "   1    1   hello") {
-		t.Errorf("Expected line numbers, got: %s", withNumbers)
-	}
+	assert.True(t, strings.Contains(withNumbers, "   1    1"), "Expected line numbers in diff output")
 
 	// Without line numbers
 	withoutNumbers := myers.Diff(a, b, myers.WithShowLineNumbers(false))
-	if strings.Contains(withoutNumbers, "   1    1") {
-		t.Errorf("Did not expect line numbers, got: %s", withoutNumbers)
-	}
-	if !strings.Contains(withoutNumbers, "  hello") {
-		t.Errorf("Expected content without line numbers, got: %s", withoutNumbers)
-	}
+	assert.False(t, strings.Contains(withoutNumbers, "   1    1"), "Did not expect line numbers in diff output")
+	assert.False(t, strings.Contains(withoutNumbers, "   2    2"), "Did not expect line numbers in diff output")
 }
 
 func TestWithMaxEditDistance(t *testing.T) {
@@ -639,21 +601,10 @@ func TestWithMaxEditDistance(t *testing.T) {
 	// With unlimited edit distance
 	result := myers.Diff(a, b)
 
-	if !strings.Contains(result, "1      - a") {
-		t.Errorf("Expected content with %s , got: %s", "1      - a", result)
-	}
-
-	if !strings.Contains(result, "100      - a") {
-		t.Errorf("Expected content with %s , got: %s", "100      - a", result)
-	}
-
-	if !strings.Contains(result, "1 + b") {
-		t.Errorf("Expected content with %s , got: %s", "1 + b", result)
-	}
-
-	if !strings.Contains(result, "100 + b") {
-		t.Errorf("Expected content with %s , got: %s", "100 + b", result)
-	}
+	assert.True(t, strings.Contains(result, "1      - a"), "Expected content with 1 - a")
+	assert.True(t, strings.Contains(result, "100      - a"), "Expected content with 100 - a")
+	assert.True(t, strings.Contains(result, "1 + b"), "Expected content with 1 + b")
+	assert.True(t, strings.Contains(result, "100 + b"), "Expected content with 100 + b")
 }
 
 func TestWithLargeInputThreshold(t *testing.T) {
@@ -703,12 +654,8 @@ func TestWithLargeInputThreshold(t *testing.T) {
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
 			hasEllipsis := strings.Contains(result, "...\n")
 
-			if tt.shouldFallback && hasEllipsis {
-				t.Error("Expected simple diff (no chunks), but got chunked output")
-			}
-			if !tt.shouldFallback && !hasEllipsis && len(lines) > 4 {
-				t.Error("Expected Myers diff with chunks, but got unchunked output")
-			}
+			assert.False(t, tt.shouldFallback && hasEllipsis, "Expected simple diff (no chunks), but got chunked output")
+			assert.False(t, !tt.shouldFallback && !hasEllipsis && len(lines) > 4, "Expected Myers diff with chunks, but got unchunked output")
 		})
 	}
 }
@@ -772,16 +719,7 @@ func TestWithSmallThreshold(t *testing.T) {
 			bLen := len(bLines)
 
 			// We are checking for conditions where computescript is not called!
-			if aLen < smallInputThreshold || bLen < smallInputThreshold {
-				if tt.expectLinearSpace != (tt.thresholdSize < min(aLen, bLen)) {
-					t.Errorf("Inconsistent linear space: %s.  Desc: %s. expected %v, got %v", tt.name, tt.desc, tt.expectLinearSpace, (tt.thresholdSize < min(aLen, bLen)))
-				}
-			} else {
-				// If both are above the threshold, expect linearSpace to be used if thresholdSize is less.
-				if tt.expectLinearSpace != (tt.thresholdSize < min(aLen, bLen)) {
-					t.Errorf("Inconsistent linear space: %s.  Desc: %s. expected %v, got %v", tt.name, tt.desc, tt.expectLinearSpace, (tt.thresholdSize < min(aLen, bLen)))
-				}
-			}
+			assert.True(t, tt.expectLinearSpace == (tt.thresholdSize < min(aLen, bLen)), "DiffStrings/%q: Expected linear space algorithm to be used", tt.name)
 		})
 	}
 }
@@ -843,35 +781,21 @@ func TestWithLinearRecursionMaxDepth(t *testing.T) {
 			}
 
 			// The changes should be paired (each change is a deletion and an insertion)
-			if deletions != insertions {
-				t.Errorf("Unbalanced changes: %d deletions, %d insertions", deletions, insertions)
-			}
+			assert.Equal(t, deletions, insertions, "DiffStrings/%q: Unbalanced changes: %d deletions, %d insertions", tt.name, deletions, insertions)
 
 			changes := deletions // or insertions, they should be equal
-			t.Logf("Found %d changes", changes)
 
 			// We expect approximately size/2 changes (every other line is different)
 			expectedChanges := size / 2
 			minExpectedChanges := expectedChanges / 2
 
-			if changes == 0 {
-				t.Error("Expected changes, got none")
-				// Print first few lines of input for debugging
-				for i := 0; i < min(10, len(aLines)); i++ {
-					t.Logf("Line %d: a=%q b=%q", i, aLines[i], bLines[i])
-				}
-			}
+			assert.NotZero(t, changes, minExpectedChanges, "DiffStrings/%q", tt.name)
 
 			// For deep recursion, we expect to find most changes
-			if tt.maxDepth > 10 && changes < minExpectedChanges {
-				t.Errorf("With deep recursion, expected at least %d changes, got %d",
-					minExpectedChanges, changes)
-			}
+			assert.True(t, tt.maxDepth <= 10 || changes >= minExpectedChanges, "DiffStrings/%q", tt.name)
 
 			// Verify specific changes are present
-			if !strings.Contains(result, "a0") && !strings.Contains(result, "b0") {
-				t.Error("Expected to find changes in the first line")
-			}
+			assert.True(t, strings.Contains(result, "a0") && strings.Contains(result, "b0"), "DiffStrings/%q", tt.name)
 		})
 	}
 }
@@ -909,9 +833,7 @@ func TestOptionCombinations(t *testing.T) {
 	result := differ.DiffStrings(a, b)
 
 	// Verify that line numbers are hidden
-	if strings.Contains(result, "   1    1") {
-		t.Error("Line numbers should be hidden")
-	}
+	assert.False(t, strings.Contains(result, "   1    1"), "Line numbers should be hidden")
 
 	// Verify context lines
 	lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
@@ -924,14 +846,10 @@ func TestOptionCombinations(t *testing.T) {
 		"  line5",
 	}
 
-	if len(lines) != len(expectedLines) {
-		t.Errorf("Expected %d lines, got %d", len(expectedLines), len(lines))
-	}
+	assert.Equal(t, len(lines), len(expectedLines))
 
 	for i, expected := range expectedLines {
-		if i < len(lines) && lines[i] != expected {
-			t.Errorf("Line %d: expected %q, got %q", i, expected, lines[i])
-		}
+		assert.True(t, i >= len(lines) || lines[i] == expected, "Line %d: expected %q, got %q", i, expected, lines[i])
 	}
 }
 
@@ -952,15 +870,11 @@ func TestLongTextDiff(t *testing.T) {
 
 	// With context
 	result := myers.DiffStrings(aLines, bLines, myers.WithContextLines(3))
-	if !strings.Contains(result, "Line A a") {
-		t.Errorf("Expected content without line numbers, got: %s", result)
-	}
+	assert.True(t, strings.Contains(result, "Line A a"), "Expected content with line numbers")
 
 	// Without context
 	result = myers.DiffStrings(aLines, bLines)
-	if !strings.Contains(result, "Line A a") {
-		t.Errorf("Expected content without line numbers, got: %s", result)
-	}
+	assert.True(t, strings.Contains(result, "Line A a"), "Expected content with line numbers")
 }
 
 func BenchmarkMyersDiff(b *testing.B) {
@@ -1001,7 +915,7 @@ func BenchmarkMyersDiffLinearSpace(b *testing.B) {
 			b.Run(name, func(b *testing.B) {
 				a, bb := generateBenchmarkInput(size, changeRate)
 				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
+				for b.Loop() {
 					_ = myers.Diff(a, bb, myers.WithLinearSpace(true))
 				}
 			})
@@ -1084,7 +998,7 @@ func generateBenchmarkInput(size int, changeRate float64) (string, string) {
 			for range deletions {
 				if len(aLines) > 1 { // Keep at least one line
 					pos := rand.Intn(len(aLines))
-					aLines = append(aLines[:pos], aLines[pos+1:]...)
+					aLines = slices.Delete(aLines, pos, pos+1)
 				}
 			}
 		}
@@ -1119,114 +1033,3 @@ func generateBenchmarkInput(size int, changeRate float64) (string, string) {
 
 	return strings.Join(aLines, "\n"), strings.Join(bLines, "\n")
 }
-
-// generateBenchmarkInput creates two strings for benchmarking diff operations.
-// size: number of lines to generate
-// changeRate: fraction of lines that should be different (0.0 to 1.0)
-// func generateBenchmarkInput(size int, changeRate float64) (string, string) {
-// 	if size <= 0 {
-// 		return "", ""
-// 	}
-// 	if changeRate < 0.0 {
-// 		changeRate = 0.0
-// 	}
-// 	if changeRate > 1.0 {
-// 		changeRate = 1.0
-// 	}
-
-// 	// Pre-allocate slices for both inputs
-// 	aLines := make([]string, size)
-// 	bLines := make([]string, size)
-
-// 	// Calculate how many lines should be different
-// 	changesToMake := int(float64(size) * changeRate)
-
-// 	// Create a set of indices that will be changed
-// 	changeIndices := make(map[int]bool)
-// 	if changesToMake > 0 {
-// 		// Use a simple random selection if we're changing less than half
-// 		if changeRate <= 0.5 {
-// 			for len(changeIndices) < changesToMake {
-// 				idx := rand.Intn(size)
-// 				changeIndices[idx] = true
-// 			}
-// 		} else {
-// 			// For higher change rates, select indices to keep the same
-// 			keepSame := size - changesToMake
-// 			for i := range size {
-// 				changeIndices[i] = true
-// 			}
-// 			for range keepSame {
-// 				idx := rand.Intn(size)
-// 				delete(changeIndices, idx)
-// 			}
-// 		}
-// 	}
-
-// 	// Generate the lines with controlled changes
-// 	for i := range size {
-// 		if changeIndices[i] {
-// 			// Create different content for changed lines
-// 			aLines[i] = fmt.Sprintf("old line %d content %d", i, rand.Intn(1000))
-// 			bLines[i] = fmt.Sprintf("new line %d content %d", i, rand.Intn(1000))
-// 		} else {
-// 			// Create identical content for unchanged lines
-// 			content := fmt.Sprintf("same line %d content %d", i, rand.Intn(1000))
-// 			aLines[i] = content
-// 			bLines[i] = content
-// 		}
-// 	}
-
-// 	// Consider adding some structural changes based on changeRate
-// 	if changeRate > 0.3 {
-// 		// Maybe add some lines
-// 		extraLines := int(float64(size) * 0.1) // Add up to 10% extra lines
-// 		if extraLines > 0 {
-// 			for i := range extraLines {
-// 				pos := rand.Intn(len(bLines) + 1)
-// 				newLine := fmt.Sprintf("inserted line %d", i)
-// 				bLines = append(bLines[:pos], append([]string{newLine}, bLines[pos:]...)...)
-// 			}
-// 		}
-
-// 		// Maybe delete some lines from a
-// 		if changeRate > 0.6 {
-// 			deletions := int(float64(size) * 0.1) // Delete up to 10% of lines
-// 			for range deletions {
-// 				if len(aLines) > 1 { // Keep at least one line
-// 					pos := rand.Intn(len(aLines))
-// 					aLines = append(aLines[:pos], aLines[pos+1:]...)
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	// Add some common patterns that often appear in real text
-// 	if size > 10 {
-// 		// Add some repeated lines
-// 		repeatedLine := "this line appears multiple times"
-// 		for range 3 {
-// 			pos := rand.Intn(len(aLines))
-// 			aLines[pos] = repeatedLine
-// 			bLines[pos] = repeatedLine
-// 		}
-
-// 		// Add some blocks of similar lines
-// 		if size > 100 {
-// 			blockSize := min(5, size/20)
-// 			blockStart := rand.Intn(size - blockSize)
-// 			for i := range blockSize {
-// 				prefix := "block line "
-// 				if changeIndices[blockStart+i] {
-// 					aLines[blockStart+i] = prefix + "old " + strconv.Itoa(i)
-// 					bLines[blockStart+i] = prefix + "new " + strconv.Itoa(i)
-// 				} else {
-// 					aLines[blockStart+i] = prefix + strconv.Itoa(i)
-// 					bLines[blockStart+i] = prefix + strconv.Itoa(i)
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	return strings.Join(aLines, "\n"), strings.Join(bLines, "\n")
-// }

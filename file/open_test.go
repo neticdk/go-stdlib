@@ -4,19 +4,18 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/neticdk/go-stdlib/assert"
+	"github.com/neticdk/go-stdlib/require"
 )
 
 func TestSafePath(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "go-common-test-")
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
 	realTmpDir, err := filepath.EvalSymlinks(tmpDir)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		name      string
@@ -165,25 +164,20 @@ func TestSafePath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setup != nil {
-				if err := tt.setup(); err != nil {
-					t.Fatalf("setup failed: %v", err)
-				}
+				err := tt.setup()
+				require.NoError(t, err, "setup failed")
 			}
 
 			got, err := SafePath(tt.root, tt.path)
-
-			if err != tt.expectErr {
-				t.Errorf("Expected error %v, got %v", tt.expectErr, err)
+			if err != nil && tt.expectErr != nil {
+				assert.ErrorIs(t, err, tt.expectErr)
 			}
 
-			if got != tt.want {
-				t.Errorf("SafePath() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, got, tt.want, "SafePath()/%q", tt.name)
 
 			if tt.teardown != nil {
-				if err := tt.teardown(); err != nil {
-					t.Fatalf("teardown failed: %v", err)
-				}
+				err := tt.teardown()
+				require.NoError(t, err, "teardown failed")
 			}
 		})
 	}

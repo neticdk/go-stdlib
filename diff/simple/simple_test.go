@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/neticdk/go-stdlib/assert"
 	"github.com/neticdk/go-stdlib/diff/simple"
 )
 
@@ -74,9 +75,7 @@ func TestSimpleDifferInterface(t *testing.T) {
 	for _, tt := range stringTests {
 		t.Run("Default/String/"+tt.name, func(t *testing.T) {
 			result := differ.Diff(tt.a, tt.b)
-			if result != tt.expected {
-				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "Diff/%q", tt.name)
 		})
 	}
 
@@ -84,9 +83,7 @@ func TestSimpleDifferInterface(t *testing.T) {
 	for _, tt := range sliceTests {
 		t.Run("Default/Slice/"+tt.name, func(t *testing.T) {
 			result := differ.DiffStrings(tt.a, tt.b)
-			if result != tt.expected {
-				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "DiffStrings/%q", tt.name)
 		})
 	}
 
@@ -100,9 +97,7 @@ func TestSimpleDifferInterface(t *testing.T) {
 
 	t.Run("Custom/String", func(t *testing.T) {
 		result := customDiffer.Diff("hello\nworld", "hello\nmiddle\nworld")
-		if result != customExpected {
-			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
-		}
+		assert.Equal(t, result, customExpected)
 	})
 
 	t.Run("Custom/Slice", func(t *testing.T) {
@@ -110,9 +105,7 @@ func TestSimpleDifferInterface(t *testing.T) {
 			[]string{"hello", "world"},
 			[]string{"hello", "middle", "world"},
 		)
-		if result != customExpected {
-			t.Errorf("Expected:\n%s\nGot:\n%s", customExpected, result)
-		}
+		assert.Equal(t, result, customExpected)
 	})
 }
 
@@ -180,9 +173,7 @@ func TestDiff(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := simple.Diff(tt.a, tt.b)
-			if result != tt.expected {
-				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "Diff/%q", tt.name)
 		})
 	}
 }
@@ -228,9 +219,7 @@ func TestDiffStrings(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := simple.DiffStrings(tt.a, tt.b)
-			if result != tt.expected {
-				t.Errorf("Expected:\n%s\nGot:\n%s", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "DiffStrings/%q", tt.name)
 		})
 	}
 }
@@ -241,18 +230,12 @@ func TestWithShowLineNumbers(t *testing.T) {
 
 	// With line numbers (default)
 	withNumbers := simple.Diff(a, b)
-	if !strings.Contains(withNumbers, "   1    1   hello") {
-		t.Errorf("Expected line numbers, got: %s", withNumbers)
-	}
+	assert.True(t, strings.Contains(withNumbers, "   1    1"), "Expected line numbers")
 
 	// Without line numbers
 	withoutNumbers := simple.Diff(a, b, simple.WithShowLineNumbers(false))
-	if strings.Contains(withoutNumbers, "   1    1") {
-		t.Errorf("Did not expect line numbers, got: %s", withoutNumbers)
-	}
-	if !strings.Contains(withoutNumbers, "  hello") {
-		t.Errorf("Expected content without line numbers, got: %s", withoutNumbers)
-	}
+	assert.False(t, strings.Contains(withoutNumbers, "   1    1"), "Did not expect line numbers")
+	assert.False(t, strings.Contains(withoutNumbers, "   2    2"), "Did not expect line numbers")
 }
 
 func TestLongTextDiff(t *testing.T) {
@@ -272,9 +255,7 @@ func TestLongTextDiff(t *testing.T) {
 
 	// Run the diff
 	result := simple.DiffStrings(aLines, bLines)
-	if !strings.Contains(result, "Line A a") {
-		t.Errorf("Expected content without line numbers, got: %s", result)
-	}
+	assert.True(t, strings.Contains(result, "Line A a"), "Expected content with line numbers")
 }
 
 func TestEdgeCases(t *testing.T) {
@@ -322,9 +303,7 @@ func TestEdgeCases(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result := simple.DiffStrings(tc.a, tc.b)
-			if result != tc.expected {
-				t.Errorf("Expected %s, got %s", tc.expected, result)
-			}
+			assert.Equal(t, result, tc.expected, "DiffStrings/%q", tc.name)
 		})
 	}
 }

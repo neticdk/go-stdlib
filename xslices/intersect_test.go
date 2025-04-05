@@ -2,6 +2,8 @@ package xslices
 
 import (
 	"testing"
+
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestIntersectionOfTwoSlices(t *testing.T) {
@@ -57,9 +59,7 @@ func TestIntersectionOfTwoSlices(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := Intersect(tt.a, tt.b)
-			if !equal(result, tt.expected) {
-				t.Errorf("expected %v, got %v", tt.expected, result)
-			}
+			assert.Equal(t, result, tt.expected, "Intersect/%q", tt.name)
 		})
 	}
 }

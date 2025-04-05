@@ -60,7 +60,7 @@ func TestComputeEditsLCS(t *testing.T) {
 			name:     "complex case",
 			a:        []string{"a", "b", "c", "d", "e"},
 			b:        []string{"a", "c", "f", "e"},
-			expected: []diff.Line{{Kind: diff.Equal, Text: "a"}, {Kind: diff.Delete, Text: "b"}, {Kind: diff.Equal, Text: "c"},{Kind: diff.Delete, Text: "d"}, {Kind: diff.Insert, Text: "f"}, {Kind: diff.Equal, Text: "e"}},
+			expected: []diff.Line{{Kind: diff.Equal, Text: "a"}, {Kind: diff.Delete, Text: "b"}, {Kind: diff.Equal, Text: "c"}, {Kind: diff.Delete, Text: "d"}, {Kind: diff.Insert, Text: "f"}, {Kind: diff.Equal, Text: "e"}},
 		},
 	}
 

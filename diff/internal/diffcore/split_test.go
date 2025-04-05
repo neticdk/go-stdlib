@@ -1,8 +1,10 @@
-package diffcore
+package diffcore_test
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/neticdk/go-stdlib/assert"
+	"github.com/neticdk/go-stdlib/diff/internal/diffcore"
 )
 
 func TestSplitLines(t *testing.T) {
@@ -55,10 +57,8 @@ func TestSplitLines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := SplitLines(tt.input)
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("Split() = %v, want %v", result, tt.expected)
-			}
+			result := diffcore.SplitLines(tt.input)
+			assert.Equal(t, result, tt.expected, "SplitLines/%q", tt.name)
 		})
 	}
 }

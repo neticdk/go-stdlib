@@ -1,10 +1,11 @@
-package diffcore
+package diffcore_test
 
 import (
-	"reflect"
 	"testing"
 
+	"github.com/neticdk/go-stdlib/assert"
 	"github.com/neticdk/go-stdlib/diff"
+	"github.com/neticdk/go-stdlib/diff/internal/diffcore"
 )
 
 func TestComputeEditsLCS(t *testing.T) {
@@ -66,10 +67,8 @@ func TestComputeEditsLCS(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ComputeEditsLCS(tt.a, tt.b)
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("ComputeEditsLCS() = %v, want %v", result, tt.expected)
-			}
+			result := diffcore.ComputeEditsLCS(tt.a, tt.b)
+			assert.Equal(t, result, tt.expected, "ComputeEditsLcs/%q", tt.name)
 		})
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/neticdk/go-stdlib/diff"
-	"github.com/neticdk/go-stdlib/diff/internal/diffcore" // Import the new internal package
+	"github.com/neticdk/go-stdlib/diff/internal/diffcore"
 )
 
 // Diff computes differences between two strings using a simple diff algorithm.

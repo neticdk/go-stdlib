@@ -23,10 +23,12 @@ func Diff(a, b string, opts ...Option) string {
 // DiffStrings computes differences between string slices using a simple diff algorithm.
 // Currently never returns an error.
 func DiffStrings(a, b []string, opts ...Option) string {
-	options := applyOptions(opts...)
+	return simpleDiffStrings(a, b, applyOptions(opts...))
+}
 
+func simpleDiffStrings(a, b []string, opts options) string {
 	// Compute edit script using the shared simple LCS-based diff algorithm
-	edits := diffcore.ComputeEditsLCS(a, b)
+	script := diffcore.ComputeEditsLCS(a, b)
 
 	// Format the diff output
 	var sb strings.Builder
@@ -35,36 +37,46 @@ func DiffStrings(a, b []string, opts ...Option) string {
 	aLineNum := 1
 	bLineNum := 1
 
-	for _, edit := range edits {
-		switch edit.Kind {
-		case diff.Equal:
-			if options.showLineNumbers {
-				sb.WriteString(fmt.Sprintf("%4d %4d   ", aLineNum, bLineNum))
-			} else {
-				sb.WriteString("  ")
+	// Group edits by type for context-aware output
+	chunks := diffcore.GroupEditsByContext(script, opts.contextLines)
+
+	for i, chunk := range chunks {
+		// Add separator between chunks
+		if i > 0 && opts.contextLines > 0 {
+			sb.WriteString("...\n")
+		}
+
+		for _, edit := range chunk {
+			switch edit.Kind {
+			case diff.Equal:
+				if opts.showLineNumbers {
+					sb.WriteString(fmt.Sprintf("%4d %4d   ", aLineNum, bLineNum))
+				} else {
+					sb.WriteString("  ")
+				}
+				sb.WriteString(edit.Text)
+				sb.WriteString("\n")
+				aLineNum++
+				bLineNum++
+			case diff.Delete:
+				if opts.showLineNumbers {
+					sb.WriteString(fmt.Sprintf("%4d      - ", aLineNum))
+				} else {
+					sb.WriteString("- ")
+				}
+				sb.WriteString(edit.Text)
+				sb.WriteString("\n")
+				aLineNum++
+			case diff.Insert:
+				if opts.showLineNumbers {
+					sb.WriteString(fmt.Sprintf("     %4d + ", bLineNum))
+				} else {
+					sb.WriteString("+ ")
+				}
+				sb.WriteString(edit.Text)
+				sb.WriteString("\n")
+				bLineNum++
 			}
-			sb.WriteString(edit.Text)
-			sb.WriteString("\n")
-			aLineNum++
-			bLineNum++
-		case diff.Delete:
-			if options.showLineNumbers {
-				sb.WriteString(fmt.Sprintf("%4d      - ", aLineNum))
-			} else {
-				sb.WriteString("- ")
-			}
-			sb.WriteString(edit.Text)
-			sb.WriteString("\n")
-			aLineNum++
-		case diff.Insert:
-			if options.showLineNumbers {
-				sb.WriteString(fmt.Sprintf("     %4d + ", bLineNum))
-			} else {
-				sb.WriteString("+ ")
-			}
-			sb.WriteString(edit.Text)
-			sb.WriteString("\n")
-			bLineNum++
 		}
 	}
 

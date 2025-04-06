@@ -1,9 +1,12 @@
 package myers
 
 const (
+	// Formatting options
 	defaultContextLines    = 3
-	defaultLinearSpace     = false
 	defaultShowLineNumbers = true
+
+	// Algorithm options
+	defaultLinearSpace     = false
 	defaultMaxEditDistance = -1 // no constraint
 
 	// defaultLinearRecursionMaxDepth specifies the maximum depth of recursion

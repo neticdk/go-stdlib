@@ -32,9 +32,11 @@ type Line struct {
 // Use the factory functions from each package to create a Differ implementation
 type Differ interface {
 	// Diff returns a string representation of the differences between two
-	// strings
-	Diff(a, b string) string
+	// strings. It returns an error if invalid options are provided or diffing
+	// fails.
+	Diff(a, b string) (string, error)
 	// DiffStrings returns a string representation of the differences between
-	// two slices of strings
-	DiffStrings(a, b []string) string
+	// two slices of strings. It returns an error if invalid options are
+	// provided or diffing fails.
+	DiffStrings(a, b []string) (string, error)
 }

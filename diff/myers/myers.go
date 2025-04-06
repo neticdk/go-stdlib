@@ -1,18 +1,15 @@
 package myers
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/neticdk/go-stdlib/diff"
 	"github.com/neticdk/go-stdlib/diff/internal/diffcore"
 )
 
 // Diff computes differences between two values using the Myers diff algorithm.
-// Currently never returns an error.
-func Diff(a, b string, opts ...Option) string {
+// Returns an error if option validation fails.
+func Diff(a, b string, opts ...Option) (string, error) {
 	if a == "" && b == "" {
-		return ""
+		return "", nil
 	}
 
 	aLines := diffcore.SplitLines(a)
@@ -21,9 +18,13 @@ func Diff(a, b string, opts ...Option) string {
 }
 
 // DiffStrings computes differences between string slices using the Myers diff algorithm.
-// Currently never returns an error.
-func DiffStrings(a, b []string, opts ...Option) string {
-	return myersDiffStrings(a, b, applyOptions(opts...))
+// Returns an error if option validation fails.
+func DiffStrings(a, b []string, opts ...Option) (string, error) {
+	appliedOptions := applyOptions(opts...)
+	if err := appliedOptions.validate(); err != nil {
+		return "", err
+	}
+	return myersDiffStrings(a, b, applyOptions(opts...)), nil
 }
 
 func myersDiffStrings(a, b []string, opts options) string {
@@ -34,58 +35,7 @@ func myersDiffStrings(a, b []string, opts options) string {
 	} else {
 		script = computeEditScript(a, b, opts.maxEditDistance)
 	}
-
-	// Format the diff output
-	var sb strings.Builder
-
-	// Track line numbers if enabled
-	aLineNum := 1
-	bLineNum := 1
-
-	// Group edits by type for context-aware output
-	chunks := diffcore.GroupEditsByContext(script, opts.contextLines)
-
-	for i, chunk := range chunks {
-		// Add separator between chunks
-		if i > 0 && opts.contextLines > 0 {
-			sb.WriteString("...\n")
-		}
-
-		for _, edit := range chunk {
-			switch edit.Kind {
-			case diff.Equal:
-				if opts.showLineNumbers {
-					sb.WriteString(fmt.Sprintf("%4d %4d   ", aLineNum, bLineNum))
-				} else {
-					sb.WriteString("  ")
-				}
-				sb.WriteString(edit.Text)
-				sb.WriteString("\n")
-				aLineNum++
-				bLineNum++
-			case diff.Delete:
-				if opts.showLineNumbers {
-					sb.WriteString(fmt.Sprintf("%4d      - ", aLineNum))
-				} else {
-					sb.WriteString("- ")
-				}
-				sb.WriteString(edit.Text)
-				sb.WriteString("\n")
-				aLineNum++
-			case diff.Insert:
-				if opts.showLineNumbers {
-					sb.WriteString(fmt.Sprintf("     %4d + ", bLineNum))
-				} else {
-					sb.WriteString("+ ")
-				}
-				sb.WriteString(edit.Text)
-				sb.WriteString("\n")
-				bLineNum++
-			}
-		}
-	}
-
-	return sb.String()
+	return opts.formatter.Format(script, opts.FormatOptions)
 }
 
 // computeEditScript implements Myers' diff algorithm to find the shortest edit script

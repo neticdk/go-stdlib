@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/neticdk/go-stdlib/assert"
+	"github.com/neticdk/go-stdlib/diff"
 	"github.com/neticdk/go-stdlib/diff/myers"
 )
 
@@ -86,7 +87,8 @@ func TestMyersDifferInterface(t *testing.T) {
 	// Test string input
 	for _, tt := range stringTests {
 		t.Run("Default/String/"+tt.name, func(t *testing.T) {
-			result := differ.Diff(tt.a, tt.b)
+			result, err := differ.Diff(tt.a, tt.b)
+			assert.NoError(t, err)
 			assert.Equal(t, result, tt.expected, "Diff/%q", tt.name)
 		})
 	}
@@ -94,7 +96,8 @@ func TestMyersDifferInterface(t *testing.T) {
 	// Test string slice input
 	for _, tt := range sliceTests {
 		t.Run("Default/Slice/"+tt.name, func(t *testing.T) {
-			result := differ.DiffStrings(tt.a, tt.b)
+			result, err := differ.DiffStrings(tt.a, tt.b)
+			assert.NoError(t, err)
 			assert.Equal(t, result, tt.expected, "DiffStrings/%q", tt.name)
 		})
 	}
@@ -109,15 +112,17 @@ func TestMyersDifferInterface(t *testing.T) {
 	customExpected := "  hello\n+ middle\n  world\n"
 
 	t.Run("Custom/String", func(t *testing.T) {
-		result := customDiffer.Diff("hello\nworld", "hello\nmiddle\nworld")
+		result, err := customDiffer.Diff("hello\nworld", "hello\nmiddle\nworld")
+		assert.NoError(t, err)
 		assert.Equal(t, result, customExpected, "CustomDiff/%q", "String")
 	})
 
 	t.Run("Custom/Slice", func(t *testing.T) {
-		result := customDiffer.DiffStrings(
+		result, err := customDiffer.DiffStrings(
 			[]string{"hello", "world"},
 			[]string{"hello", "middle", "world"},
 		)
+		assert.NoError(t, err)
 		assert.Equal(t, result, customExpected, "CustomDiffStrings/%q", "Slice")
 	})
 }
@@ -185,7 +190,8 @@ func TestDiff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := myers.Diff(tt.a, tt.b)
+			result, err := myers.Diff(tt.a, tt.b)
+			assert.NoError(t, err)
 			assert.Equal(t, result, tt.expected, "Diff/%q", tt.name)
 		})
 	}
@@ -231,8 +237,135 @@ func TestDiffStrings(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := myers.DiffStrings(tt.a, tt.b)
+			result, err := myers.DiffStrings(tt.a, tt.b)
+			assert.NoError(t, err)
 			assert.Equal(t, result, tt.expected, "DiffStrings/%q", tt.name)
+		})
+	}
+}
+
+// capturingMockFormatter captures the options passed to it
+type capturingMockFormatter struct {
+	capturedOptions diff.FormatOptions
+}
+
+func (m *capturingMockFormatter) Format(edits []diff.Line, options diff.FormatOptions) string {
+	m.capturedOptions = options
+	// Return a string representing the captured options for verification
+	return fmt.Sprintf("Formatted with options: {OutputFormat:%s ContextLines:%d ShowLineNumbers:%v}",
+		options.OutputFormat, options.ContextLines, options.ShowLineNumbers)
+}
+
+// mockFormatter for testing WithFormatter option
+type mockFormatter struct {
+	returnValue string
+}
+
+func (m mockFormatter) Format(edits []diff.Line, options diff.FormatOptions) string {
+	return m.returnValue
+}
+
+func TestWithFormatterOptions(t *testing.T) {
+	a := "line1\nold\nline3"
+	b := "line1\nnew\nline3"
+
+	tests := []struct {
+		name          string
+		options       []myers.Option
+		expected      string
+		expectedPanic bool // Not used yet, but could be for future validation tests
+	}{
+		{
+			name: "Default (ContextFormatter)", // Tests the default formatter
+			options: []myers.Option{
+				myers.WithShowLineNumbers(false), // Simplify expected output
+			},
+			expected: "  line1\n- old\n+ new\n  line3\n",
+		},
+		{
+			name: "WithContextFormatter", // Explicitly tests WithContextFormatter
+			options: []myers.Option{
+				myers.WithContextFormatter(),
+				myers.WithShowLineNumbers(false),
+			},
+			expected: "  line1\n- old\n+ new\n  line3\n",
+		},
+		{
+			name: "WithUnifiedFormatter", // Explicitly tests WithUnifiedFormatter
+			options: []myers.Option{
+				myers.WithUnifiedFormatter(),
+				myers.WithShowLineNumbers(false), // Although unified usually ignores this
+			},
+			// Uses the actual output from UnifiedFormatter
+			expected: "--- a\n+++ b\n@@ -1,3 +1,3 @@\n line1\n-old\n+new\n line3\n",
+		},
+		{
+			name: "WithCustomFormatter", // Explicitly tests WithFormatter with a custom type
+			options: []myers.Option{
+				myers.WithFormatter(mockFormatter{returnValue: "Mock output!"}),
+			},
+			expected: "Mock output!",
+		},
+		{
+			name: "WithCustomFormatter nil (should use default)", // Tests nil handling for WithFormatter
+			options: []myers.Option{
+				myers.WithFormatter(nil), // Setting nil should be ignored, default ContextFormatter used
+				myers.WithShowLineNumbers(false),
+			},
+			expected: "  line1\n- old\n+ new\n  line3\n",
+		},
+		{
+			name: "WithContextFormatter overrides WithUnifiedFormatter (last wins)", // Tests override precedence
+			options: []myers.Option{
+				myers.WithUnifiedFormatter(),
+				myers.WithContextFormatter(), // This one should take effect
+				myers.WithShowLineNumbers(false),
+			},
+			expected: "  line1\n- old\n+ new\n  line3\n",
+		},
+		{
+			name: "WithFormatter overrides WithContextFormatter (last wins)", // Tests override precedence
+			options: []myers.Option{
+				myers.WithContextFormatter(),
+				myers.WithFormatter(mockFormatter{returnValue: "Mock wins!"}), // This one should take effect
+			},
+			expected: "Mock wins!",
+		},
+		{
+			name: "WithOutputFormat (used by formatter)", // Tests WithOutputFormat propagation
+			options: []myers.Option{
+				// Set a mock formatter that captures the options
+				myers.WithFormatter(&capturingMockFormatter{}), // Use the capturing mock
+				myers.WithOutputFormat(diff.FormatUnified),     // Set the format option
+				myers.WithContextLines(5),                      // Set other format options
+				myers.WithShowLineNumbers(false),
+			},
+			// Expected value comes from the mock formatter which should echo the option
+			expected: "Formatted with options: {OutputFormat:unified ContextLines:5 ShowLineNumbers:false}",
+		},
+		{
+			name: "Formatter with specific context options", // Tests passing options to default ContextFormatter
+			options: []myers.Option{
+				myers.WithContextFormatter(), // Explicitly context
+				myers.WithContextLines(0),    // No context lines
+				myers.WithShowLineNumbers(false),
+			},
+			expected: "- old\n+ new\n", // Only changed lines
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Using DiffStrings directly with options
+			result, err := myers.DiffStrings(strings.Split(a, "\n"), strings.Split(b, "\n"), tt.options...)
+			assert.NoError(t, err)
+			assert.Equal(t, result, tt.expected, "DiffStrings/%q", tt.name)
+
+			// Also test via CustomDiffer factory
+			customDiffer := myers.NewCustomDiffer(tt.options...)
+			resultFactory, err := customDiffer.Diff(a, b)
+			assert.NoError(t, err)
+			assert.Equal(t, resultFactory, tt.expected, "CustomDiffer.Diff/%q", tt.name)
 		})
 	}
 }
@@ -253,7 +386,8 @@ func TestWithContextLines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := myers.Diff(a, b, myers.WithContextLines(tt.contextLines))
+			result, err := myers.Diff(a, b, myers.WithContextLines(tt.contextLines))
+			assert.NoError(t, err)
 
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
 			assert.Equal(t, len(lines), tt.expectLines, "Diff/%q", tt.name)
@@ -313,7 +447,8 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Skip the generic checks for the "very small input" test case. We are now testing for this directly.
 			if tt.name == "very small input to force n=1 or m=1 in findMiddleSnake and use linear space" {
-				result := myers.DiffStrings(tt.a, tt.b, tt.opts...)
+				result, err := myers.DiffStrings(tt.a, tt.b, tt.opts...)
+				assert.NoError(t, err)
 
 				expected := "+ b\n  a\n" // Expected output
 				assert.Equal(t, result, expected, "DiffStrings/%q", tt.name)
@@ -332,7 +467,8 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 			}
 
 			// Run diff with the specified options
-			result := myers.DiffStrings(tt.a, tt.b, tt.opts...)
+			result, err := myers.DiffStrings(tt.a, tt.b, tt.opts...)
+			assert.NoError(t, err)
 
 			// Verify we got a valid diff
 			assert.NotEmpty(t, result)
@@ -420,7 +556,8 @@ func TestLinearSpaceBaseConditions(t *testing.T) {
 				myers.WithShowLineNumbers(false), // Disable line numbers for easier comparison
 			)
 
-			result := differ.DiffStrings(fullA, fullB)
+			result, err := differ.DiffStrings(fullA, fullB)
+			assert.NoError(t, err)
 
 			// Extract the relevant part of the diff (the middle section)
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
@@ -508,7 +645,8 @@ func TestEditScriptAlgorithmSelection(t *testing.T) {
 				opts = append(opts, myers.WithMaxEditDistance(tt.maxEditDist))
 			}
 
-			result := myers.DiffStrings(tt.a, tt.b, opts...)
+			result, err := myers.DiffStrings(tt.a, tt.b, opts...)
+			assert.NoError(t, err)
 			assert.Contains(t, result, "common", "DiffStrings/%q", tt.name)
 		})
 	}
@@ -553,10 +691,11 @@ func TestLinearSpaceRecursionDepth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := myers.DiffStrings(a, b,
+			result, err := myers.DiffStrings(a, b,
 				myers.WithLinearSpace(true),
 				myers.WithLinearRecursionMaxDepth(tt.maxDepth),
 			)
+			assert.NoError(t, err)
 
 			// Verify we got a valid diff
 			assert.NotEmpty(t, result, "DiffStrings/%q", tt.name)
@@ -584,11 +723,13 @@ func TestWithShowLineNumbers(t *testing.T) {
 	b := "hello\neveryone"
 
 	// With line numbers (default)
-	withNumbers := myers.Diff(a, b)
+	withNumbers, err := myers.Diff(a, b)
+	assert.NoError(t, err)
 	assert.Contains(t, withNumbers, "   1    1")
 
 	// Without line numbers
-	withoutNumbers := myers.Diff(a, b, myers.WithShowLineNumbers(false))
+	withoutNumbers, err := myers.Diff(a, b, myers.WithShowLineNumbers(false))
+	assert.NoError(t, err)
 	assert.NotContains(t, withoutNumbers, "   1    1")
 	assert.NotContains(t, withoutNumbers, "   2    2")
 }
@@ -599,8 +740,8 @@ func TestWithMaxEditDistance(t *testing.T) {
 	b := strings.Repeat("b\n", 100)
 
 	// With unlimited edit distance
-	result := myers.Diff(a, b)
-
+	result, err := myers.Diff(a, b)
+	assert.NoError(t, err)
 	assert.Contains(t, result, "1      - a", "Expected content with 1 - a")
 	assert.Contains(t, result, "100      - a", "Expected content with 100 - a")
 	assert.Contains(t, result, "1 + b", "Expected content with 1 + b")
@@ -647,7 +788,8 @@ func TestWithLargeInputThreshold(t *testing.T) {
 				myers.WithContextLines(0), // Minimize output size
 			)
 
-			result := differ.DiffStrings(aLines, bLines)
+			result, err := differ.DiffStrings(aLines, bLines)
+			assert.NoError(t, err)
 
 			// The simple diff algorithm will include all changes in a single chunk
 			// while the Myers algorithm with context will show them separately
@@ -712,7 +854,7 @@ func TestWithSmallThreshold(t *testing.T) {
 				myers.WithLinearSpace(true), // Force the code to call the linear space algorithm.
 			)
 
-			_ = differ.DiffStrings(aLines, bLines)
+			_, _ = differ.DiffStrings(aLines, bLines)
 
 			// This will test to verify if the test hit the linear space algorithm or not
 			aLen := len(aLines)
@@ -763,7 +905,8 @@ func TestWithLinearRecursionMaxDepth(t *testing.T) {
 				myers.WithContextLines(0), // No context to make changes clearer
 			)
 
-			result := differ.DiffStrings(aLines, bLines)
+			result, err := differ.DiffStrings(aLines, bLines)
+			assert.NoError(t, err)
 
 			// Count the actual changes
 			lines := strings.Split(strings.TrimRight(result, "\n"), "\n")
@@ -831,7 +974,8 @@ func TestOptionCombinations(t *testing.T) {
 		myers.WithMaxEditDistance(50),
 	)
 
-	result := differ.DiffStrings(a, b)
+	result, err := differ.DiffStrings(a, b)
+	assert.NoError(t, err)
 
 	// Verify that line numbers are hidden
 	assert.NotContains(t, result, "   1    1", "Line numbers should be hidden")
@@ -870,12 +1014,124 @@ func TestLongTextDiff(t *testing.T) {
 	bLines[300] = aLines[300]
 
 	// With context
-	result := myers.DiffStrings(aLines, bLines, myers.WithContextLines(3))
+	result, err := myers.DiffStrings(aLines, bLines, myers.WithContextLines(3))
+	assert.NoError(t, err)
 	assert.Contains(t, result, "Line A a", "Expected content with line numbers")
 
 	// Without context
-	result = myers.DiffStrings(aLines, bLines)
+	result, err = myers.DiffStrings(aLines, bLines)
+	assert.NoError(t, err)
 	assert.Contains(t, result, "Line A a", "Expected content with line numbers")
+}
+
+// TestOptionsValidationViaDiffStrings tests the internal validation logic indirectly
+// by calling DiffStrings and checking the returned error.
+func TestOptionsValidationViaDiffStrings(t *testing.T) {
+	// Dummy inputs, content doesn't matter for option validation
+	dummyA := []string{"a"}
+	dummyB := []string{"b"}
+
+	tests := []struct {
+		name         string
+		opts         []myers.Option
+		expectErr    bool
+		errSubstring string // Substring expected in the error message
+	}{
+		{
+			name:      "default options are valid",
+			opts:      []myers.Option{},
+			expectErr: false,
+		},
+		{
+			name: "valid custom options",
+			opts: []myers.Option{
+				myers.WithMaxEditDistance(100),
+				myers.WithSmallInputThreshold(50),
+				myers.WithLargeInputThreshold(5000),
+				myers.WithLinearRecursionMaxDepth(20),
+				myers.WithContextLines(5),
+				myers.WithShowLineNumbers(false),
+				myers.WithUnifiedFormatter(), // Use With... option to set formatter
+			},
+			expectErr: false,
+		},
+		{
+			name: "invalid MaxEditDistance",
+			opts: []myers.Option{
+				myers.WithMaxEditDistance(-2), // Invalid, must be >= -1
+			},
+			expectErr:    true,
+			errSubstring: "MaxEditDistance cannot be less than -1",
+		},
+		{
+			name: "invalid SmallInputThreshold (negative)",
+			opts: []myers.Option{
+				myers.WithSmallInputThreshold(-1),
+			},
+			expectErr:    true,
+			errSubstring: "Thresholds and max depth must be non-negative",
+		},
+		{
+			name: "invalid LargeInputThreshold (negative)",
+			opts: []myers.Option{
+				myers.WithLargeInputThreshold(-1),
+			},
+			expectErr:    true,
+			errSubstring: "Thresholds and max depth must be non-negative",
+		},
+		{
+			name: "invalid LinearRecursionMaxDepth (negative)",
+			opts: []myers.Option{
+				myers.WithLinearRecursionMaxDepth(-1),
+			},
+			expectErr:    true,
+			errSubstring: "Thresholds and max depth must be non-negative",
+		},
+		{
+			name: "invalid threshold relation (small >= large)",
+			opts: []myers.Option{
+				myers.WithSmallInputThreshold(500),
+				myers.WithLargeInputThreshold(500),
+			},
+			expectErr:    true,
+			errSubstring: "smallInputThreshold (500) must be less than largeInputThreshold (500)",
+		},
+		{
+			name: "invalid threshold relation (small > large)",
+			opts: []myers.Option{
+				myers.WithSmallInputThreshold(600),
+				myers.WithLargeInputThreshold(500),
+			},
+			expectErr:    true,
+			errSubstring: "smallInputThreshold (600) must be less than largeInputThreshold (500)",
+		},
+		// Test validation inherited from FormatOptions
+		{
+			name: "invalid context lines (inherited)",
+			opts: []myers.Option{
+				myers.WithContextLines(-1),
+			},
+			expectErr:    true,
+			errSubstring: "ContextLines must be non-negative",
+		},
+		// Note: Testing invalid OutputFormat enum value is difficult via functional options,
+		// but the FormatOptions.Validate test covers the internal check.
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := myers.DiffStrings(dummyA, dummyB, tt.opts...)
+
+			if tt.expectErr {
+				assert.Error(t, err, "Expected an error but got none")
+				if err != nil && tt.errSubstring != "" {
+					assert.Contains(t, err.Error(), tt.errSubstring, "Error message mismatch")
+				}
+			} else {
+				assert.NoError(t, err, "Expected no error but got: %v", err)
+			}
+		})
+	}
 }
 
 func BenchmarkMyersDiff(b *testing.B) {
@@ -902,7 +1158,7 @@ func BenchmarkMyersDiff(b *testing.B) {
 	// Run the benchmark
 	b.ResetTimer()
 	for b.Loop() {
-		_ = myers.DiffStrings(aLines, bLines)
+		_, _ = myers.DiffStrings(aLines, bLines)
 	}
 }
 
@@ -917,7 +1173,7 @@ func BenchmarkMyersDiffLinearSpace(b *testing.B) {
 				a, bb := generateBenchmarkInput(size, changeRate)
 				b.ResetTimer()
 				for b.Loop() {
-					_ = myers.Diff(a, bb, myers.WithLinearSpace(true))
+					_, _ = myers.Diff(a, bb, myers.WithLinearSpace(true))
 				}
 			})
 		}

@@ -268,7 +268,8 @@ func computeDiff(got, want any) string {
 	gotLines := strings.Split(string(gotJSON), "\n")
 	wantLines := strings.Split(string(wantJSON), "\n")
 
-	return myers.DiffStrings(gotLines, wantLines)
+	diff, _ := myers.DiffStrings(gotLines, wantLines)
+	return diff
 }
 
 // StackTracesEnabled indicates whether stack traces are enabled for assertion errors.

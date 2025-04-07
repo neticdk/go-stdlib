@@ -7,6 +7,8 @@ import (
 	"github.com/neticdk/go-stdlib/xstructs"
 )
 
+type TestingMapAny map[string]any
+
 func TestToMap(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -87,6 +89,26 @@ func TestToMap(t *testing.T) {
 					D int `json:"d"`
 				}{
 					D: 2,
+				},
+			},
+			expected: map[string]any{
+				"a": 1,
+				"b": "test",
+				"d": 2,
+			},
+			wantErr: false,
+		},
+		{
+			name: "TestingMapAny yaml inline",
+			data: &struct {
+				A             int    `yaml:"a"`
+				B             string `yaml:"b"`
+				TestingMapAny `yaml:",inline"`
+			}{
+				A: 1,
+				B: "test",
+				TestingMapAny: map[string]any{
+					"d": 2,
 				},
 			},
 			expected: map[string]any{

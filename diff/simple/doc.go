@@ -24,19 +24,37 @@
 //
 // # Output Format
 //
-// The output is a formatted string showing the differences between inputs:
+// The output is a formatted string showing the differences between inputs.
+// By default, it uses a context diff format with line numbers:
 //   - Lines prefixed with spaces are unchanged (present in both inputs)
 //   - Lines prefixed with "+" were added (present only in the second input)
 //   - Lines prefixed with "-" were deleted (present only in the first input)
 //
-// By default, line numbers are shown in the output.
+// It's possible to configure the output to use a unified diff, or to remove the line numbers.
+// The format of the diff output is controlled by a `Formatter`.
 //
 // # Configuration Options
 //
-// The package supports the following option:
+// The package supports the following options:
 //
-//	// Create a custom differ that hides line numbers in the output
+//   - `WithContextFormatter`:  Selects the context diff format (default).
+//   - `WithUnifiedFormatter`:  Selects the unified diff format.
+//   - `WithFormatter`: Allows specifying a completely custom `Formatter` implementation.
+//
+// Other options include:
+//
+// Create a custom differ that hides line numbers in the output:
+//
 //	differ := simple.NewCustomDiffer(simple.WithShowLineNumbers(false))
+//
+// Create a custom differ that uses the unified diff format:
+//
+//	differ := simple.NewCustomDiffer(simple.WithUnifiedFormatter())
+//
+// Create a completely custom formatter:
+//
+//	customFormatter := &MyCustomFormatter{}  // Replace with your custom implementation
+//	differ := simple.NewCustomDiffer(simple.WithFormatter(customFormatter))
 //
 // Alternatively, you can use the Diff or DiffStrings functions directly with options:
 //

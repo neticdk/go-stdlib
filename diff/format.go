@@ -66,25 +66,13 @@ type ContextFormatter struct{}
 
 // Format formats the diff output using the ContextFormatter
 func (c ContextFormatter) Format(edits []Line, options FormatOptions) string {
-	// Check for no actual changes first
-	// hasChanges := false
-	// for _, edit := range edits {
-	// 	if edit.Kind != Equal {
-	// 		hasChanges = true
-	// 		break
-	// 	}
-	// }
-	// if len(edits) == 0 || !hasChanges {
-	// 	return ""
-	// }
-
 	var sb strings.Builder
 	aLineNum, bLineNum := 1, 1 // Global line counters
 
 	// Determine which edits belong to printable chunks
 	chunkRanges := calculateChunkRanges(edits, options.ContextLines)
 
-	firstChunkPrinted := false // Track if we have printed the first chunk yet
+	firstChunkPrinted := false
 
 	for idx, edit := range edits {
 		// Determine if the current edit falls within any printable chunk range
@@ -157,19 +145,8 @@ type UnifiedFormatter struct{}
 
 // Format formats the diff output using the UnifiedFormatter
 func (u UnifiedFormatter) Format(edits []Line, options FormatOptions) string {
-	// Check if there are any actual changes (non-Equal edits)
-	// hasChanges := false
-	// for _, edit := range edits {
-	// 	if edit.Kind != Equal {
-	// 		hasChanges = true
-	// 		break
-	// 	}
-	// }
-	// if len(edits) == 0 || !hasChanges {
-	// 	return ""
-	// }
-
 	var sb strings.Builder
+
 	// Standard headers for unified format (generic filenames)
 	sb.WriteString("--- a\n")
 	sb.WriteString("+++ b\n")
@@ -182,49 +159,13 @@ func (u UnifiedFormatter) Format(edits []Line, options FormatOptions) string {
 			continue
 		}
 
-		// --- Calculate Hunk Header ---
-		// The starting line numbers for the hunk are the *global* line numbers
-		// corresponding to the *first line* included in this chunk range (r.start).
-		hunkAStart, hunkBStart := calculateStartLinesForIndex(edits, r.start)
-
-		// Calculate lengths by iterating *only* through the edits within this range
-		hunkALen := 0
-		hunkBLen := 0
-		for i := r.start; i < r.end; i++ {
-			// Check index bounds just in case
-			if i >= len(edits) {
-				break
-			}
-			switch edits[i].Kind {
-			case Equal, Delete:
-				hunkALen++
-			}
-			switch edits[i].Kind {
-			case Equal, Insert:
-				hunkBLen++
-			}
-		}
-
-		// Adjust display start for 0-length hunks
-		hunkAStartDisplay := hunkAStart
-		if hunkALen == 0 && hunkAStart > 0 { // Avoid 0,0 for empty files, keep 0,0 if start was 0
-			hunkAStartDisplay = hunkAStart - 1
-		} else if hunkALen == 0 && hunkAStart == 0 {
-			hunkAStartDisplay = 0 // Handle edge case for empty file change
-		}
-
-		hunkBStartDisplay := hunkBStart
-		if hunkBLen == 0 && hunkBStart > 0 {
-			hunkBStartDisplay = hunkBStart - 1
-		} else if hunkBLen == 0 && hunkBStart == 0 {
-			hunkBStartDisplay = 0
-		}
+		// Calculate Hunk Header
+		hunkHeader := calculateHunkHeader(edits, r)
 
 		// Format the @@ hunk header
-		sb.WriteString(fmt.Sprintf("@@ -%d,%d +%d,%d @@\n", hunkAStartDisplay, hunkALen, hunkBStartDisplay, hunkBLen))
-		// --- End Hunk Header ---
+		sb.WriteString(fmt.Sprintf("@@ -%s +%s @@\n", hunkHeader.aRange, hunkHeader.bRange))
 
-		// --- Write Hunk Body ---
+		// Write Hunk Body
 		// Iterate through the chunk range to write the body
 		for i := r.start; i < r.end; i++ {
 			// Check index bounds just in case
@@ -247,8 +188,78 @@ func (u UnifiedFormatter) Format(edits []Line, options FormatOptions) string {
 				sb.WriteString("\n")
 			}
 		}
-		// --- End Hunk Body ---
 	}
 
 	return sb.String()
+}
+
+type hunkHeader struct {
+	aRange string
+	bRange string
+}
+
+// calculateHunkHeader calculates the header string for a unified diff hunk.
+func calculateHunkHeader(edits []Line, r chunkRange) hunkHeader {
+	// The starting line numbers for the hunk are the *global* line numbers
+	// corresponding to the *first line* included in this chunk range (r.Start).
+	hunkAStart, hunkBStart := calculateStartLinesForIndex(edits, r.start)
+
+	// Calculate lengths by iterating *only* through the edits within this range
+	hunkALen := 0
+	hunkBLen := 0
+	for i := r.start; i < r.end; i++ {
+		// Check index bounds just in case
+		if i >= len(edits) {
+			break
+		}
+		switch edits[i].Kind {
+		case Equal, Delete:
+			hunkALen++
+		}
+		switch edits[i].Kind {
+		case Equal, Insert:
+			hunkBLen++
+		}
+	}
+
+	// Adjust display start for 0-length hunks
+	hunkAStartDisplay := hunkAStart
+	if hunkALen == 0 && hunkAStart > 0 { // Avoid 0,0 for empty files, keep 0,0 if start was 0
+		hunkAStartDisplay = hunkAStart - 1
+	} else if hunkALen == 0 && hunkAStart == 0 {
+		hunkAStartDisplay = 0 // Handle edge case for empty file change
+	}
+
+	hunkBStartDisplay := hunkBStart
+	if hunkBLen == 0 && hunkBStart > 0 {
+		hunkBStartDisplay = hunkBStart - 1
+	} else if hunkBLen == 0 && hunkBStart == 0 {
+		hunkBStartDisplay = 0
+	}
+
+	aRange := fmt.Sprintf("%d,%d", hunkAStartDisplay, hunkALen)
+	bRange := fmt.Sprintf("%d,%d", hunkBStartDisplay, hunkBLen)
+
+	return hunkHeader{aRange: aRange, bRange: bRange}
+}
+
+// calculateStartLinesForIndex determines the original a and b line numbers
+// corresponding to the start of the edit at the given targetIndex.
+func calculateStartLinesForIndex(edits []Line, targetIndex int) (aLineNum, bLineNum int) {
+	aLine, bLine := 1, 1
+	for i := range targetIndex {
+		if i >= len(edits) {
+			break
+		}
+		switch edits[i].Kind {
+		case Equal:
+			aLine++
+			bLine++
+		case Delete:
+			aLine++
+		case Insert:
+			bLine++
+		}
+	}
+	return aLine, bLine
 }

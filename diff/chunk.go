@@ -1,5 +1,7 @@
 package diff
 
+import "sort"
+
 type chunkRange struct {
 	start      int  // Start index (inclusive) in the original edits slice
 	end        int  // End index (exclusive) in the original edits slice
@@ -13,12 +15,15 @@ func calculateChunkRanges(edits []Line, contextLines int) []chunkRange {
 		contextLines = 0
 	}
 
-	// Handle empty input case
+	// Handle empty edits case.
 	if len(edits) == 0 {
 		return []chunkRange{}
 	}
 
+	// Find the indices of the lines that are not equal (i.e., changes).
 	changeIndices := findChangeIndices(edits)
+
+	// If there are no changes and contextLines is 0, return an empty slice.  Otherwise, return a single chunk of the entire edit.
 	if len(changeIndices) == 0 {
 		if contextLines > 0 {
 			return []chunkRange{{start: 0, end: len(edits), isNewGroup: false}}
@@ -26,7 +31,7 @@ func calculateChunkRanges(edits []Line, contextLines int) []chunkRange {
 		return []chunkRange{}
 	}
 
-	// Handle context=0 case
+	// If context is 0, then simply generate a chunk for each diff.
 	if contextLines == 0 {
 		ranges := make([]chunkRange, 0, len(changeIndices))
 		for _, idx := range changeIndices {
@@ -35,10 +40,25 @@ func calculateChunkRanges(edits []Line, contextLines int) []chunkRange {
 		return ranges
 	}
 
-	// Group changes that are close based on contextLines
+	// Group the change indices based on the context lines.
 	groups := groupIndices(changeIndices, contextLines*2)
 
-	// Create initial ranges without merging
+	// Create chunk ranges from the grouped change indices.
+	ranges := createChunkRanges(edits, groups, contextLines)
+
+	// Merge overlapping chunk ranges to form larger chunks.
+	mergedRanges := mergeChunkRanges(ranges)
+
+	// Post-process to ensure groups are properly marked
+	for i := 1; i < len(mergedRanges); i++ {
+		mergedRanges[i].isNewGroup = true
+	}
+
+	return mergedRanges
+}
+
+// createChunkRanges creates ChunkRange structs from grouped change indices.
+func createChunkRanges(edits []Line, groups [][]int, contextLines int) []chunkRange {
 	ranges := make([]chunkRange, 0, len(groups))
 	for i, group := range groups {
 		firstChange := group[0]
@@ -50,38 +70,40 @@ func calculateChunkRanges(edits []Line, contextLines int) []chunkRange {
 		isNew := i > 0
 		ranges = append(ranges, chunkRange{start: startIdx, end: endIdx, isNewGroup: isNew})
 	}
+	return ranges
+}
 
-	// Return early if no merging needed
+// mergeChunkRanges merges overlapping ChunkRange structs.
+func mergeChunkRanges(ranges []chunkRange) []chunkRange {
 	if len(ranges) <= 1 {
 		return ranges
 	}
 
-	// Process ranges to merge only when necessary while preserving group structure
-	result := make([]chunkRange, 0, len(ranges))
+	// Sort ranges by start index to enable merging.
+	sort.Slice(ranges, func(i, j int) bool {
+		return ranges[i].start < ranges[j].start
+	})
+
+	mergedRanges := make([]chunkRange, 0, len(ranges))
 	current := ranges[0]
 
 	for i := 1; i < len(ranges); i++ {
 		next := ranges[i]
 
 		// If ranges overlap significantly (more than just touching at edges)
-		if next.start < current.end-contextLines {
+		if next.start < current.end {
 			// Merge the ranges
 			current.end = max(current.end, next.end)
 		} else {
 			// Add current range and start new one
-			result = append(result, current)
+			mergedRanges = append(mergedRanges, current)
 			current = next
 		}
 	}
 	// Add the final range
-	result = append(result, current)
+	mergedRanges = append(mergedRanges, current)
 
-	// Post-process to ensure groups are properly marked
-	for i := 1; i < len(result); i++ {
-		result[i].isNewGroup = true
-	}
-
-	return result
+	return mergedRanges
 }
 
 // findChangeIndices returns the indices of non-Equal edits.
@@ -118,26 +140,4 @@ func groupIndices(indices []int, maxGap int) [][]int {
 	groups = append(groups, currentGroup)
 
 	return groups
-}
-
-// calculateStartLinesForIndex determines the original a and b line numbers
-// corresponding to the start of the edit at the given targetIndex.
-func calculateStartLinesForIndex(edits []Line, targetIndex int) (aLineNum, bLineNum int) {
-	aLine, bLine := 1, 1 // Start from line 1
-	for i := 0; i < targetIndex; i++ {
-		// Ensure we don't go out of bounds if targetIndex is invalid
-		if i >= len(edits) {
-			break
-		}
-		switch edits[i].Kind {
-		case Equal:
-			aLine++
-			bLine++
-		case Delete:
-			aLine++
-		case Insert:
-			bLine++
-		}
-	}
-	return aLine, bLine
 }

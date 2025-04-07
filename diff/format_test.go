@@ -382,6 +382,46 @@ func TestUnifiedFormatter_Format(t *testing.T) {
 +ins_end
 `,
 		},
+		{
+			name: "zero length hunk - pure insertion",
+			options: diff.FormatOptions{
+				ContextLines: 2,
+			},
+			edits: []diff.Line{
+				{Kind: diff.Equal, Text: "line1"},
+				{Kind: diff.Insert, Text: "inserted line 1"},
+				{Kind: diff.Insert, Text: "inserted line 2"},
+				{Kind: diff.Equal, Text: "line2"},
+			},
+			expected: `--- a
++++ b
+@@ -1,2 +1,4 @@
+ line1
++inserted line 1
++inserted line 2
+ line2
+`,
+		},
+		{
+			name: "zero length hunk - pure deletion",
+			options: diff.FormatOptions{
+				ContextLines: 2,
+			},
+			edits: []diff.Line{
+				{Kind: diff.Equal, Text: "line1"},
+				{Kind: diff.Delete, Text: "deleted line 1"},
+				{Kind: diff.Delete, Text: "deleted line 2"},
+				{Kind: diff.Equal, Text: "line2"},
+			},
+			expected: `--- a
++++ b
+@@ -1,4 +1,2 @@
+ line1
+-deleted line 1
+-deleted line 2
+ line2
+`,
+		},
 	}
 
 	for _, tt := range tests {

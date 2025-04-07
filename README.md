@@ -52,7 +52,8 @@ package mypkg
 
 ## Packages
 
-- `assert` / `require` - assertion functions
+- `assert` / `require` - test helpers for assertion
+- `diff` / `diff/myers` / `diff/simple` - generate diffs
 - `file` - file operations
 - `set` - set data structure
 - `unit` - unit formatting and conversion package

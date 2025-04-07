@@ -24,8 +24,11 @@ func (o OpKind) String() string {
 
 // Line represents a line of text in the diff with an associated operation
 type Line struct {
-	Kind OpKind // Op is the operation performed on the line
-	Text string // Text is the content of the line
+	// OpKind is the operation performed on the line
+	Kind OpKind
+
+	// Text is the content of the line
+	Text string
 }
 
 // The Differ interface defines the contract for diffing two slices of strings
@@ -35,6 +38,7 @@ type Differ interface {
 	// strings. It returns an error if invalid options are provided or diffing
 	// fails.
 	Diff(a, b string) (string, error)
+
 	// DiffStrings returns a string representation of the differences between
 	// two slices of strings. It returns an error if invalid options are
 	// provided or diffing fails.

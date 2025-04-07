@@ -35,10 +35,10 @@
 //
 // Example using the simple subpackage:
 //
-//	 import (
-//	     "fmt"
-//	     "github.com/neticdk/go-stdlib/diff/simple"
-//	 )
+//	import (
+//	    "fmt"
+//	    "github.com/neticdk/go-stdlib/diff/simple"
+//	)
 //
 //	differ := simple.NewDiffer()
 //	diff, err := differ.Diff("hello\nworld", "hello\nthere\nworld")

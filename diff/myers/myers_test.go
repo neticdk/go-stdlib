@@ -270,15 +270,14 @@ func TestWithFormatterOptions(t *testing.T) {
 	b := "line1\nnew\nline3"
 
 	tests := []struct {
-		name          string
-		options       []myers.Option
-		expected      string
-		expectedPanic bool // Not used yet, but could be for future validation tests
+		name     string
+		options  []myers.Option
+		expected string
 	}{
 		{
-			name: "Default (ContextFormatter)", // Tests the default formatter
+			name: "Default (ContextFormatter)",
 			options: []myers.Option{
-				myers.WithShowLineNumbers(false), // Simplify expected output
+				myers.WithShowLineNumbers(false),
 			},
 			expected: "  line1\n- old\n+ new\n  line3\n",
 		},
@@ -407,7 +406,11 @@ func TestLinearSpaceAlgorithmPaths(t *testing.T) {
 			name: "very small input to force n=1 or m=1 in findMiddleSnake and use linear space",
 			a:    []string{"a"},
 			b:    []string{"b", "a"},
-			opts: []myers.Option{myers.WithLinearSpace(true), myers.WithMaxEditDistance(100), myers.WithShowLineNumbers(false)}, // Force use of linear space algorithm, and allow a reasonable edit distance
+			opts: []myers.Option{
+				myers.WithLinearSpace(true),
+				myers.WithMaxEditDistance(100),
+				myers.WithShowLineNumbers(false),
+			}, // Force use of linear space algorithm, and allow a reasonable edit distance
 			desc: "should use linear space algorithm and reach n=1||m=1 in findMiddleSnake",
 		},
 		{

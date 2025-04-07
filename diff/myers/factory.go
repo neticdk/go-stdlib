@@ -11,10 +11,14 @@ func NewDiffer() diff.Differ {
 	return &differ{}
 }
 
+// Diff computes differences between two values using the Myers diff algorithm.
+// Returns an error if option validation fails.
 func (d *differ) Diff(a, b string) (string, error) {
 	return Diff(a, b)
 }
 
+// DiffStrings computes differences between string slices using the Myers diff algorithm.
+// Returns an error if option validation fails.
 func (d *differ) DiffStrings(a, b []string) (string, error) {
 	return DiffStrings(a, b)
 }
@@ -28,10 +32,14 @@ func NewCustomDiffer(opts ...Option) diff.Differ {
 	return &customDiffer{opts: opts}
 }
 
+// Diff computes differences between two values using the Myers diff algorithm.
+// Returns an error if option validation fails.
 func (d *customDiffer) Diff(a, b string) (string, error) {
 	return Diff(a, b, d.opts...)
 }
 
+// DiffStrings computes differences between string slices using the Myers diff algorithm.
+// Returns an error if option validation fails.
 func (d *customDiffer) DiffStrings(a, b []string) (string, error) {
 	return DiffStrings(a, b, d.opts...)
 }

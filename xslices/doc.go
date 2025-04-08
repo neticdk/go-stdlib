@@ -1,2 +1,2 @@
-// Package xslices provides additional functionality for working with slices.
+// Package xslices provides functionality for working with slices.
 package xslices

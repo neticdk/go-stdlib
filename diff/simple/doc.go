@@ -17,7 +17,7 @@
 //	differ := simple.NewDiffer()
 //	diff, err := differ.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
 //
-// Alternatively, you can use the Diff or DiffStrings functions directly:
+// You can also use the Diff or DiffStrings functions directly:
 //
 //	diff, err := simple.Diff("hello\nworld", "hello\nthere\nworld")
 //	diff, err := simple.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
@@ -39,7 +39,7 @@
 //
 //   - `WithContextFormatter`:  Selects the context diff format (default).
 //   - `WithUnifiedFormatter`:  Selects the unified diff format.
-//   - `WithFormatter`: Allows specifying a completely custom `Formatter` implementation.
+//   - `WithFormatter`: Allows specifying a custom `Formatter` implementation.
 //
 // Other options include:
 //
@@ -51,12 +51,12 @@
 //
 //	differ := simple.NewCustomDiffer(simple.WithUnifiedFormatter())
 //
-// Create a completely custom formatter:
+// Create a custom formatter:
 //
 //	customFormatter := &MyCustomFormatter{}  // Replace with your custom implementation
 //	differ := simple.NewCustomDiffer(simple.WithFormatter(customFormatter))
 //
-// Alternatively, you can use the Diff or DiffStrings functions directly with options:
+// You can also use the Diff or DiffStrings functions directly with options:
 //
 //	diff, err := simple.Diff("hello\nworld", "hello\nthere\nworld",
 //	       simple.WithShowLineNumbers(false))

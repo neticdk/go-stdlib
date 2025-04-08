@@ -29,7 +29,7 @@ Do *NOT* add exceptions to this list without peer review.
 - Prefix names for packages that mirror a go standard library package with `x`.
 - Prefix names for packages that are likely to mirror future go standard library
   Packages with `x`.
-- Use singular names for package (except in the previously mentioned cases).
+- Use singular names for package (except in the mentioned cases).
 
 ## Testing
 
@@ -43,7 +43,7 @@ Do *NOT* add exceptions to this list without peer review.
   instructions and usage examples.
 - Use `make gen` to generate `README.md` files
 
-### doc.go minimum
+### doc.go minimal content
 
 ```go
 // Package mypkg does ...

@@ -1,2 +1,2 @@
-// Package xjson provides additional functionality for working with json.
+// Package xjson provides functionality for working with JSON.
 package xjson

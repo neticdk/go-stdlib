@@ -2,10 +2,10 @@
 // integrate seamlessly with the Go standard testing package. It aims to improve
 // the readability and expressiveness of test code.
 //
-// It has been written as an alternative to the testify package but it is not a
+// It has been written as an alternative to the testify package but it's not a
 // drop-in replacement:
 //   - it supports most basic assertions
-//   - it is type-safe
+//   - it's type-safe
 //   - it has far less features than testify
 //   - it does not support advanced diffs - use github.com/google/go-cmp for that
 //
@@ -66,10 +66,10 @@
 // # Diffs
 //
 // The `Equal` function supports diffs when the `DiffsEnabled` global variable
-// is set to true (default). This feature can be useful for debugging and understanding
-// the differences between expected and actual values. However the
-// implementation is very basic and does not support complex types or nested
-// structures. It is based on JSON serialization and comparison and thus might
+// is set to true (default). This feature can be useful for debugging and
+// understanding the differences between expected and actual values. That said,
+// the implementation is simple and does not support complex types or nested
+// structures. It's based on JSON serialization and comparison and thus might
 // fail for unexported fields, channels or functions. Diff output uses the Myers
 // diff algorithm.
 //
@@ -82,20 +82,20 @@
 // defaults to `false`.
 //
 // Capturing stack traces incurs a performance cost due to the use of `runtime.Stack`.
-// Therefore, it is recommended to enable this feature primarily during debugging
-// sessions when the additional context of the call path is needed to understand
-// a complex failure.
+// It's recommended to enable this feature primarily during debugging sessions
+// when the context of the call path is needed to understand a complex failure.
 //
-//	// Example: Enable stack traces (e.g., in TestMain or a specific test)
+// Example: Enable stack traces (e.g., in TestMain or a specific test):
+//
 //	assert.StackTracesEnabled = true
 //	assert.Equal(t, someComplexResult(), expectedValue) // Stack trace printed if this fails
 //	assert.StackTracesEnabled = false // Optionally disable afterwards
 //
 // **Special Case: `NotPanics`**
 // Because unexpected panics are critical failures where the stack trace is essential
-// for debugging, `assert.NotPanics` (and consequently `require.NotPanics`) will
-// **always** include a filtered stack trace in the error output when a panic
-// occurs, regardless of the `StackTracesEnabled` setting.
+// for debugging, `assert.NotPanics` (and `require.NotPanics`) will **always**
+// include a filtered stack trace in the error output when a panic occurs,
+// regardless of the `StackTracesEnabled` setting.
 //
 // The generated stack trace is filtered to remove internal frames from the Go
 // runtime, testing framework, and the assertion library itself, focusing on
@@ -103,7 +103,7 @@
 //
 // # Assertions
 //
-// Assertions accept a testing.T interface, the value(s) being tested, and
+// All assertions accept a `testing.T` interface, the value(s) being tested, and
 // optional message arguments. They report failures using t.Errorf.
 //
 // # Error reporting

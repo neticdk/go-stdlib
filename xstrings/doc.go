@@ -1,2 +1,2 @@
-// Package xstrings provides additional functions for working with strings.
+// Package xstrings provides functionality for working with strings.
 package xstrings

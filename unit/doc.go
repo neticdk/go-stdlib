@@ -26,7 +26,7 @@
 //
 // Formatting Functions:
 //
-// This package provides multiple approaches to formatting values with units:
+// This package provides approaches to formatting values with units:
 //
 // 1. Option-Based Approach (Most Flexible):
 //   - Format: Returns a Value struct that provides both the scaled value
@@ -38,7 +38,7 @@
 //	// Basic usage
 //	fmt.Println(Format(1024, Binary(), WithUnit(Byte))) // Output: 1 KiB
 //
-//	// Multiple options
+//	// Using options
 //	fmt.Println(Format(1500,
 //	    Decimal(),
 //	    WithUnit(Bit),
@@ -92,8 +92,8 @@
 // Custom Formatting Systems:
 //
 // If the standard SI (base-10) or IEC (base-2) scaling doesn't fit your needs,
-// you can define completely custom formatting systems with different boundaries
-// and prefix names/symbols.
+// you can define custom formatting systems with different boundaries and prefix
+// names/symbols.
 //
 //   - FormatSystem: Represents a custom system with its name, scaling boundaries,
 //     and prefix map.
@@ -104,7 +104,8 @@
 //
 // Example:
 //
-//	// Define a simple time formatting system (seconds, minutes, hours)
+// Define a simple time formatting system (seconds, minutes, hours):
+//
 //	timeSystem := unit.RegisterFormatSystem(
 //	    "time",
 //	    []float64{3600, 60}, // Boundaries (hour, minute)
@@ -115,7 +116,8 @@
 //	)
 //	UnitSecond := unit.MustRegister(unit.Descriptor{Symbol: "", Singular: "", Plural: "s"})
 //
-//	// Format a duration using the custom system
+// Format a duration using the custom system:
+//
 //	duration := 3725.0 // seconds
 //	fmt.Println(unit.Format(duration, unit.WithSystem(timeSystem), unit.WithUnit(UnitSecond), unit.WithPrecision(1))) // Output: 1.0 h
 //

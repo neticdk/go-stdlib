@@ -3,11 +3,12 @@
 // The Myers algorithm is an efficient method for computing the shortest edit
 // script between two sequences (typically lines of text). This implementation
 // provides both string-based and string slice-based diff functions with
-// various configuration options.
+// configuration options.
 //
 // For large inputs, a linear space variant of Myers algorithm is used to reduce
 // memory consumption.  A fallback to a simpler LCS-based algorithm is also
-// employed for extremely large inputs or when recursion depth limits are reached.
+// employed for large inputs (default > 10000 lines) or when recursion depth
+// limits (default 30) are reached.
 //
 // # Basic Usage
 //
@@ -21,7 +22,7 @@
 //	differ := myers.NewDiffer()
 //	diff, err := differ.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
 //
-// Alternatively, you can use the Diff or DiffStrings functions directly:
+// You can also use the Diff or DiffStrings functions directly:
 //
 //	diff, err := myers.Diff("hello\nworld", "hello\nthere\nworld")
 //	diff, err := myers.DiffStrings([]string{"hello", "world"}, []string{"hello", "there", "world"})
@@ -39,14 +40,15 @@
 // context for the changes. The specific formatting is handled by a `Formatter`
 // interface.
 //
-// # Configuration Options
+// # Configuration
 //
-// Several options can be used to customize the diff output and algorithm behavior.
-// Key among these is the ability to select a `Formatter` to control the output style:
+// Options can be used to customize the diff output and algorithm behavior. Key
+// among these is the ability to select a `Formatter` to control the output
+// style:
 //
 //   - `WithContextFormatter`:  Selects the context diff format (default).
 //   - `WithUnifiedFormatter`:  Selects the unified diff format.
-//   - `WithFormatter`: Allows specifying a completely custom `Formatter` implementation.
+//   - `WithFormatter`: Allows specifying a custom `Formatter` implementation.
 //
 // Other options include:
 //
@@ -70,18 +72,18 @@
 //
 //	differ := myers.NewCustomDiffer(myers.WithLinearSpace(true))
 //
-// Combine multiple options:
+// Combine options:
 //
 //	differ := myers.NewCustomDiffer(
 //	     myers.WithContextLines(3),
 //	     myers.WithShowLineNumbers(false))
 //
-// Create a completely custom formatter:
+// Create a custom formatter:
 //
 //	customFormatter := &MyCustomFormatter{}  // Replace with your custom implementation
 //	differ := myers.NewCustomDiffer(myers.WithFormatter(customFormatter))
 //
-// Alternatively, you can use the Diff or DiffStrings functions directly with options:
+// You can also use the Diff or DiffStrings functions directly with options:
 //
 //	// With strings:
 //	diff, err := myers.Diff("hello\nworld", "hello\nthere\nworld",
@@ -105,14 +107,16 @@
 //
 // This implementation uses the following strategies:
 //   - Myers' greedy algorithm for finding the shortest edit script.
-//   - A linear space variant of Myers' algorithm (Hirschberg's algorithm principle) to reduce memory usage for large inputs.
-//   - A fallback to a simpler LCS-based algorithm (implemented in the internal/diffcore package) for extremely large edit distances,
-//     very large inputs, or when linear space recursion depth limits are reached.
-//   - Context-aware output formatting similar to unified diff format.
+//   - A linear space variant of Myers' algorithm (Hirschberg's algorithm
+//     principle) to reduce memory usage for large inputs.
+//   - A fallback to a simpler LCS-based algorithm (implemented in the
+//     internal/diffcore package) for large edit distances, large
+//     inputs, or when linear space recursion depth limits are reached.
+//   - Context-aware output formatting.
 //
-// The time complexity is typically O(ND) where N is the sum of input lengths and D is the
-// size of the minimum edit script. However, the fallback to the LCS-based algorithm
-// results in O(N*M) time complexity in certain cases.
+// The time complexity is typically O(ND) where N is the sum of input lengths
+// and D is the size of the minimum edit script, but the fallback to the
+// LCS-based algorithm results in O(N*M) time complexity in certain cases.
 //
 // Space complexity varies depending on the chosen algorithm variant:
 //   - O(N) for the linear space algorithm.

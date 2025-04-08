@@ -1,3 +1,2 @@
+// Package xjson provides functionality for working with JSON.
 package xjson
-
-//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md

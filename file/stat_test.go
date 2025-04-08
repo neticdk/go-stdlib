@@ -6,19 +6,20 @@ import (
 	"path/filepath"
 	"syscall"
 	"testing"
+
+	"github.com/neticdk/go-stdlib/assert"
+	"github.com/neticdk/go-stdlib/require"
 )
 
 func TestExists(t *testing.T) {
 	// Create temporary test files/directories
 	tmpDir := t.TempDir()
 	regularFile := filepath.Join(tmpDir, "regular.txt")
-	if err := os.WriteFile(regularFile, []byte("test"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	err := os.WriteFile(regularFile, []byte("test"), 0o644)
+	require.NoError(t, err)
 	subDir := filepath.Join(tmpDir, "subdir")
-	if err := os.Mkdir(subDir, 0755); err != nil {
-		t.Fatal(err)
-	}
+	err = os.Mkdir(subDir, 0o755)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -49,19 +50,19 @@ func TestExists(t *testing.T) {
 			want:    false,
 			wantErr: true,
 			setup: func() error {
-				if err := os.Mkdir(filepath.Join(tmpDir, "noperm"), 0755); err != nil {
+				if err := os.Mkdir(filepath.Join(tmpDir, "noperm"), 0o755); err != nil {
 					return err
 				}
-				if err := os.WriteFile(filepath.Join(tmpDir, "noperm", "test.txt"), []byte("test"), 0000); err != nil {
+				if err := os.WriteFile(filepath.Join(tmpDir, "noperm", "test.txt"), []byte("test"), 0o000); err != nil {
 					return err
 				}
-				if err := os.Chmod(filepath.Join(tmpDir, "noperm"), 0000); err != nil {
+				if err := os.Chmod(filepath.Join(tmpDir, "noperm"), 0o000); err != nil {
 					return err
 				}
 				return nil
 			},
 			teardown: func() error {
-				if err := os.Chmod(filepath.Join(tmpDir, "noperm"), 0755); err != nil {
+				if err := os.Chmod(filepath.Join(tmpDir, "noperm"), 0o755); err != nil {
 					return err
 				}
 				return os.RemoveAll(filepath.Join(tmpDir, "noperm"))
@@ -81,7 +82,7 @@ func TestExists(t *testing.T) {
 			path: filepath.Join(tmpDir, "pipe"),
 			want: true,
 			setup: func() error {
-				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0o644)
 			},
 		},
 		{
@@ -89,7 +90,7 @@ func TestExists(t *testing.T) {
 			path: filepath.Join(tmpDir, "chardev"),
 			want: true,
 			setup: func() error {
-				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0o644, 0)
 			},
 		},
 	}
@@ -103,18 +104,14 @@ func TestExists(t *testing.T) {
 			}
 
 			got, err := Exists(tt.path)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Exists() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			if !tt.wantErr {
+				assert.NoError(t, err, "Exists()/%q", tt.name)
 			}
-			if got != tt.want {
-				t.Errorf("Exists() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, got, tt.want, "Exists()/%q", tt.name)
 
 			if tt.teardown != nil {
-				if err := tt.teardown(); err != nil {
-					t.Fatal(err)
-				}
+				err := tt.teardown()
+				require.NoError(t, err, "teardown/%q", tt.name)
 			}
 		})
 	}
@@ -124,13 +121,11 @@ func TestIsDir(t *testing.T) {
 	// Create temporary test files/directories
 	tmpDir := t.TempDir()
 	regularFile := filepath.Join(tmpDir, "regular.txt")
-	if err := os.WriteFile(regularFile, []byte("test"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	err := os.WriteFile(regularFile, []byte("test"), 0o644)
+	require.NoError(t, err)
 	subDir := filepath.Join(tmpDir, "subdir")
-	if err := os.Mkdir(subDir, 0755); err != nil {
-		t.Fatal(err)
-	}
+	err = os.Mkdir(subDir, 0o755)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name  string
@@ -175,7 +170,7 @@ func TestIsDir(t *testing.T) {
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
 			setup: func() error {
-				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0o644)
 			},
 		},
 		{
@@ -183,7 +178,7 @@ func TestIsDir(t *testing.T) {
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
 			setup: func() error {
-				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0o644, 0)
 			},
 		},
 	}
@@ -196,9 +191,8 @@ func TestIsDir(t *testing.T) {
 				}
 			}
 
-			if got := IsDir(tt.path); got != tt.want {
-				t.Errorf("IsDir() = %v, want %v", got, tt.want)
-			}
+			got := IsDir(tt.path)
+			assert.Equal(t, got, tt.want, "IsDir()/%q", tt.name)
 		})
 	}
 }
@@ -207,13 +201,11 @@ func TestIsRegular(t *testing.T) {
 	// Create temporary test files/directories
 	tmpDir := t.TempDir()
 	regularFile := filepath.Join(tmpDir, "regular.txt")
-	if err := os.WriteFile(regularFile, []byte("test"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	err := os.WriteFile(regularFile, []byte("test"), 0o644)
+	require.NoError(t, err)
 	subDir := filepath.Join(tmpDir, "subdir")
-	if err := os.Mkdir(subDir, 0755); err != nil {
-		t.Fatal(err)
-	}
+	err = os.Mkdir(subDir, 0o755)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name  string
@@ -258,7 +250,7 @@ func TestIsRegular(t *testing.T) {
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
 			setup: func() error {
-				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0o644)
 			},
 		},
 		{
@@ -266,7 +258,7 @@ func TestIsRegular(t *testing.T) {
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
 			setup: func() error {
-				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0o644, 0)
 			},
 		},
 	}
@@ -279,9 +271,8 @@ func TestIsRegular(t *testing.T) {
 				}
 			}
 
-			if got := IsRegular(tt.path); got != tt.want {
-				t.Errorf("IsRegular() = %v, want %v", got, tt.want)
-			}
+			got := IsRegular(tt.path)
+			assert.Equal(t, got, tt.want, "IsRegular()/%q", tt.name)
 		})
 	}
 }
@@ -290,13 +281,11 @@ func TestIsSymlink(t *testing.T) {
 	// Create temporary test files/directories
 	tmpDir := t.TempDir()
 	regularFile := filepath.Join(tmpDir, "regular.txt")
-	if err := os.WriteFile(regularFile, []byte("test"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	err := os.WriteFile(regularFile, []byte("test"), 0o644)
+	require.NoError(t, err)
 	subDir := filepath.Join(tmpDir, "subdir")
-	if err := os.Mkdir(subDir, 0755); err != nil {
-		t.Fatal(err)
-	}
+	err = os.Mkdir(subDir, 0o755)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name  string
@@ -341,7 +330,7 @@ func TestIsSymlink(t *testing.T) {
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
 			setup: func() error {
-				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0o644)
 			},
 		},
 		{
@@ -349,7 +338,7 @@ func TestIsSymlink(t *testing.T) {
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
 			setup: func() error {
-				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0o644, 0)
 			},
 		},
 	}
@@ -362,9 +351,8 @@ func TestIsSymlink(t *testing.T) {
 				}
 			}
 
-			if got := IsSymlink(tt.path); got != tt.want {
-				t.Errorf("IsSymlink() = %v, want %v", got, tt.want)
-			}
+			got := IsSymlink(tt.path)
+			assert.Equal(t, got, tt.want, "IsSymlink()/%q", tt.name)
 		})
 	}
 }
@@ -373,13 +361,11 @@ func TestIsSocket(t *testing.T) {
 	// Create temporary test files/directories
 	tmpDir := t.TempDir()
 	regularFile := filepath.Join(tmpDir, "regular.txt")
-	if err := os.WriteFile(regularFile, []byte("test"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	err := os.WriteFile(regularFile, []byte("test"), 0o644)
+	require.NoError(t, err)
 	subDir := filepath.Join(tmpDir, "subdir")
-	if err := os.Mkdir(subDir, 0755); err != nil {
-		t.Fatal(err)
-	}
+	err = os.Mkdir(subDir, 0o755)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name  string
@@ -424,7 +410,7 @@ func TestIsSocket(t *testing.T) {
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
 			setup: func() error {
-				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0o644)
 			},
 		},
 		{
@@ -432,7 +418,7 @@ func TestIsSocket(t *testing.T) {
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
 			setup: func() error {
-				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0o644, 0)
 			},
 		},
 	}
@@ -445,9 +431,8 @@ func TestIsSocket(t *testing.T) {
 				}
 			}
 
-			if got := IsSocket(tt.path); got != tt.want {
-				t.Errorf("IsFile() = %v, want %v", got, tt.want)
-			}
+			got := IsSocket(tt.path)
+			assert.Equal(t, got, tt.want, "IsSocket()/%q", tt.name)
 		})
 	}
 }
@@ -456,13 +441,11 @@ func TestIsNamedPipe(t *testing.T) {
 	// Create temporary test files/directories
 	tmpDir := t.TempDir()
 	regularFile := filepath.Join(tmpDir, "regular.txt")
-	if err := os.WriteFile(regularFile, []byte("test"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	err := os.WriteFile(regularFile, []byte("test"), 0o644)
+	require.NoError(t, err)
 	subDir := filepath.Join(tmpDir, "subdir")
-	if err := os.Mkdir(subDir, 0755); err != nil {
-		t.Fatal(err)
-	}
+	err = os.Mkdir(subDir, 0o755)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name  string
@@ -507,7 +490,7 @@ func TestIsNamedPipe(t *testing.T) {
 			path: filepath.Join(tmpDir, "pipe"),
 			want: true,
 			setup: func() error {
-				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0o644)
 			},
 		},
 		{
@@ -515,7 +498,7 @@ func TestIsNamedPipe(t *testing.T) {
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
 			setup: func() error {
-				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0o644, 0)
 			},
 		},
 	}
@@ -528,9 +511,8 @@ func TestIsNamedPipe(t *testing.T) {
 				}
 			}
 
-			if got := IsNamedPipe(tt.path); got != tt.want {
-				t.Errorf("IsFile() = %v, want %v", got, tt.want)
-			}
+			got := IsNamedPipe(tt.path)
+			assert.Equal(t, got, tt.want, "IsNamedPipe()/%q", tt.name)
 		})
 	}
 }
@@ -539,13 +521,11 @@ func TestIsDevice(t *testing.T) {
 	// Create temporary test files/directories
 	tmpDir := t.TempDir()
 	regularFile := filepath.Join(tmpDir, "regular.txt")
-	if err := os.WriteFile(regularFile, []byte("test"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	err := os.WriteFile(regularFile, []byte("test"), 0o644)
+	require.NoError(t, err)
 	subDir := filepath.Join(tmpDir, "subdir")
-	if err := os.Mkdir(subDir, 0755); err != nil {
-		t.Fatal(err)
-	}
+	err = os.Mkdir(subDir, 0o755)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name  string
@@ -590,7 +570,7 @@ func TestIsDevice(t *testing.T) {
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
 			setup: func() error {
-				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0o644)
 			},
 		},
 		{
@@ -598,7 +578,7 @@ func TestIsDevice(t *testing.T) {
 			path: filepath.Join(tmpDir, "chardev"),
 			want: true,
 			setup: func() error {
-				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0o644, 0)
 			},
 		},
 	}
@@ -611,9 +591,8 @@ func TestIsDevice(t *testing.T) {
 				}
 			}
 
-			if got := IsDevice(tt.path); got != tt.want {
-				t.Errorf("IsFile() = %v, want %v", got, tt.want)
-			}
+			got := IsDevice(tt.path)
+			assert.Equal(t, got, tt.want, "IsDevice()/%q", tt.name)
 		})
 	}
 }
@@ -622,13 +601,11 @@ func TestIsFile(t *testing.T) {
 	// Create temporary test files/directories
 	tmpDir := t.TempDir()
 	regularFile := filepath.Join(tmpDir, "regular.txt")
-	if err := os.WriteFile(regularFile, []byte("test"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	err := os.WriteFile(regularFile, []byte("test"), 0o644)
+	require.NoError(t, err)
 	subDir := filepath.Join(tmpDir, "subdir")
-	if err := os.Mkdir(subDir, 0755); err != nil {
-		t.Fatal(err)
-	}
+	err = os.Mkdir(subDir, 0o755)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name  string
@@ -673,7 +650,7 @@ func TestIsFile(t *testing.T) {
 			path: filepath.Join(tmpDir, "pipe"),
 			want: true,
 			setup: func() error {
-				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0o644)
 			},
 		},
 		{
@@ -681,7 +658,7 @@ func TestIsFile(t *testing.T) {
 			path: filepath.Join(tmpDir, "chardev"),
 			want: true,
 			setup: func() error {
-				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0o644, 0)
 			},
 		},
 	}
@@ -694,9 +671,8 @@ func TestIsFile(t *testing.T) {
 				}
 			}
 
-			if got := IsFile(tt.path); got != tt.want {
-				t.Errorf("IsFile() = %v, want %v", got, tt.want)
-			}
+			got := IsFile(tt.path)
+			assert.Equal(t, got, tt.want, "IsFile()/%q", tt.name)
 		})
 	}
 }

@@ -1,8 +1,9 @@
 package xslices
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestFold(t *testing.T) {
@@ -57,9 +58,7 @@ func TestFold(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			actual := Fold(tt.acc, tt.data, tt.f)
-			if !reflect.DeepEqual(actual, tt.expected) {
-				t.Errorf("expected %d, got %d", tt.expected, actual)
-			}
+			assert.Equal(t, actual, tt.expected, "Fold/%q", tt.name)
 		})
 	}
 }
@@ -116,9 +115,7 @@ func TestFoldR(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			actual := FoldR(tt.acc, tt.data, tt.f)
-			if !reflect.DeepEqual(actual, tt.expected) {
-				t.Errorf("expected %d, got %d", tt.expected, actual)
-			}
+			assert.Equal(t, actual, tt.expected, "FoldR/%q", tt.name)
 		})
 	}
 }

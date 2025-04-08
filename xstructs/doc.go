@@ -1,3 +1,2 @@
+// Package xstructs provides functionality for working with structs.
 package xstructs
-
-//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md

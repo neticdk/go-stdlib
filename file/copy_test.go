@@ -5,14 +5,33 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/neticdk/go-stdlib/assert"
+	"github.com/neticdk/go-stdlib/require"
 )
 
 func TestCopyFile(t *testing.T) {
+	srcFile := "test_src_file.txt"
+	dstFile := "test_dst_file.txt"
+	content := []byte("Hello, World!")
+
+	// Create source file
+	err := os.WriteFile(srcFile, content, 0o640)
+	require.NoError(t, err, "creating source file")
+	defer os.Remove(srcFile)
+	defer os.Remove(dstFile)
+
+	// Copy file
+	err = Copy(srcFile, dstFile)
+	require.NoError(t, err)
+
+	// Verify content
+	dstContent, err := os.ReadFile(dstFile)
+	require.NoError(t, err, "reading destination file")
+	assert.Equal(t, string(content), string(dstContent), "content mismatch")
+
 	testDir := "go-stdlib-test-copy"
-	if err := os.MkdirAll(testDir, os.ModePerm); err != nil {
-		t.Error(err)
-	}
+	err = os.MkdirAll(testDir, os.ModePerm)
+  require.NoError(t, err, "creating test directory")
 	defer func() { _ = os.RemoveAll(testDir) }()
 
 	tests := []struct {
@@ -79,34 +98,27 @@ func TestCopyFile(t *testing.T) {
 
 func TestCopyDirectory(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "go-common-test-")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	srcDir := filepath.Join(tmpDir, "src")
 	dstDir := filepath.Join(tmpDir, "dst")
 	fileContent := []byte("Hello, Directory!")
 	defer os.RemoveAll(tmpDir)
 
 	// Create source directory and file
-	if err := os.Mkdir(srcDir, 0o750); err != nil {
-		t.Fatalf("creating source directory: %v", err)
-	}
+	err = os.Mkdir(srcDir, 0o750)
+	require.NoError(t, err, "creating source directory")
 
 	srcFile := filepath.Join(srcDir, "file.txt")
-	if err := os.WriteFile(srcFile, fileContent, 0o640); err != nil {
-		t.Fatalf("creating source file: %v", err)
-	}
+	err = os.WriteFile(srcFile, fileContent, 0o640)
+	require.NoError(t, err, "creating source file")
 
 	// Copy directory
-	if err := CopyDirectory(srcDir, dstDir); err != nil {
-		t.Fatalf("copying directory: %v", err)
-	}
+	err = CopyDirectory(srcDir, dstDir)
+	require.NoError(t, err)
 
 	// Verify content
 	dstFile := filepath.Join(dstDir, "file.txt")
 	dstContent, err := os.ReadFile(dstFile)
-	if err != nil {
-		t.Fatalf("reading destination file: %v", err)
-	}
-	if string(dstContent) != string(fileContent) {
-		t.Fatalf("content mismatch: expected %s, got %s", string(fileContent), string(dstContent))
-	}
+	require.NoError(t, err, "reading destination file")
+	assert.Equal(t, string(dstContent), string(fileContent), "content mismatch")
 }

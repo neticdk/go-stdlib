@@ -12,7 +12,7 @@
 //
 // The transliteration tables are based on the tables used here
 // https://github.com/mozillazg/go-unidecode but they have been modified
-// to include additional characters and improve accuracy.
+// to include characters and improve accuracy.
 //
 // Currently supports Unicode BMP (U+0000-U+FFFF) and some supplementary planes:
 //   - x1d4: Mathematical Alphanumeric Symbols
@@ -31,13 +31,13 @@
 // # Cache Behavior
 //
 // The package maintains a cache of up to 1000 character translations.
-// When the cache becomes full, it is completely cleared. This approach
-// favors simplicity over granular eviction but may affect performance
-// for workloads with highly varying character sets.
+// When the cache becomes full, it's cleared. This approach favors simplicity
+// over granular eviction but may affect performance for workloads with highly
+// varying character sets.
 //
 // # Configuration
 //
-// The package can be configured using the Configure function with various options:
+// The package can be configured using the Configure function with options:
 //
 // Cache size (default 1000 entries):
 //
@@ -47,7 +47,7 @@
 //
 //	transliterate.Configure(transliterate.WithMaxInputLength(1 << 24)) // 16MB
 //
-// Multiple options can be combined:
+// Options can be combined:
 //
 //	transliterate.Configure(
 //	    transliterate.WithMaxCacheSize(5000),
@@ -65,8 +65,6 @@
 //
 // Examples:
 //
-//	ascii := transliterate.String("これはひらがなです") // Output: "korehahiraganadesu"
-//	ascii := transliterate.String("你好，世界") // Output: "Ni Hao, Shi Jie" (Depends on table)
+//	transliterate.String("これはひらがなです") // Output: "korehahiraganadesu"
+//	transliterate.String("你好，世界") // Output: "Ni Hao, Shi Jie" (Depends on table)
 package transliterate
-
-//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md

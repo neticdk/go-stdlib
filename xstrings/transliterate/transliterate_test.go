@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestTransliterate(t *testing.T) {
@@ -206,7 +206,7 @@ func TestTransliterate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := String(tt.input)
-			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, result, tt.expected, "Transliteration mismatch/%q", tt.name)
 		})
 	}
 }
@@ -248,11 +248,11 @@ func TestWithLimit(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := WithLimit(tt.input)
 			if tt.expectError {
-				assert.Error(t, err)
-				assert.Empty(t, result)
+				assert.NotNil(t, err, "WithLimit/%q", tt.name)
+				assert.Empty(t, result, "WithLimit/%q", tt.name)
 			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expected, result)
+				assert.NoError(t, err, "WithLimit/%q", tt.name)
+				assert.Equal(t, result, tt.expected, "WithLimit/%q", tt.name)
 			}
 		})
 	}

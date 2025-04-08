@@ -3,7 +3,7 @@ package xslices
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/neticdk/go-stdlib/assert"
 )
 
 func TestFindFunc(t *testing.T) {
@@ -39,15 +39,15 @@ func TestFindFunc(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			actual, found := FindFunc(tc.haystack, tc.f)
-			assert.Equal(t, tc.expected, actual)
-			assert.Equal(t, tc.found, found)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual, found := FindFunc(tt.haystack, tt.f)
+			assert.Equal(t, actual, tt.expected, "FindFunc/%q", tt.name)
+			assert.Equal(t, found, tt.found, "FindFunc/%q", tt.name)
 
-			actualPtr, foundPtr := FindFunc(tc.haystack, tc.f)
-			assert.Equal(t, tc.expected, actualPtr)
-			assert.Equal(t, tc.found, foundPtr)
+			actualPtr, foundPtr := FindFunc(tt.haystack, tt.f)
+			assert.Equal(t, actualPtr, tt.expected, "FindFunc/%q", tt.name)
+			assert.Equal(t, foundPtr, tt.found, "FindFunc/%q", tt.name)
 		})
 	}
 }
@@ -86,9 +86,8 @@ func TestFindIFunc(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			index, found := FindIFunc(tt.data, tt.predicate)
-			if index != tt.expectedIndex || found != tt.expectedFound {
-				t.Errorf("FindIFunc() = (%d, %v), want (%d, %v)", index, found, tt.expectedIndex, tt.expectedFound)
-			}
+			assert.Equal(t, index, tt.expectedIndex, "FindIFunc/%q", tt.name)
+			assert.Equal(t, found, tt.expectedFound, "FindIFunc/%q", tt.name)
 		})
 	}
 }

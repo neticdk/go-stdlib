@@ -17,7 +17,6 @@ use any external dependencies unless listed below.
 Exceptions:
 
 - `golang.org/x/*` - maintained by go and dependency free
-- `github.com/stretchr/testify` - used for testing
 
 CI checks the imports against regular expressions found in the
 `.allowed-imports` file. To allow new imports, add them to the
@@ -30,7 +29,7 @@ Do *NOT* add exceptions to this list without peer review.
 - Prefix names for packages that mirror a go standard library package with `x`.
 - Prefix names for packages that are likely to mirror future go standard library
   Packages with `x`.
-- Use singular names for package (except in the previously mentioned cases).
+- Use singular names for package (except in the mentioned cases).
 
 ## Testing
 
@@ -44,17 +43,17 @@ Do *NOT* add exceptions to this list without peer review.
   instructions and usage examples.
 - Use `make gen` to generate `README.md` files
 
-### doc.go minimum
+### doc.go minimal content
 
 ```go
 // Package mypkg does ...
 package mypkg
-
-//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md
 ```
 
 ## Packages
 
+- `assert` / `require` - test helpers for assertion
+- `diff` / `diff/myers` / `diff/simple` - generate diffs
 - `file` - file operations
 - `set` - set data structure
 - `unit` - unit formatting and conversion package

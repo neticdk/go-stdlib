@@ -1,3 +1,2 @@
+// Package xslices provides functionality for working with slices.
 package xslices
-
-//go:generate go tool github.com/princjef/gomarkdoc/cmd/gomarkdoc -o README.md

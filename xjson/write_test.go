@@ -10,7 +10,7 @@ import (
 func TestPrettyPrintJSON(t *testing.T) {
 	t.Run("valid JSON", func(t *testing.T) {
 		input := []byte(`{"name": "John", "age": 30}`)
-		expected := "{\n  \"name\": \"John\",\n  \"age\": 30\n}\n"
+		expected := "{\n    \"name\": \"John\",\n    \"age\": 30\n}\n"
 		var output bytes.Buffer
 		err := PrettyPrintJSON(input, &output)
 		assert.NoError(t, err)

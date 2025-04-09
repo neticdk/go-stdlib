@@ -10,7 +10,7 @@ import (
 // PrettyPrintJSON pretty prints JSON
 func PrettyPrintJSON(body []byte, writer io.Writer) error {
 	var prettyJSON bytes.Buffer
-	err := json.Indent(&prettyJSON, body, "", "  ")
+	err := json.Indent(&prettyJSON, body, "", "    ")
 	if err != nil {
 		return err
 	}

@@ -13,7 +13,7 @@ var tagCategories = []string{"json", "yaml"}
 
 func WithTags(tags ...string) toMapOptions {
 	return func(h *handler) {
-		h.tags = append(h.tags, tags...)
+		h.tags = tags
 	}
 }
 

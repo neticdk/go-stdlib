@@ -11,6 +11,30 @@ import (
 // tagCategories is a list of tag categories to check for.
 var tagCategories = []string{"json", "yaml"}
 
+func WithTags(tags ...string) toMapOptions {
+	return func(h *handler) {
+		h.tags = append(h.tags, tags...)
+	}
+}
+
+type toMapOptions func(*handler)
+
+type handler struct {
+	tags []string
+}
+
+func newHandler(opts ...toMapOptions) *handler {
+	h := &handler{
+		tags: tagCategories,
+	}
+
+	for _, opt := range opts {
+		opt(h)
+	}
+
+	return h
+}
+
 // ToMap converts a struct or map to a map[string]any.
 // It handles nested structs, maps, and slices.
 // It uses the "json" and "yaml" tags to determine the key names.
@@ -20,11 +44,13 @@ var tagCategories = []string{"json", "yaml"}
 //
 // If the input is nil, it returns nil.
 // If the input is not a struct or map, it returns an error.
-func ToMap(obj any) (map[string]any, error) {
+func ToMap(obj any, opts ...toMapOptions) (map[string]any, error) {
+	handler := newHandler(opts...)
+
 	if obj == nil {
 		return nil, nil
 	}
-	res := handle(obj)
+	res := handler.handle(obj)
 	if v, ok := res.(map[string]any); ok {
 		return v, nil
 	}
@@ -33,7 +59,7 @@ func ToMap(obj any) (map[string]any, error) {
 
 // handle is a helper function that recursively handles
 // the conversion of structs, maps, and slices to a map[string]any.
-func handle(obj any) any {
+func (h *handler) handle(obj any) any {
 	if obj == nil {
 		return nil
 	}
@@ -45,11 +71,11 @@ func handle(obj any) any {
 
 	switch val.Kind() {
 	case reflect.Map:
-		return handleMap(obj)
+		return h.handleMap(obj)
 	case reflect.Struct:
-		return handleStruct(obj)
+		return h.handleStruct(obj)
 	case reflect.Slice:
-		return handleSlice(obj)
+		return h.handleSlice(obj)
 	default:
 		return obj
 	}
@@ -57,7 +83,7 @@ func handle(obj any) any {
 
 // handleStruct handles the conversion of a struct to a map[string]any.
 // It uses the "json" and "yaml" tags to determine the key names.
-func handleStruct(obj any) any {
+func (h *handler) handleStruct(obj any) any {
 	res := map[string]any{}
 	val := reflect.ValueOf(obj)
 	if val.Kind() == reflect.Ptr {
@@ -74,7 +100,7 @@ func handleStruct(obj any) any {
 
 		name := field.Name
 		value := val.Field(i)
-		tagName, tagOpts := getTag(field)
+		tagName, tagOpts := h.getTag(field)
 		if tagName != "" {
 			name = tagName
 		}
@@ -105,7 +131,7 @@ func handleStruct(obj any) any {
 			if _, ok := xslices.FindFunc(tagOpts, func(s string) bool {
 				return s == "inline"
 			}); ok {
-				if nestedValues, ok := handle(value.Interface()).(map[string]any); ok {
+				if nestedValues, ok := h.handle(value.Interface()).(map[string]any); ok {
 					for k, v := range nestedValues {
 						if _, ok := res[k]; !ok {
 							res[k] = v
@@ -116,7 +142,7 @@ func handleStruct(obj any) any {
 			}
 		}
 
-		res[name] = handle(value.Interface())
+		res[name] = h.handle(value.Interface())
 	}
 
 	return res
@@ -124,7 +150,7 @@ func handleStruct(obj any) any {
 
 // handleMap handles the conversion of a map to a map[string]any,
 // recursively converting nested maps, slices and structs.
-func handleMap(obj any) any {
+func (h *handler) handleMap(obj any) any {
 	m := map[string]any{}
 	val := reflect.ValueOf(obj)
 	for _, key := range val.MapKeys() {
@@ -136,18 +162,18 @@ func handleMap(obj any) any {
 		if v == nil {
 			continue
 		}
-		m[fmt.Sprintf("%v", k)] = handle(v)
+		m[fmt.Sprintf("%v", k)] = h.handle(v)
 	}
 	return m
 }
 
 // handleSlice handles the conversion of a slice to a slice of any,
 // recursively converting nested maps, slices and structs.
-func handleSlice(obj any) any {
+func (h *handler) handleSlice(obj any) any {
 	s := []any{}
 	val := reflect.ValueOf(obj)
 	for i := range val.Len() {
-		s = append(s, handle(val.Index(i).Interface()))
+		s = append(s, h.handle(val.Index(i).Interface()))
 	}
 	return s
 }
@@ -156,8 +182,8 @@ func handleSlice(obj any) any {
 // It checks for the "json" and "yaml" tags in that order.
 // If one tag is empty, it will return the other tag.
 // If both tags are empty, it returns an empty string and an empty slice.
-func getTag(field reflect.StructField) (string, []string) {
-	for _, category := range tagCategories {
+func (h *handler) getTag(field reflect.StructField) (string, []string) {
+	for _, category := range h.tags {
 		if tag := field.Tag.Get(category); tag != "" {
 			splitTag := strings.Split(tag, ",")
 			return splitTag[0], splitTag[1:]

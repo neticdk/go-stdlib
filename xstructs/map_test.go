@@ -13,6 +13,7 @@ func TestToMap(t *testing.T) {
 	tests := []struct {
 		name     string
 		data     any
+		opts     []xstructs.ToMapOptions
 		expected map[string]any
 		wantErr  bool
 	}{
@@ -244,11 +245,139 @@ func TestToMap(t *testing.T) {
 			expected: nil,
 			wantErr:  false,
 		},
+		{
+			name: "unexported field",
+			data: struct {
+				A int `json:"a"`
+				b string
+			}{
+				A: 1,
+				b: "test",
+			},
+			expected: map[string]any{
+				"a": 1,
+			},
+			wantErr: false,
+		},
+		{
+			name: "with custom tag order",
+			data: struct {
+				A int    `json:"-" yaml:"a"`
+				B string `json:"-" yaml:"b"`
+				C struct {
+					D int `json:"-" yaml:"d"`
+				} `json:"-" yaml:"c"`
+				E []string `json:"-" yaml:"e,omitempty"`
+			}{
+				A: 1,
+				B: "test",
+				C: struct {
+					D int `json:"-" yaml:"d"`
+				}{
+					D: 2,
+				},
+				E: []string{"one", "two"},
+			},
+			opts: []xstructs.ToMapOptions{
+				xstructs.WithTags("yaml", "json"),
+			},
+			expected: map[string]any{
+				"a": 1,
+				"b": "test",
+				"c": map[string]any{
+					"d": 2,
+				},
+				"e": []any{"one", "two"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "with custom tags none exist",
+			data: struct {
+				A int    `json:"-" yaml:"a"`
+				B string `json:"-" yaml:"b"`
+				C struct {
+					D int `json:"-" yaml:"d"`
+				} `json:"-" yaml:"c"`
+				E []string `json:"-" yaml:"e,omitempty"`
+			}{
+				A: 1,
+				B: "test",
+				C: struct {
+					D int `json:"-" yaml:"d"`
+				}{
+					D: 2,
+				},
+				E: []string{"one", "two"},
+			},
+			opts: []xstructs.ToMapOptions{
+				xstructs.WithTags("custom"),
+			},
+			expected: map[string]any{},
+			wantErr:  false,
+		},
+		{
+			name: "with allow no tags",
+			data: struct {
+				A int
+				B string
+			}{
+				A: 1,
+				B: "test",
+			},
+			opts: []xstructs.ToMapOptions{
+				xstructs.WithAllowNoTags(),
+			},
+			expected: map[string]any{
+				"A": 1,
+				"B": "test",
+			},
+			wantErr: false,
+		},
+		{
+			name: "with pointer value",
+			data: &struct {
+				A int `json:"a"`
+				B *struct {
+					C int `json:"c"`
+				} `json:"b"`
+			}{
+				A: 1,
+				B: &struct {
+					C int `json:"c"`
+				}{
+					C: 2,
+				},
+			},
+			expected: map[string]any{
+				"a": 1,
+				"b": map[string]any{
+					"c": 2,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "with nil pointer value",
+			data: &struct {
+				A int `json:"a"`
+				B *struct {
+					C int `json:"c"`
+				} `json:"b"`
+			}{
+				A: 1,
+				B: nil,
+			},
+			expected: map[string]any{
+				"a": 1,
+			},
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := xstructs.ToMap(tt.data)
+			got, err := xstructs.ToMap(tt.data, tt.opts...)
 			if tt.wantErr {
 				assert.Error(t, err)
 			}

@@ -114,7 +114,7 @@ func (h *handler) handle(obj any) any {
 }
 
 // handleStruct handles the conversion of a struct to a map[string]any.
-// It uses the "json" and "yaml" tags to determine the key names.
+// It uses the tags from the handler to determine the key names.
 func (h *handler) handleStruct(obj any) any {
 	res := map[string]any{}
 	val := reflect.ValueOf(obj)
@@ -222,16 +222,16 @@ func (h *handler) handleSlice(obj any) any {
 }
 
 // getTag retrieves the tag name and options from a struct field.
-// It checks for the "json" and "yaml" tags in that order.
+// It checks the tags provided by the handler one by one.
 // If one tag is empty, it will return the other tag.
-// If both tags are empty, it returns an empty string and an empty slice.
+// If all tags are empty, it returns an error.
 func (h *handler) getTag(field reflect.StructField) (*tagWrapper, error) {
 	for _, category := range h.tags {
 		if tag := field.Tag.Get(category); tag != "" {
 			splitTag := strings.Split(tag, ",")
 			// Test if tag is solitary comma, i.e. `json:","`
 			if splitTag[0] == "" && len(splitTag[1]) == 0 {
-				return nil, fmt.Errorf("no tag of %s found for field %s", strings.Join(h.tags, ", "), field.Name)
+				continue
 			}
 			return &tagWrapper{
 				Name:    splitTag[0],

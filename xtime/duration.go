@@ -60,28 +60,35 @@ const (
 
 // FormatOptions provides configuration for Format.
 type FormatOptions struct {
-	// MaxUnit is the largest time unit to display (e.g., HourNs, DayNs).
-	// Components larger than this will be represented in terms of this unit.
-	// Default: DayNs.
+	// MaxUnit is the largest time unit to display (e.g., time.Hour,
+	// xtime.Day). Components larger than this will be represented in terms of
+	// this unit.
+	// Default: xtime.Day.
 	MaxUnit time.Duration
-	// MinUnit is the smallest time unit to display (e.g., SecondNs, MillisecondNs).
-	// Any remaining duration smaller than this will be truncated or rounded depending on RoundMinUnit.
-	// Default: SecondNs.
+	// MinUnit is the smallest time unit to display (e.g., time.Second,
+	// time.Millisecond). Any remaining duration smaller than this will be
+	// truncated or rounded depending on Rounding.
+	// Default: time.Second.
 	MinUnit time.Duration
-	// Rounding enables rounding of the smallest displayed unit based on the remainder.
+	// Rounding enables rounding of the smallest displayed unit based on the
+	// remainder.
 	// If false (default), the remainder is truncated.
 	Rounding bool
-	// MaxComponents limits the maximum number of components displayed (e.g., 2 // might yield "1h 5m").
+	// MaxComponents limits the maximum number of components displayed (e.g.,
+	// 2 // might yield "1h 5m").
 	// Set to 0 or negative for unlimited components (down to MinUnit).
 	// Default: 0 (unlimited).
 	MaxComponents int
-	// Style determines the format of unit names (short, long, long-and).
+	// Style determines the format of unit names (compact, short, long,
+	// long-and).
 	// Default: FormatStyleShort.
 	Style FormatStyle
-	// Separator is the string used between components (ignored if only one component).
-	// Default: ", " for long styles, " " for short style.
+	// Separator is the string used between components (ignored if only one
+	// component).
+	// Default: ", " for long styles, " " for short style, "" for compact style.
 	Separator string
-	// Conjunction is the string used before the last component in "long-and" style.
+	// Conjunction is the string used before the last component in "long-and"
+	// style.
 	// Default: " and ".
 	Conjunction string
 }

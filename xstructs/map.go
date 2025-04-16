@@ -68,7 +68,8 @@ func newHandler(opts ...ToMapOptions) *handler {
 
 // ToMap converts a struct or map to a map[string]any.
 // It handles nested structs, maps, and slices.
-// It uses the "json" and "yaml" tags to determine the key names.
+// By default, it uses the "json" and "yaml" tags
+// to determine the key names in that order.
 // It respects the `omitempty` tag for fields.
 // It respects the `inline` tag for nested structs.
 // It respects the `-` tag to omit fields.
@@ -228,6 +229,10 @@ func (h *handler) getTag(field reflect.StructField) (*tagWrapper, error) {
 	for _, category := range h.tags {
 		if tag := field.Tag.Get(category); tag != "" {
 			splitTag := strings.Split(tag, ",")
+			// Test if tag is solitary comma, i.e. `json:","`
+			if splitTag[0] == "" && len(splitTag[1]) == 0 {
+				return nil, fmt.Errorf("no tag of %s found for field %s", strings.Join(h.tags, ", "), field.Name)
+			}
 			return &tagWrapper{
 				Name:    splitTag[0],
 				Options: splitTag[1:],

@@ -373,6 +373,16 @@ func TestToMap(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "comma in tag",
+			data: struct {
+				A int `json:","`
+			}{
+				A: 1,
+			},
+			expected: map[string]any{},
+			wantErr:  false,
+		},
 	}
 
 	for _, tt := range tests {

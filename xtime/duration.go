@@ -112,7 +112,7 @@ type FormatOption func(*FormatOptions)
 // WithMaxUnit sets the largest unit to display.
 func WithMaxUnit(unit time.Duration) FormatOption {
 	return func(o *FormatOptions) {
-		if unit > 0 {
+		if unit >= time.Nanosecond {
 			o.MaxUnit = unit
 		}
 	}

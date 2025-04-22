@@ -115,7 +115,7 @@ func parse(input string) (time.Duration, error) {
 	// Handle single number input (interpreted as seconds)
 	if len(tokens) == 1 {
 		token := tokens[0]
-		seconds, err := strconv.ParseFloat(token, float64Size)
+		seconds, err := strconv.ParseFloat(token, floatBitSize)
 		if err == nil {
 			duration = time.Duration(seconds * float64(time.Second))
 			return duration, nil
@@ -135,7 +135,7 @@ func parse(input string) (time.Duration, error) {
 		valueStr := tokens[i]
 		unitStr := tokens[i+1]
 
-		value, err := strconv.ParseFloat(valueStr, float64Size)
+		value, err := strconv.ParseFloat(valueStr, floatBitSize)
 		if err != nil {
 			msg := "expected a number"
 			return 0, newParseTokenError(input, valueStr, msg, i)

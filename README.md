@@ -57,7 +57,6 @@ package mypkg
 - `file` - file operations
 - `set` - set data structure
 - `unit` - unit formatting and conversion package
-- `version` - version functions
 - `xjson` - JSON functions
 - `xslices` - slice data type functions
 - `xstrings` - string data type functions

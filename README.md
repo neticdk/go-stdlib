@@ -11,9 +11,8 @@ comes in the form of a collection of packages.
 
 ## Dependencies
 
-The packages are dependency free meaning. Packages added to this module must not
-use any external dependencies unless listed below.
-
+The packages are dependency free, meaning they must not use any external
+dependencies unless explicitly listed.
 Exceptions:
 
 - `golang.org/x/*` - maintained by go and dependency free
@@ -28,20 +27,19 @@ Do *NOT* add exceptions to this list without peer review.
 
 - Prefix names for packages that mirror a go standard library package with `x`.
 - Prefix names for packages that are likely to mirror future go standard library
-  Packages with `x`.
+  packages with `x`.
 - Use singular names for package (except in the mentioned cases).
 
 ## Testing
 
 - Unit testing is mandatory.
-- Go for > 95% coverage, preferably 100%.
+- Go for > 90% coverage, preferably 100%.
 
 ## Documentation
 
 - Document all exported (public) identifiers
 - Maintain a `doc.go` in each package with introduction, installation
   instructions and usage examples.
-- Use `make gen` to generate `README.md` files
 
 ### doc.go minimal content
 
@@ -61,6 +59,7 @@ package mypkg
 - `xslices` - slice data type functions
 - `xstrings` - string data type functions
 - `xstructs` - struct data type functions
+- `xtime` - time functions
 
 ## Installation
 

@@ -134,13 +134,6 @@ func WithRounding() FormatOption {
 	}
 }
 
-// WithoutRounding disables rounding of the MinUnit.
-func WithoutRounding() FormatOption {
-	return func(o *FormatOptions) {
-		o.Rounding = false
-	}
-}
-
 // WithMaxComponents sets the max number of components. 0 means unlimited.
 func WithMaxComponents(p int) FormatOption {
 	return func(o *FormatOptions) {

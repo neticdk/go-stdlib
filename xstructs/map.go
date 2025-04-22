@@ -14,7 +14,7 @@ var tagCategories = []string{"json", "yaml"}
 // WithTags allows you to specify custom tag categories to check for.
 // It can be used to override the default "json" and "yaml" tags.
 // The tags are checked in the order they are provided.
-func WithTags(tags ...string) ToMapOptions {
+func WithTags(tags ...string) ToMapOption {
 	return func(h *handler) {
 		h.tags = tags
 	}
@@ -22,14 +22,14 @@ func WithTags(tags ...string) ToMapOptions {
 
 // WithAllowNoTags allows you to specify whether to allow fields without tags.
 // If used, fields without tags will be included in the output map.
-func WithAllowNoTags() ToMapOptions {
+func WithAllowNoTags() ToMapOption {
 	return func(h *handler) {
 		h.allowNoTags = true
 	}
 }
 
-// ToMapOptions is a function that modifies the handler.
-type ToMapOptions func(*handler)
+// ToMapOption is a function that modifies the handler.
+type ToMapOption func(*handler)
 
 // handler is a struct that contains the options for the ToMap function.
 // It contains a list of tags to check for and a flag to allow fields
@@ -53,7 +53,7 @@ type tagWrapper struct {
 // It also initializes the allowNoTags flag to false.
 // It can be modified using the ToMapOptions functions.
 // It returns a pointer to the handler.
-func newHandler(opts ...ToMapOptions) *handler {
+func newHandler(opts ...ToMapOption) *handler {
 	h := &handler{
 		tags:        tagCategories,
 		allowNoTags: false,
@@ -76,7 +76,7 @@ func newHandler(opts ...ToMapOptions) *handler {
 //
 // If the input is nil, it returns nil.
 // If the input is not a struct or map, it returns an error.
-func ToMap(obj any, opts ...ToMapOptions) (map[string]any, error) {
+func ToMap(obj any, opts ...ToMapOption) (map[string]any, error) {
 	handler := newHandler(opts...)
 
 	if obj == nil {

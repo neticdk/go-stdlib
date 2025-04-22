@@ -13,7 +13,7 @@ func TestToMap(t *testing.T) {
 	tests := []struct {
 		name     string
 		data     any
-		opts     []xstructs.ToMapOptions
+		opts     []xstructs.ToMapOption
 		expected map[string]any
 		wantErr  bool
 	}{
@@ -278,7 +278,7 @@ func TestToMap(t *testing.T) {
 				},
 				E: []string{"one", "two"},
 			},
-			opts: []xstructs.ToMapOptions{
+			opts: []xstructs.ToMapOption{
 				xstructs.WithTags("yaml", "json"),
 			},
 			expected: map[string]any{
@@ -310,7 +310,7 @@ func TestToMap(t *testing.T) {
 				},
 				E: []string{"one", "two"},
 			},
-			opts: []xstructs.ToMapOptions{
+			opts: []xstructs.ToMapOption{
 				xstructs.WithTags("custom"),
 			},
 			expected: map[string]any{},
@@ -325,7 +325,7 @@ func TestToMap(t *testing.T) {
 				A: 1,
 				B: "test",
 			},
-			opts: []xstructs.ToMapOptions{
+			opts: []xstructs.ToMapOption{
 				xstructs.WithAllowNoTags(),
 			},
 			expected: map[string]any{

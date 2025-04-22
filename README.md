@@ -11,8 +11,8 @@ comes in the form of a collection of packages.
 
 ## Dependencies
 
-The packages are dependency free meaning packages added to this module must not
-use any external dependencies unless listed below.
+The packages are dependency free, meaning they must not use any external
+dependencies unless explicitly listed.'
 
 Exceptions:
 

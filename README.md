@@ -12,8 +12,7 @@ comes in the form of a collection of packages.
 ## Dependencies
 
 The packages are dependency free, meaning they must not use any external
-dependencies unless explicitly listed.'
-
+dependencies unless explicitly listed.
 Exceptions:
 
 - `golang.org/x/*` - maintained by go and dependency free

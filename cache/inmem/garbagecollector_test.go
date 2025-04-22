@@ -20,7 +20,7 @@ type mockCache[K comparable, V any] struct {
 // newMockCache creates a new instance of mockCache.
 func newMockCache[K comparable, V any]() *mockCache[K, V] {
 	return &mockCache[K, V]{
-		safeMapCache: NewSafeMapCache[K, V](),
+		safeMapCache: NewSafeMap[K, V](),
 	}
 }
 

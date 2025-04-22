@@ -47,11 +47,11 @@ type safeMapCache[K comparable, V any] struct {
 	mu sync.RWMutex
 }
 
-// NewSafeMapCache creates a new instance of safeMapCache.
+// NewSafeMap creates a new instance of safeMapCache.
 // It initializes the items map and sets up the garbage collector.
 // The garbage collector is started in a separate goroutine.
 // The clock is set to the real time package by default.
-func NewSafeMapCache[K comparable, V any]() *safeMapCache[K, V] {
+func NewSafeMap[K comparable, V any]() *safeMapCache[K, V] {
 	// Create the cache instance
 	c := &safeMapCache[K, V]{
 		items: make(map[K]item[V]),

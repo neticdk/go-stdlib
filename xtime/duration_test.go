@@ -292,7 +292,7 @@ func TestYearsFromDuration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := xtime.YearsFromDuration(tt.duration)
+			got := xtime.ApproxYearsFromDuration(tt.duration)
 			assert.InDelta(t, got, tt.expected, delta)
 		})
 	}

@@ -328,7 +328,7 @@ func findUnitDef(unit time.Duration) (timeUnitDef, bool) {
 	return timeUnitDef{}, false
 }
 
-// YearsFromDuration converts a duration into an approximate number of years.
+// ApproxYearsFromDuration converts a duration into an approximate number of years.
 // It calculates this based on the average length of a year in the
 // Gregorian calendar (365.2425 days).
 //
@@ -337,7 +337,7 @@ func findUnitDef(unit time.Duration) (timeUnitDef, bool) {
 // occurrences within a specific period, or time zones. For calendar-accurate
 // differences involving years and months, use functions operating on time.Time
 // values.
-func YearsFromDuration(d time.Duration) float64 {
+func ApproxYearsFromDuration(d time.Duration) float64 {
 	return float64(d) / float64(YearApprox)
 }
 

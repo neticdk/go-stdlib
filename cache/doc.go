@@ -1,2 +1,2 @@
-// Package cache provides functionality for working with simple in-memory caches.
+// Package cache provides functionality for working with caches.
 package cache

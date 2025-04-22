@@ -5,18 +5,24 @@ import (
 	"time"
 )
 
+// GarbageCollector is an interface that defines the methods for a garbage collector.
+// It is responsible for periodically deleting expired items from the cache.
 type GarbageCollector[K comparable, V any] interface {
 	// Start begins the garbage collection process.
+	// This should be called in a separate goroutine.
+	// E.g. go gc.Start(c)
 	Start(c garbageCollection[K, V])
+
 	// Stop stops the garbage collection process.
 	Stop()
+
 	// IsActive returns true if the garbage collector is currently running.
 	IsActive() bool
 }
 
 // garbageCollector is responsible for periodically deleting expired items
-// from the cache. It runs in a separate goroutine and uses a ticker to
-// trigger the deletion process at regular intervals.
+// from the cache. It should be run in a separate goroutine.
+// It uses a ticker to trigger the deletion process at regular intervals.
 type garbageCollector[K comparable, V any] struct {
 	// active indicates whether the garbage collector is currently running.
 	active bool
@@ -32,6 +38,8 @@ type garbageCollector[K comparable, V any] struct {
 	clock Clock
 }
 
+// NewGarbageCollector creates a new garbage collector with the specified
+// interval. The interval must be greater than 0.
 func NewGarbageCollector[K comparable, V any](interval time.Duration) *garbageCollector[K, V] {
 	if interval <= 0 {
 		return nil
@@ -44,8 +52,9 @@ func NewGarbageCollector[K comparable, V any](interval time.Duration) *garbageCo
 	}
 }
 
-// start begins the garbage collection process. It runs in a separate
-// goroutine and periodically checks for expired items in the cache.
+// Start begins the garbage collection process.
+// It should be run in a separate goroutine.
+// It periodically checks for expired items in the cache.
 // When a tick happens, it calls the DeleteExpired method on the cache to
 // remove expired items.
 func (gc *garbageCollector[K, V]) Start(c garbageCollection[K, V]) {
@@ -57,6 +66,7 @@ func (gc *garbageCollector[K, V]) Start(c garbageCollection[K, V]) {
 	for {
 		select {
 		case <-ticker.C:
+			// Perform garbage collection
 			ctx, cancel := context.WithTimeout(context.Background(), gc.interval)
 			_ = c.deleteExpired(ctx)
 			cancel()
@@ -68,18 +78,19 @@ func (gc *garbageCollector[K, V]) Start(c garbageCollection[K, V]) {
 	}
 }
 
-// stopGarbageCollector stops the garbage collector by sending a signal
-// to the stop channel. This will cause the garbage collector to exit
-// its loop and stop running.
+// stopGarbageCollector stops the garbage collector by calling the Stop method.
 // It is important to call this function when the cache is no longer
 // needed to avoid resource leaks and ensure that the goroutine is
 // properly cleaned up.
 func stopGarbageCollector[K comparable, V any](gc GarbageCollector[K, V]) {
 	// Prevent panic if GC was never started
+	if gc == nil {
+		return
+	}
 	gc.Stop()
 }
 
-// stopGarbageCollector stops the garbage collector by sending a signal
+// Stop stops the garbage collector by sending a signal
 // to the stop channel. This will cause the garbage collector to exit
 // its loop and stop running.
 // It is important to call this function when the cache is no longer

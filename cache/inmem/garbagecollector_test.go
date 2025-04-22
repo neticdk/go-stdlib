@@ -6,20 +6,29 @@ import (
 	"time"
 )
 
+// mockClock is a mock implementation of the safeMapCache struct.
+// It allows for testing the calls to methods of safeMapCache
+// without using the actual implementations.
 type mockCache[K comparable, V any] struct {
+	// embeds the safeMapCache struct to inherit its methods
 	*safeMapCache[K, V]
-	called int
+
+	// counter for deleteExpired calls
+	deleteExpiredCalled int
 }
 
+// newMockCache creates a new instance of mockCache.
 func newMockCache[K comparable, V any]() *mockCache[K, V] {
 	return &mockCache[K, V]{
 		safeMapCache: NewSafeMapCache[K, V](),
 	}
 }
 
+// deleteExpired is a mock implementation of the deleteExpired method.
+// It increments the deleteExpiredCalled counter each time it is called.
 func (m *mockCache[K, V]) deleteExpired(ctx context.Context) error {
 	// Mock implementation
-	m.called++
+	m.deleteExpiredCalled++
 	return nil
 }
 
@@ -55,8 +64,8 @@ func TestGarbageCollector(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond) // Allow some time for the tick to be processed
 
-	if c.called != 1 {
-		t.Errorf("Expected DeleteExpired to be called once, got %d", c.called)
+	if c.deleteExpiredCalled != 1 {
+		t.Errorf("Expected DeleteExpired to be called once, got %d", c.deleteExpiredCalled)
 	}
 
 	// 8. Test Stopping the Garbage Collector

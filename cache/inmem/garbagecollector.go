@@ -2,6 +2,7 @@ package inmem
 
 import (
 	"context"
+	"sync"
 	"time"
 )
 
@@ -36,6 +37,9 @@ type garbageCollector[K comparable, V any] struct {
 	// clock is an interface that provides the current time and
 	// a ticker for scheduling garbage collection.
 	clock Clock
+
+	// mu is a mutex used to synchronize access to the active field.
+	mu sync.RWMutex
 }
 
 // NewGarbageCollector creates a new garbage collector with the specified
@@ -49,6 +53,7 @@ func NewGarbageCollector[K comparable, V any](interval time.Duration) *garbageCo
 		stop:     make(chan bool),
 		active:   false,
 		clock:    &realClock{},
+		mu:       sync.RWMutex{},
 	}
 }
 
@@ -61,7 +66,9 @@ func (gc *garbageCollector[K, V]) Start(c garbageCollection[K, V]) {
 	ticker := gc.clock.NewTicker(gc.interval)
 
 	defer ticker.Stop()
+	gc.mu.Lock()
 	gc.active = true
+	gc.mu.Unlock()
 
 	for {
 		select {
@@ -72,7 +79,9 @@ func (gc *garbageCollector[K, V]) Start(c garbageCollection[K, V]) {
 			cancel()
 		case <-gc.stop:
 			// Stop the garbage collector
+			gc.mu.Lock()
 			gc.active = false
+			gc.mu.Unlock()
 			return
 		}
 	}
@@ -106,5 +115,7 @@ func (gc *garbageCollector[K, V]) Stop() {
 
 // IsActive returns true if the garbage collector is currently running.
 func (gc *garbageCollector[K, V]) IsActive() bool {
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
 	return gc.active
 }

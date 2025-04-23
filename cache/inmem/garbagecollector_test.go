@@ -28,6 +28,8 @@ func newMockCache[K comparable, V any]() *mockCache[K, V] {
 // It increments the deleteExpiredCalled counter each time it is called.
 func (m *mockCache[K, V]) deleteExpired(ctx context.Context) error {
 	// Mock implementation
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.deleteExpiredCalled++
 	return nil
 }
@@ -64,8 +66,11 @@ func TestGarbageCollector(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond) // Allow some time for the tick to be processed
 
-	if c.deleteExpiredCalled != 1 {
-		t.Errorf("Expected DeleteExpired to be called once, got %d", c.deleteExpiredCalled)
+	c.mu.RLock()
+	deleteExpiredCalls := c.deleteExpiredCalled
+	c.mu.RUnlock()
+	if deleteExpiredCalls != 1 {
+		t.Errorf("Expected DeleteExpired to be called once, got %d", deleteExpiredCalls)
 	}
 
 	// 8. Test Stopping the Garbage Collector

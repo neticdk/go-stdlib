@@ -68,6 +68,16 @@ func TestToKebabCase(t *testing.T) {
 			expected: "get-http-2-data",
 		},
 		{
+			name:     "mixed case with lower s and numbers",
+			input:    "getHTTPs2Data",
+			expected: "get-https2-data",
+		},
+		{
+			name:     "mixed case with upper S and numbers",
+			input:    "getHTTPS2Data",
+			expected: "get-https-2-data",
+		},
+		{
 			name:     "consecutive separators",
 			input:    "multiple__separators",
 			expected: "multiple-separators",
@@ -331,13 +341,37 @@ func TestToDelimited(t *testing.T) {
 			name:      "with numbers",
 			input:     "user123Name",
 			delimiter: "-",
-			expected:  "user-123-name",
+			expected:  "user123-name",
 		},
 		{
 			name:      "starting with number",
 			input:     "123Test",
 			delimiter: "-",
 			expected:  "123-test",
+		},
+		{
+			name:      "leading delimiter",
+			input:     "-helloWorld",
+			delimiter: "-",
+			expected:  "hello-world",
+		},
+		{
+			name:      "trailing delimiter",
+			input:     "helloWorld-",
+			delimiter: "-",
+			expected:  "hello-world",
+		},
+		{
+			name:      "multi leading delimiter",
+			input:     "---helloWorld",
+			delimiter: "-",
+			expected:  "hello-world",
+		},
+		{
+			name:      "multi trailing delimiter",
+			input:     "helloWorld---",
+			delimiter: "-",
+			expected:  "hello-world",
 		},
 	}
 

@@ -16,7 +16,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 		transliterate bool
 	}{
 		{
-			name:          "empty_all_true",
+			name:          "empty all true",
 			input:         "",
 			expected:      "",
 			lowercase:     true,
@@ -24,7 +24,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "empty_all_true_except_transliterate",
+			name:          "empty all true except transliterate",
 			input:         "",
 			expected:      "",
 			lowercase:     true,
@@ -32,7 +32,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "empty_all_false_except_lowercase",
+			name:          "empty all false except lowercase",
 			input:         "",
 			expected:      "",
 			lowercase:     true,
@@ -40,7 +40,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "empty_all_false_except_transliterate",
+			name:          "empty all false except transliterate",
 			input:         "",
 			expected:      "",
 			lowercase:     true,
@@ -48,7 +48,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "empty_all_false",
+			name:          "empty all false",
 			input:         "",
 			expected:      "",
 			lowercase:     false,
@@ -56,7 +56,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "empty_all_false_except_transliterate",
+			name:          "empty all false except transliterate",
 			input:         "",
 			expected:      "",
 			lowercase:     false,
@@ -64,7 +64,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "empty_all_false_except_decamelize_and_transliterate",
+			name:          "empty all false except decamelize and transliterate",
 			input:         "",
 			expected:      "",
 			lowercase:     false,
@@ -72,7 +72,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "empty_all_false_except_decamelize",
+			name:          "empty all false except decamelize",
 			input:         "",
 			expected:      "",
 			lowercase:     false,
@@ -80,7 +80,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_world_all_true",
+			name:          "hello world all true",
 			input:         "hello world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -88,7 +88,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_world_all_true_except_transliterate",
+			name:          "hello world all true except transliterate",
 			input:         "hello world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -96,7 +96,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_world_all_false_except_lowercase",
+			name:          "hello world all false except lowercase",
 			input:         "hello world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -104,7 +104,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_world_all_false_except_transliterate",
+			name:          "hello world all false except transliterate",
 			input:         "hello world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -112,7 +112,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_world_all_false",
+			name:          "hello world all false",
 			input:         "hello world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -120,7 +120,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_world_all_false_except_transliterate",
+			name:          "hello world all false except transliterate",
 			input:         "hello world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -128,7 +128,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_world_all_false_except_decamelize_and_transliterate",
+			name:          "hello world all false except decamelize and transliterate",
 			input:         "hello world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -136,7 +136,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_world_all_false_except_decamelize",
+			name:          "hello world all false except decamelize",
 			input:         "hello world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -144,7 +144,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_double_space_all_true",
+			name:          "hello double space all true",
 			input:         "hello  world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -152,7 +152,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_double_space_all_true_except_transliterate",
+			name:          "hello double space all true except transliterate",
 			input:         "hello  world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -160,7 +160,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_double_space_all_false_except_lowercase",
+			name:          "hello double space all false except lowercase",
 			input:         "hello  world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -168,7 +168,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_double_space_all_false_except_transliterate",
+			name:          "hello double space all false except transliterate",
 			input:         "hello  world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -176,7 +176,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_double_space_all_false",
+			name:          "hello double space all false",
 			input:         "hello  world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -184,7 +184,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_double_space_all_false_except_transliterate",
+			name:          "hello double space all false except transliterate",
 			input:         "hello  world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -192,7 +192,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_double_space_all_false_except_decamelize_and_transliterate",
+			name:          "hello double space all false except decamelize and transliterate",
 			input:         "hello  world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -200,7 +200,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_double_space_all_false_except_decamelize",
+			name:          "hello double space all false except decamelize",
 			input:         "hello  world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -208,7 +208,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_triple_dash_all_true",
+			name:          "hello triple dash all true",
 			input:         "hello---world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -216,7 +216,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_triple_dash_all_true_except_transliterate",
+			name:          "hello triple dash all true except transliterate",
 			input:         "hello---world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -224,7 +224,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_triple_dash_all_false_except_lowercase",
+			name:          "hello triple dash all false except lowercase",
 			input:         "hello---world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -232,7 +232,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_triple_dash_all_false_except_transliterate",
+			name:          "hello triple dash all false except transliterate",
 			input:         "hello---world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -240,7 +240,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_triple_dash_all_false",
+			name:          "hello triple dash all false",
 			input:         "hello---world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -248,7 +248,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_triple_dash_all_false_except_transliterate",
+			name:          "hello triple dash all false except transliterate",
 			input:         "hello---world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -256,7 +256,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_triple_dash_all_false_except_decamelize_and_transliterate",
+			name:          "hello triple dash all false except decamelize and transliterate",
 			input:         "hello---world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -264,7 +264,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_triple_dash_all_false_except_decamelize",
+			name:          "hello triple dash all false except decamelize",
 			input:         "hello---world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -272,7 +272,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_space_dash_space_all_true",
+			name:          "hello space dash space all true",
 			input:         "hello- -world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -280,7 +280,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_space_dash_space_all_true_except_transliterate",
+			name:          "hello space dash space all true except transliterate",
 			input:         "hello- -world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -288,7 +288,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_lowercase",
+			name:          "hello space dash space all false except lowercase",
 			input:         "hello- -world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -296,7 +296,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_transliterate",
+			name:          "hello space dash space all false except transliterate",
 			input:         "hello- -world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -304,7 +304,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_space_dash_space_all_false",
+			name:          "hello space dash space all false",
 			input:         "hello- -world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -312,7 +312,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_transliterate",
+			name:          "hello space dash space all false except transliterate",
 			input:         "hello- -world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -320,7 +320,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_decamelize_and_transliterate",
+			name:          "hello space dash space all false except decamelize and transliterate",
 			input:         "hello- -world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -328,7 +328,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_decamelize",
+			name:          "hello space dash space all false except decamelize",
 			input:         "hello- -world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -336,7 +336,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_space_dash_space_all_true",
+			name:          "hello space dash space all true",
 			input:         "hello - - world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -344,7 +344,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_space_dash_space_all_true_except_transliterate",
+			name:          "hello space dash space all true except transliterate",
 			input:         "hello - - world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -352,7 +352,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_lowercase",
+			name:          "hello space dash space all false except lowercase",
 			input:         "hello - - world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -360,7 +360,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_transliterate",
+			name:          "hello space dash space all false except transliterate",
 			input:         "hello - - world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -368,7 +368,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_space_dash_space_all_false",
+			name:          "hello space dash space all false",
 			input:         "hello - - world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -376,7 +376,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_transliterate",
+			name:          "hello space dash space all false except transliterate",
 			input:         "hello - - world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -384,7 +384,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_decamelize_and_transliterate",
+			name:          "hello space dash space all false except decamelize and transliterate",
 			input:         "hello - - world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -392,7 +392,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "hello_space_dash_space_all_false_except_decamelize",
+			name:          "hello space dash space all false except decamelize",
 			input:         "hello - - world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -400,7 +400,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dashes_all_true",
+			name:          "dashes all true",
 			input:         "-------",
 			expected:      "",
 			lowercase:     true,
@@ -408,7 +408,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dashes_all_true_except_transliterate",
+			name:          "dashes all true except transliterate",
 			input:         "-------",
 			expected:      "",
 			lowercase:     true,
@@ -416,7 +416,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dashes_all_false_except_lowercase",
+			name:          "dashes all false except lowercase",
 			input:         "-------",
 			expected:      "",
 			lowercase:     true,
@@ -424,7 +424,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dashes_all_false_except_transliterate",
+			name:          "dashes all false except transliterate",
 			input:         "-------",
 			expected:      "",
 			lowercase:     true,
@@ -432,7 +432,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dashes_all_false",
+			name:          "dashes all false",
 			input:         "-------",
 			expected:      "",
 			lowercase:     false,
@@ -440,7 +440,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dashes_all_false_except_transliterate",
+			name:          "dashes all false except transliterate",
 			input:         "-------",
 			expected:      "",
 			lowercase:     false,
@@ -448,7 +448,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dashes_all_false_except_decamelize_and_transliterate",
+			name:          "dashes all false except decamelize and transliterate",
 			input:         "-------",
 			expected:      "",
 			lowercase:     false,
@@ -456,7 +456,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dashes_all_false_except_decamelize",
+			name:          "dashes all false except decamelize",
 			input:         "-------",
 			expected:      "",
 			lowercase:     false,
@@ -464,7 +464,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dash_hello_world_all_true",
+			name:          "dash hello world all true",
 			input:         "-hello world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -472,7 +472,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dash_hello_world_all_true_except_transliterate",
+			name:          "dash hello world all true except transliterate",
 			input:         "-hello world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -480,7 +480,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dash_hello_world_all_false_except_lowercase",
+			name:          "dash hello world all false except lowercase",
 			input:         "-hello world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -488,7 +488,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dash_hello_world_all_false_except_transliterate",
+			name:          "dash hello world all false except transliterate",
 			input:         "-hello world",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -496,7 +496,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dash_hello_world_all_false",
+			name:          "dash hello world all false",
 			input:         "-hello world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -504,7 +504,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dash_hello_world_all_false_except_transliterate",
+			name:          "dash hello world all false except transliterate",
 			input:         "-hello world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -512,7 +512,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dash_hello_world_all_false_except_decamelize_and_transliterate",
+			name:          "dash hello world all false except decamelize and transliterate",
 			input:         "-hello world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -520,7 +520,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dash_hello_world_all_false_except_decamelize",
+			name:          "dash hello world all false except decamelize",
 			input:         "-hello world",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -528,7 +528,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "space_hello_world_space_all_true",
+			name:          "space hello world space all true",
 			input:         " hello world ",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -536,7 +536,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "space_hello_world_space_all_true_except_transliterate",
+			name:          "space hello world space all true except transliterate",
 			input:         " hello world ",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -544,7 +544,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "space_hello_world_space_all_false_except_lowercase",
+			name:          "space hello world space all false except lowercase",
 			input:         " hello world ",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -552,7 +552,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "space_hello_world_space_all_false_except_transliterate",
+			name:          "space hello world space all false except transliterate",
 			input:         " hello world ",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -560,7 +560,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "space_hello_world_space_all_false",
+			name:          "space hello world space all false",
 			input:         " hello world ",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -568,7 +568,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "space_hello_world_space_all_false_except_transliterate",
+			name:          "space hello world space all false except transliterate",
 			input:         " hello world ",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -576,7 +576,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "space_hello_world_space_all_false_except_decamelize_and_transliterate",
+			name:          "space hello world space all false except decamelize and transliterate",
 			input:         " hello world ",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -584,7 +584,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "space_hello_world_space_all_false_except_decamelize",
+			name:          "space hello world space all false except decamelize",
 			input:         " hello world ",
 			expected:      "hello-world",
 			lowercase:     false,
@@ -592,7 +592,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "special_characters_all_true",
+			name:          "special characters all true",
 			input:         "!@#$%^&*()_+=-`~[]\\{}|;':\",./<>?",
 			expected:      "",
 			lowercase:     true,
@@ -600,7 +600,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "special_characters_all_true_except_transliterate",
+			name:          "special characters all true except transliterate",
 			input:         "!@#$%^&*()_+=-`~[]\\{}|;':\",./<>?",
 			expected:      "",
 			lowercase:     true,
@@ -608,7 +608,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "special_characters_all_false_except_lowercase",
+			name:          "special characters all false except lowercase",
 			input:         "!@#$%^&*()_+=-`~[]\\{}|;':\",./<>?",
 			expected:      "",
 			lowercase:     true,
@@ -616,7 +616,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "special_characters_all_false_except_transliterate",
+			name:          "special characters all false except transliterate",
 			input:         "!@#$%^&*()_+=-`~[]\\{}|;':\",./<>?",
 			expected:      "",
 			lowercase:     true,
@@ -624,7 +624,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "special_characters_all_false",
+			name:          "special characters all false",
 			input:         "!@#$%^&*()_+=-`~[]\\{}|;':\",./<>?",
 			expected:      "",
 			lowercase:     false,
@@ -632,7 +632,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "special_characters_all_false_except_transliterate",
+			name:          "special characters all false except transliterate",
 			input:         "!@#$%^&*()_+=-`~[]\\{}|;':\",./<>?",
 			expected:      "",
 			lowercase:     false,
@@ -640,7 +640,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "special_characters_all_false_except_decamelize_and_transliterate",
+			name:          "special characters all false except decamelize and transliterate",
 			input:         "!@#$%^&*()_+=-`~[]\\{}|;':\",./<>?",
 			expected:      "",
 			lowercase:     false,
@@ -648,7 +648,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "special_characters_all_false_except_decamelize",
+			name:          "special characters all false except decamelize",
 			input:         "!@#$%^&*()_+=-`~[]\\{}|;':\",./<>?",
 			expected:      "",
 			lowercase:     false,
@@ -656,7 +656,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "unicode_all_true",
+			name:          "unicode all true",
 			input:         "HélLø Wörld",
 			expected:      "hel-lo-world",
 			lowercase:     true,
@@ -664,7 +664,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "unicode_all_true_except_transliterate",
+			name:          "unicode all true except transliterate",
 			input:         "HélLø Wörld",
 			expected:      "h-l-l-w-rld",
 			lowercase:     true,
@@ -672,7 +672,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "unicode_all_false_except_lowercase",
+			name:          "unicode all false except lowercase",
 			input:         "HélLø Wörld",
 			expected:      "h-ll-w-rld",
 			lowercase:     true,
@@ -680,7 +680,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "unicode_all_false_except_transliterate",
+			name:          "unicode all false except transliterate",
 			input:         "HélLø Wörld",
 			expected:      "hello-world",
 			lowercase:     true,
@@ -688,7 +688,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "unicode_all_false",
+			name:          "unicode all false",
 			input:         "HélLø Wörld",
 			expected:      "H-lL-W-rld",
 			lowercase:     false,
@@ -696,7 +696,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "unicode_all_false_except_transliterate",
+			name:          "unicode all false except transliterate",
 			input:         "HélLø Wörld",
 			expected:      "HelLo-World",
 			lowercase:     false,
@@ -704,7 +704,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "unicode_all_false_except_decamelize_and_transliterate",
+			name:          "unicode all false except decamelize and transliterate",
 			input:         "HélLø Wörld",
 			expected:      "hel-lo-world",
 			lowercase:     false,
@@ -712,7 +712,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "unicode_all_false_except_decamelize",
+			name:          "unicode all false except decamelize",
 			input:         "HélLø Wörld",
 			expected:      "h-l-l-w-rld",
 			lowercase:     false,
@@ -720,7 +720,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dots_all_true",
+			name:          "dots all true",
 			input:         "with.dots.everywhere",
 			expected:      "with-dots-everywhere",
 			lowercase:     true,
@@ -728,7 +728,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dots_all_true_except_transliterate",
+			name:          "dots all true except transliterate",
 			input:         "with.dots.everywhere",
 			expected:      "with-dots-everywhere",
 			lowercase:     true,
@@ -736,7 +736,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dots_all_false_except_lowercase",
+			name:          "dots all false except lowercase",
 			input:         "with.dots.everywhere",
 			expected:      "with-dots-everywhere",
 			lowercase:     true,
@@ -744,7 +744,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dots_all_false_except_transliterate",
+			name:          "dots all false except transliterate",
 			input:         "with.dots.everywhere",
 			expected:      "with-dots-everywhere",
 			lowercase:     true,
@@ -752,7 +752,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dots_all_false",
+			name:          "dots all false",
 			input:         "with.dots.everywhere",
 			expected:      "with-dots-everywhere",
 			lowercase:     false,
@@ -760,7 +760,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "dots_all_false_except_transliterate",
+			name:          "dots all false except transliterate",
 			input:         "with.dots.everywhere",
 			expected:      "with-dots-everywhere",
 			lowercase:     false,
@@ -768,7 +768,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dots_all_false_except_decamelize_and_transliterate",
+			name:          "dots all false except decamelize and transliterate",
 			input:         "with.dots.everywhere",
 			expected:      "with-dots-everywhere",
 			lowercase:     false,
@@ -776,7 +776,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "dots_all_false_except_decamelize",
+			name:          "dots all false except decamelize",
 			input:         "with.dots.everywhere",
 			expected:      "with-dots-everywhere",
 			lowercase:     false,
@@ -784,7 +784,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "numbers_all_true",
+			name:          "numbers all true",
 			input:         "12345",
 			expected:      "12345",
 			lowercase:     true,
@@ -792,7 +792,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "numbers_all_true_except_transliterate",
+			name:          "numbers all true except transliterate",
 			input:         "12345",
 			expected:      "12345",
 			lowercase:     true,
@@ -800,7 +800,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "numbers_all_false_except_lowercase",
+			name:          "numbers all false except lowercase",
 			input:         "12345",
 			expected:      "12345",
 			lowercase:     true,
@@ -808,7 +808,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "numbers_all_false_except_transliterate",
+			name:          "numbers all false except transliterate",
 			input:         "12345",
 			expected:      "12345",
 			lowercase:     true,
@@ -816,7 +816,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "numbers_all_false",
+			name:          "numbers all false",
 			input:         "12345",
 			expected:      "12345",
 			lowercase:     false,
@@ -824,7 +824,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "numbers_all_false_except_transliterate",
+			name:          "numbers all false except transliterate",
 			input:         "12345",
 			expected:      "12345",
 			lowercase:     false,
@@ -832,7 +832,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "numbers_all_false_except_decamelize_and_transliterate",
+			name:          "numbers all false except decamelize and transliterate",
 			input:         "12345",
 			expected:      "12345",
 			lowercase:     false,
@@ -840,7 +840,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "numbers_all_false_except_decamelize",
+			name:          "numbers all false except decamelize",
 			input:         "12345",
 			expected:      "12345",
 			lowercase:     false,
@@ -848,39 +848,39 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "mixed_case_all_true",
+			name:          "mixed case all true",
 			input:         "MixedCase123",
-			expected:      "mixed-case-123",
+			expected:      "mixed-case123",
 			lowercase:     true,
 			decamelize:    true,
 			transliterate: true,
 		},
 		{
-			name:          "mixed_case_all_true_except_transliterate",
+			name:          "mixed case all true except transliterate",
 			input:         "MixedCase123",
-			expected:      "mixed-case-123",
+			expected:      "mixed-case123",
 			lowercase:     true,
 			decamelize:    true,
 			transliterate: false,
 		},
 		{
-			name:          "mixed_case_all_false_except_lowercase",
-			input:         "MixedCase123",
-			expected:      "mixedcase123",
-			lowercase:     true,
-			decamelize:    false,
-			transliterate: false,
-		},
-		{
-			name:          "mixed_case_all_false_except_transliterate",
+			name:          "mixed case all false except lowercase",
 			input:         "MixedCase123",
 			expected:      "mixedcase123",
 			lowercase:     true,
 			decamelize:    false,
+			transliterate: false,
+		},
+		{
+			name:          "mixed case all false except transliterate",
+			input:         "MixedCase123",
+			expected:      "mixedcase123",
+			lowercase:     true,
+			decamelize:    false,
 			transliterate: true,
 		},
 		{
-			name:          "mixed_case_all_false",
+			name:          "mixed case all false",
 			input:         "MixedCase123",
 			expected:      "MixedCase123",
 			lowercase:     false,
@@ -888,7 +888,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: false,
 		},
 		{
-			name:          "mixed_case_all_false_except_transliterate",
+			name:          "mixed case all false except transliterate",
 			input:         "MixedCase123",
 			expected:      "MixedCase123",
 			lowercase:     false,
@@ -896,17 +896,17 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 			transliterate: true,
 		},
 		{
-			name:          "mixed_case_all_false_except_decamelize_and_transliterate",
+			name:          "mixed case all false except decamelize and transliterate",
 			input:         "MixedCase123",
-			expected:      "mixed-case-123",
+			expected:      "mixed-case123",
 			lowercase:     false,
 			decamelize:    true,
 			transliterate: true,
 		},
 		{
-			name:          "mixed_case_all_false_except_decamelize",
+			name:          "mixed case all false except decamelize",
 			input:         "MixedCase123",
-			expected:      "mixed-case-123",
+			expected:      "mixed-case123",
 			lowercase:     false,
 			decamelize:    true,
 			transliterate: false,

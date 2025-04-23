@@ -78,42 +78,48 @@ func ToDelimited(s string, delimiter string) string {
 	// delimiters
 	var prev rune
 	var prevIsDelimiter bool
+	runes := []rune(s)
 
-	for i, r := range s {
+	for i, r := range runes {
 		if isDelimiter(r) {
 			// Replace any delimiter with the requested one, avoiding duplicates
 			if !prevIsDelimiter && i > 0 {
 				builder.WriteString(delimiter)
 			}
 			prevIsDelimiter = true
+			prev = r
 			continue
 		}
 
 		// We're processing a non-delimiter character
 		if i > 0 && !prevIsDelimiter {
-			// Add delimiter before uppercase letters
 			currIsUpper := unicode.IsUpper(r)
+			currIsDigit := unicode.IsDigit(r)
+
 			prevIsUpper := unicode.IsUpper(prev)
+			prevIsLetter := unicode.IsLetter(prev)
+			prevIsDigit := unicode.IsDigit(prev)
 
 			nextIsLower := false
 			nextIsS := false
-			if i+1 < len(s) {
-				nextIsLower = unicode.IsLower(rune(s[i+1]))
+			if i+1 < len(runes) {
+				nextIsLower = unicode.IsLower(runes[i+1])
 				// Special handling for 's' character
 				// "APIs" -> "apis", "HTTPs" -> "https", "URLs" -> "urls"
-				nextIsS = rune(s[i+1]) == 's'
+				nextIsS = (runes[i+1]) == 's'
 			}
 
-			isPrevDigit := unicode.IsDigit(prev)
-			isCurrentDigit := unicode.IsDigit(r)
+			// Conditions for adding a delimiter:
+			// 1. Lowercase letter -> Uppercase letter (e.g., dC in MixedCase)
+			cond1 := prevIsLetter && !prevIsUpper && currIsUpper
+			// 2. Uppercase letter -> Uppercase letter and not followed by Lowercase "s" (e.g., TS in HTTPSRequest)
+			cond2 := prevIsUpper && currIsUpper && nextIsLower && !nextIsS
+			// 3. Uppercase Letter -> Digit (e.g., P2 in HTTP2)
+			cond3 := prevIsUpper && currIsDigit
+			// 4. Digit -> Uppercase Letter (e.g., 2D in HTTP2Data)
+			cond4 := prevIsDigit && currIsUpper
 
-			// 1. "camelCase" -> "camel_case"
-			// 2. "HTTPRequest" -> "http_request" (but preserves "HTTPs" ->
-			//    "https" without delimiter)
-			// 3. "user123" -> "user_123" (digit transitions)
-			needsDelimiter := (currIsUpper && !prevIsUpper) ||
-				(prevIsUpper && currIsUpper && nextIsLower && !nextIsS) ||
-				(isCurrentDigit != isPrevDigit)
+			needsDelimiter := cond1 || cond2 || cond3 || cond4
 
 			if needsDelimiter {
 				builder.WriteString(delimiter)
@@ -130,13 +136,6 @@ func ToDelimited(s string, delimiter string) string {
 
 	// Trim any leading or trailing delimiters
 	result = strings.Trim(result, delimiter)
-
-	// Clean up any consecutive delimiters
-	if delimiter != "" {
-		for strings.Contains(result, delimiter+delimiter) {
-			result = strings.ReplaceAll(result, delimiter+delimiter, delimiter)
-		}
-	}
 
 	return result
 }

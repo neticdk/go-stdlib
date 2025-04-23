@@ -104,8 +104,8 @@ func ToDelimited(s string, delimiter string) string {
 			nextIsS := false
 			if i+1 < len(runes) {
 				nextIsLower = unicode.IsLower(runes[i+1])
-				//Special handling for 's' character
-				//"APIs" -> "apis", "HTTPs" -> "https", "URLs" -> "urls"
+				// Special handling for 's' character
+				// "APIs" -> "apis", "HTTPs" -> "https", "URLs" -> "urls"
 				nextIsS = (runes[i+1]) == 's'
 			}
 

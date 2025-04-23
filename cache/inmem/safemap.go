@@ -12,11 +12,6 @@ import (
 	"github.com/neticdk/go-stdlib/xslices"
 )
 
-// Must implement this to allow garbage collection
-type garbageCollection[K comparable, V any] interface {
-	deleteExpired(ctx context.Context) error
-}
-
 // item represents a single item in the cache.
 // It contains the value and the expiration time.
 // The expiration time is set to zero if the item does not expire.

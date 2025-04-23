@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+// Must implement this to allow garbage collection
+type garbageCollection[K comparable, V any] interface {
+	deleteExpired(ctx context.Context) error
+}
+
 // GarbageCollector is an interface that defines the methods for a garbage collector.
 // It is responsible for periodically deleting expired items from the cache.
 type GarbageCollector[K comparable, V any] interface {

@@ -51,6 +51,7 @@ package mypkg
 ## Packages
 
 - `assert` / `require` - test helpers for assertion
+- `cache` / `cache/inmem` - caching
 - `diff` / `diff/myers` / `diff/simple` - generate diffs
 - `file` - file operations
 - `set` - set data structure

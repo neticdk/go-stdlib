@@ -19,7 +19,7 @@ type GarbageCollector[K comparable, V any] interface {
 	// Start begins the garbage collection process.
 	// This should be called in a separate goroutine.
 	// E.g. go gc.Start(c)
-	Start(ctx context.Context, c garbageCollection[K, V]) error
+	Start(c garbageCollection[K, V])
 
 	// Stop stops the garbage collection process.
 	Stop(ctx context.Context) error
@@ -78,21 +78,13 @@ func NewGarbageCollector[K comparable, V any](interval time.Duration) *garbageCo
 // It periodically checks for expired items in the cache.
 // When a tick happens, it calls the DeleteExpired method on the cache to
 // remove expired items.
-func (gc *garbageCollector[K, V]) Start(ctx context.Context, c garbageCollection[K, V]) error {
+func (gc *garbageCollector[K, V]) Start(c garbageCollection[K, V]) {
 	ticker := gc.clock.NewTicker(gc.interval)
-
-	if err := ctx.Err(); err != nil {
-		return fmt.Errorf("context error: %w", err)
-	}
 
 	defer ticker.Stop()
 	gc.mu.Lock()
 	gc.active = true
 	gc.mu.Unlock()
-
-	if err := ctx.Err(); err != nil {
-		return fmt.Errorf("context error: %w", err)
-	}
 
 	for {
 		select {
@@ -111,24 +103,9 @@ func (gc *garbageCollector[K, V]) Start(ctx context.Context, c garbageCollection
 			gc.active = false
 			close(gc.stopped) // Signal that the garbage collector has stopped
 			gc.mu.Unlock()
-			return nil
+			return
 		}
 	}
-}
-
-// stopGarbageCollector stops the garbage collector by calling the Stop method.
-// It is important to call this function when the cache is no longer
-// needed to avoid resource leaks and ensure that the goroutine is
-// properly cleaned up.
-func stopGarbageCollector[K comparable, V any](gc GarbageCollector[K, V]) {
-	// Prevent panic if GC was never started
-	if gc == nil {
-		return
-	}
-	// Prepare timeout context
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	gc.Stop(ctx)
 }
 
 // Stop stops the garbage collector by sending a signal
@@ -137,7 +114,7 @@ func stopGarbageCollector[K comparable, V any](gc GarbageCollector[K, V]) {
 // It is important to call this function when the cache is no longer
 // needed to avoid resource leaks and ensure that the goroutine is
 // properly cleaned up.
-func (gc *garbageCollector[K, V]) Stop(ctx context.Context) error {
+func (gc *garbageCollector[K, V]) Stop(ctx context.Context) error { //revive:disable-line:confusing-naming
 	// Prevent panic if GC was never started
 	if gc == nil {
 		return fmt.Errorf("garbage collector is nil")
@@ -147,7 +124,7 @@ func (gc *garbageCollector[K, V]) Stop(ctx context.Context) error {
 	case <-ctx.Done(): // Wait for the context to be done
 		return fmt.Errorf("context done: %w", ctx.Err())
 	case <-gc.stopped: // Wait for the stopped channel to be closed
-		gc.logger.Info("Garbage collector stopped")
+		gc.logger.InfoContext(ctx, "Garbage collector stopped")
 	}
 	return nil
 }

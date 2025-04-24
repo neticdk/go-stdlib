@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"runtime"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -37,9 +36,8 @@ func newTestSafeMapCache(items map[string]*item[any], currentTime int64, opts ..
 	gc := newTestGarbageCollector(5*time.Minute, mc)
 	if gc != nil {
 		c.garbageCollector = gc
-		go c.garbageCollector.Start(context.Background(), c)
+		go c.garbageCollector.Start(c)
 	}
-	runtime.AddCleanup(c, stopGarbageCollector[string, any], c.garbageCollector)
 	return c
 }
 

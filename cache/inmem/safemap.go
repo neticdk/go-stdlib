@@ -2,7 +2,7 @@ package inmem
 
 import (
 	"context"
-	"runtime"
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -134,11 +134,8 @@ func NewSafeMap[K comparable, V any](opts ...SafeMapCacheOption[K, V]) *safeMapC
 	gc := NewGarbageCollector[K, V](c.defaultGCInterval)
 	if gc != nil {
 		c.garbageCollector = gc
-		go c.garbageCollector.Start(context.Background(), c)
+		go c.garbageCollector.Start(c)
 	}
-
-	// Add cleanup to stop the garbage collector when the cache is no longer needed
-	runtime.AddCleanup(c, stopGarbageCollector[K, V], c.garbageCollector)
 
 	return c
 }
@@ -244,13 +241,16 @@ func (c *safeMapCache[K, V]) setInternal(ctx context.Context, key K, value V, tt
 	willBeActive := expiry.IsZero() || now.Before(expiry)
 
 	// Determine the delta based on the existing and new item states.
-	if !keyExists && willBeActive {
+	switch {
+	case !keyExists && willBeActive:
 		delta = 1 // Adding a new active item
-	} else if keyExists && !wasActive && willBeActive {
+	case keyExists && !wasActive && willBeActive:
 		delta = 1 // Replacing inactive with active
-	} else if keyExists && wasActive && !willBeActive {
+	case keyExists && wasActive && !willBeActive:
 		delta = -1 // Replacing active with inactive (or expired)
-	} // Else no change in count (updating existing, non-expired item)
+	default:
+		delta = 0 // No change in count (updating existing, non-expired item)
+	}
 
 	if delta > 0 && c.count.Load() >= int64(c.maxSize) {
 		c.mu.Unlock() // Release Write Lock
@@ -420,7 +420,7 @@ func (c *safeMapCache[K, V]) deleteExpired(ctx context.Context) error {
 
 // Stop stops the garbage collector and clears the cache.
 // This method should be called when the cache is no longer needed.
-func (c *safeMapCache[K, V]) Stop(ctx context.Context) error {
+func (c *safeMapCache[K, V]) Stop(ctx context.Context) error { //revive:disable-line:confusing-naming
 	// Check if the context is canceled or timed out
 	if err := ctx.Err(); err != nil {
 		return err
@@ -444,7 +444,10 @@ func (c *safeMapCache[K, V]) Stop(ctx context.Context) error {
 	}
 
 	c.mu.Unlock()
-	c.Clear(ctx) // Clear the cache
+	err := c.Clear(ctx) // Clear the cache
+	if err != nil {
+		return fmt.Errorf("clearing cache: %w", err)
+	}
 
 	return nil
 }

@@ -46,7 +46,7 @@ func TestGarbageCollector(t *testing.T) {
 	// Use newDefaultCache and override the clock
 	c := newMockCache[string, any]()
 	c.garbageCollector = gc
-	go c.garbageCollector.Start(context.Background(), c) // Start the garbage collector
+	go c.garbageCollector.Start(c) // Start the garbage collector
 	c.clock = mc
 	// Set a default TTL for items added via Add()
 
@@ -70,7 +70,7 @@ func TestGarbageCollector(t *testing.T) {
 	// 8. Test Stopping the Garbage Collector
 	//stopChan := make(chan bool, 1) // Channel to signal stop
 	t.Log("Stopping garbage collector...")
-	stopGarbageCollector(c.garbageCollector) // Send stop signal
+	c.garbageCollector.Stop(context.Background()) // Send stop signal
 
 	// <-stopChan // Wait for the stop signal to be processed
 

@@ -756,12 +756,6 @@ func TestSafeMapCache_Len(t *testing.T) {
 	}
 }
 
-func newMockTimeoutContext(timeout time.Duration, count int) context.Context {
-	ctx, cancel := context.WithTimeout(newMockContext(count), timeout)
-	defer cancel()
-	return ctx
-}
-
 func TestSafeMapCache_Stop(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -925,7 +919,7 @@ func BenchmarkSafeMapCache_Len(b *testing.B) {
 	}
 }
 
-func BenchmarkSafeMapCache_deleteExpiredNoDeletions(b *testing.B) {
+func BenchmarkSafeMapCache_deleteExpired(b *testing.B) {
 	sizes := []int{10, 100, 1000, 10000, 100000, 1000000}
 	times := []float32{0.0, 0.5, 1.0}
 

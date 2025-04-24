@@ -1,6 +1,9 @@
 package cache
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // Cache is an interface that defines the basic operations for a cache.
 // It allows for storing, retrieving, and deleting items in the cache.
@@ -29,4 +32,24 @@ type Cache[K comparable, V any] interface {
 	// The context can be used to control the operation, such as
 	// setting a timeout or cancellation.
 	Clear(ctx context.Context) error
+
+	// Stop stops the cache and releases any resources it holds.
+	// The context can be used to control the operation, such as
+	// setting a timeout or cancellation.
+	Stop(ctx context.Context) error
+}
+
+// TTLCache is an interface that extends the Cache interface
+// to support time-to-live (TTL) functionality.
+// It provides a method to set a value with a specific TTL.
+type TTLCache[K comparable, V any] interface {
+	// Cache defines the basic operations for a cache.
+	// It is embedded to provide the basic cache functionality.
+	Cache[K, V]
+
+	// SetWithTTL stores a value in the cache with the specified key
+	// and a time-to-live (TTL) duration.
+	// The context can be used to control the operation, such as
+	// setting a timeout or cancellation.
+	SetWithTTL(ctx context.Context, key K, value V, ttl time.Duration) error
 }

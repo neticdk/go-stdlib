@@ -13,14 +13,15 @@ type mockCache[K comparable, V any] struct {
 	// embeds the safeMapCache struct to inherit its methods
 	*safeMapCache[K, V]
 
-	// counter for deleteExpired calls
-	deleteExpiredCalled int
+	// mutex for synchronizing access to deleteExpiredCalled
+	called chan bool
 }
 
 // newMockCache creates a new instance of mockCache.
 func newMockCache[K comparable, V any]() *mockCache[K, V] {
 	return &mockCache[K, V]{
 		safeMapCache: NewSafeMap[K, V](),
+		called:       make(chan bool, 1),
 	}
 }
 
@@ -30,7 +31,7 @@ func (m *mockCache[K, V]) deleteExpired(ctx context.Context) error {
 	// Mock implementation
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.deleteExpiredCalled++
+	m.called <- true
 	return nil
 }
 
@@ -45,7 +46,7 @@ func TestGarbageCollector(t *testing.T) {
 	// Use newDefaultCache and override the clock
 	c := newMockCache[string, any]()
 	c.garbageCollector = gc
-	go c.garbageCollector.Start(c) // Start the garbage collector
+	go c.garbageCollector.Start(context.Background(), c) // Start the garbage collector
 	c.clock = mc
 	// Set a default TTL for items added via Add()
 
@@ -64,21 +65,14 @@ func TestGarbageCollector(t *testing.T) {
 	// Simulate the ticker firing
 	mt.Tick(mc.Now()) // Send the tick (should not block due to buffered channel)
 
-	time.Sleep(100 * time.Millisecond) // Allow some time for the tick to be processed
-
-	c.mu.RLock()
-	deleteExpiredCalls := c.deleteExpiredCalled
-	c.mu.RUnlock()
-	if deleteExpiredCalls != 1 {
-		t.Errorf("Expected DeleteExpired to be called once, got %d", deleteExpiredCalls)
-	}
+	<-c.called
 
 	// 8. Test Stopping the Garbage Collector
+	//stopChan := make(chan bool, 1) // Channel to signal stop
 	t.Log("Stopping garbage collector...")
 	stopGarbageCollector(c.garbageCollector) // Send stop signal
 
-	// Allow time for the stop signal to be potentially processed
-	time.Sleep(50 * time.Millisecond)
+	// <-stopChan // Wait for the stop signal to be processed
 
 	// Check if the garbage collector is stopped
 	if c.garbageCollector.IsActive() {

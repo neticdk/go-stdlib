@@ -213,8 +213,8 @@ func (h *handler) handleMap(obj any) any {
 // handleSlice handles the conversion of a slice to a slice of any,
 // recursively converting nested maps, slices and structs.
 func (h *handler) handleSlice(obj any) any {
-	s := []any{}
 	val := reflect.ValueOf(obj)
+	s := make([]any, 0, val.Len())
 	for i := range val.Len() {
 		s = append(s, h.handle(val.Index(i).Interface()))
 	}

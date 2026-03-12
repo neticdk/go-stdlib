@@ -115,20 +115,20 @@ func (ae *AssertionError) Format(ctx *AssertionContext) string {
 
 	// Primary and comparison values
 	if ae.PrimaryValue.Label != "" {
-		sb.WriteString(fmt.Sprintf("  %s: %s\n", ae.PrimaryValue.Label, formatValue(ae.PrimaryValue.Value)))
+		fmt.Fprintf(&sb, "  %s: %s\n", ae.PrimaryValue.Label, formatValue(ae.PrimaryValue.Value))
 	}
 	if ae.ComparisonValue.Label != "" {
-		sb.WriteString(fmt.Sprintf("  %s: %s\n", ae.ComparisonValue.Label, formatValue(ae.ComparisonValue.Value)))
+		fmt.Fprintf(&sb, "  %s: %s\n", ae.ComparisonValue.Label, formatValue(ae.ComparisonValue.Value))
 	}
 
 	// Error if present
 	if ae.Error != nil {
-		sb.WriteString(fmt.Sprintf("  Error: %v\n", ae.Error))
+		fmt.Fprintf(&sb, "  Error: %v\n", ae.Error)
 	}
 
 	// Extra key-value pairs
 	for _, kv := range ae.ExtraValues {
-		sb.WriteString(fmt.Sprintf("  %s: %s\n", kv.Label, formatValue(kv.Value)))
+		fmt.Fprintf(&sb, "  %s: %s\n", kv.Label, formatValue(kv.Value))
 	}
 
 	// Diff if present
@@ -136,7 +136,7 @@ func (ae *AssertionError) Format(ctx *AssertionContext) string {
 		sb.WriteString("  Diff:\n")
 		for line := range strings.SplitSeq(ae.Diff, "\n") {
 			if line != "" {
-				sb.WriteString(fmt.Sprintf("    %s\n", line))
+				fmt.Fprintf(&sb, "    %s\n", line)
 			}
 		}
 	}
@@ -145,7 +145,7 @@ func (ae *AssertionError) Format(ctx *AssertionContext) string {
 	if len(ae.Details) > 0 {
 		sb.WriteString("  Details:\n")
 		for _, detail := range ae.Details {
-			sb.WriteString(fmt.Sprintf("    %s\n", detail))
+			fmt.Fprintf(&sb, "    %s\n", detail)
 		}
 	}
 
@@ -155,7 +155,7 @@ func (ae *AssertionError) Format(ctx *AssertionContext) string {
 		// Add indentation for the stack block
 		for line := range strings.SplitSeq(ae.Stack, "\n") {
 			if line != "" { // Avoid adding empty lines
-				sb.WriteString(fmt.Sprintf("    %s\n", line))
+				fmt.Fprintf(&sb, "    %s\n", line)
 			}
 		}
 	}

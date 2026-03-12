@@ -101,7 +101,7 @@ func (c ContextFormatter) Format(edits []Line, options FormatOptions) string {
 			switch edit.Kind {
 			case Equal:
 				if options.ShowLineNumbers {
-					sb.WriteString(fmt.Sprintf("%4d %4d   ", aLineNum, bLineNum))
+					fmt.Fprintf(&sb, "%4d %4d   ", aLineNum, bLineNum)
 				} else {
 					sb.WriteString("  ")
 				}
@@ -109,7 +109,7 @@ func (c ContextFormatter) Format(edits []Line, options FormatOptions) string {
 				sb.WriteString("\n")
 			case Delete:
 				if options.ShowLineNumbers {
-					sb.WriteString(fmt.Sprintf("%4d      - ", aLineNum))
+					fmt.Fprintf(&sb, "%4d      - ", aLineNum)
 				} else {
 					sb.WriteString("- ")
 				}
@@ -117,7 +117,7 @@ func (c ContextFormatter) Format(edits []Line, options FormatOptions) string {
 				sb.WriteString("\n")
 			case Insert:
 				if options.ShowLineNumbers {
-					sb.WriteString(fmt.Sprintf("     %4d + ", bLineNum))
+					fmt.Fprintf(&sb, "     %4d + ", bLineNum)
 				} else {
 					sb.WriteString("+ ")
 				}
@@ -163,7 +163,7 @@ func (u UnifiedFormatter) Format(edits []Line, options FormatOptions) string {
 		hunkHeader := calculateHunkHeader(edits, r)
 
 		// Format the @@ hunk header
-		sb.WriteString(fmt.Sprintf("@@ -%s +%s @@\n", hunkHeader.aRange, hunkHeader.bRange))
+		fmt.Fprintf(&sb, "@@ -%s +%s @@\n", hunkHeader.aRange, hunkHeader.bRange)
 
 		// Write Hunk Body
 		// Iterate through the chunk range to write the body

@@ -1,6 +1,6 @@
 module github.com/neticdk/go-stdlib
 
-go 1.24.1
+go 1.26.1
 
 require golang.org/x/sys v0.41.0
 

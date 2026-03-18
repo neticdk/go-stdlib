@@ -207,7 +207,7 @@ func linearSpaceMyersRecWithIndices(a, b []string, aStart, aEnd, bStart, bEnd, d
 
 	// Check for common prefix/suffix to reduce problem size
 	prefix := 0
-	for prefix < n && a[aStart+prefix] == b[bStart+prefix] {
+	for prefix < n && prefix < m && a[aStart+prefix] == b[bStart+prefix] {
 		prefix++
 	}
 
@@ -217,7 +217,7 @@ func linearSpaceMyersRecWithIndices(a, b []string, aStart, aEnd, bStart, bEnd, d
 	}
 
 	suffix := 0
-	for suffix < n-prefix && a[aEnd-1-suffix] == b[bEnd-1-suffix] {
+	for suffix < n-prefix && suffix < m-prefix && a[aEnd-1-suffix] == b[bEnd-1-suffix] {
 		suffix++
 	}
 
@@ -418,7 +418,15 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 				x = vf[idx]
 			}
 
+			// Clamp to valid grid boundaries: x must be in [0, n], y = x-k must be in [0, m].
+			// vf[k-1]+1 can exceed n when that diagonal already reached the end of a.
+			if x > n {
+				x = n
+			}
 			y := x - k // Calculate y based on x and diagonal k
+			if y < 0 || y > m {
+				continue
+			}
 
 			// Store the starting point of the potential snake for this (d, k)
 			startX := x
@@ -480,7 +488,15 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 				continue
 			}
 
+			// Clamp to valid grid boundaries: x must be in [0, n], y = x-k must be in [0, m].
+			// vr[k+1]-1 can go negative when that diagonal already reached the start.
+			if x < 0 {
+				x = 0
+			}
 			y := x - k
+			if y < 0 || y > m {
+				continue
+			}
 
 			endX := x
 			endY := y

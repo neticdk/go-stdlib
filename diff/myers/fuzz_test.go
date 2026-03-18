@@ -65,6 +65,7 @@ func FuzzMyersLinearSpace(f *testing.F) {
 }
 
 func verifyScript(t *testing.T, a, b []string, script []diff.Line) {
+	t.Helper()
 	aIdx := 0
 	bIdx := 0
 

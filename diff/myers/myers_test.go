@@ -1293,3 +1293,29 @@ func generateBenchmarkInput(size int, changeRate float64) (string, string) {
 
 	return strings.Join(aLines, "\n"), strings.Join(bLines, "\n")
 }
+
+func TestLinearSpacePanics(t *testing.T) {
+	// 1. x/y clamping panic
+	t.Run("xy clamping panic", func(t *testing.T) {
+		a := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"}
+		b := []string{"X", "Y", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "Z"}
+
+		_, err := myers.DiffStrings(a, b,
+			myers.WithLinearSpace(true),
+			myers.WithSmallInputThreshold(0),
+		)
+		assert.NoError(t, err)
+	})
+
+	// 2. prefix/suffix limit panic
+	t.Run("prefix suffix limit panic", func(t *testing.T) {
+		a := []string{"X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X"}
+		b := []string{"X", "X", "X", "X", "X", "X", "X", "X", "X", "X"}
+
+		_, err := myers.DiffStrings(a, b,
+			myers.WithLinearSpace(true),
+			myers.WithSmallInputThreshold(0),
+		)
+		assert.NoError(t, err)
+	})
+}

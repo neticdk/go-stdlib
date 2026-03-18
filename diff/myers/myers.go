@@ -343,8 +343,8 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 	if delta > 0 {
 		vectorSize += delta // Ensure space for reverse search diagonals
 	} else if delta < 0 {
-		vectorSize -= delta
-		offset -= delta
+		vectorSize -= delta // delta is negative, so this increases the size
+		offset -= delta     // delta is negative, so this increases the offset
 	}
 
 	vf := make([]int, vectorSize)

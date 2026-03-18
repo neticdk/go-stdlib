@@ -339,11 +339,13 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 	// vr: Reverse search (from bottom-right)
 	// Size needs to accommodate k ranging from -maxDiff to +maxDiff.
 	vectorSize := 2*maxDiff + 1
+	offset := maxDiff
 	if delta > 0 {
 		vectorSize += delta // Ensure space for reverse search diagonals
+	} else if delta < 0 {
+		vectorSize -= delta
+		offset -= delta
 	}
-	// offset: Used to map diagonal k (which can be negative) to non-negative array indices.
-	offset := maxDiff
 
 	vf := make([]int, vectorSize)
 	vr := make([]int, vectorSize) // Stores relative x-coordinates within the n x m grid
@@ -448,7 +450,7 @@ func findMiddleSnake(a, b []string, aStart, aEnd, bStart, bEnd int) snake { //re
 			//  Overlap Check
 			// Overlap check
 			if delta%2 != 0 && k >= delta-(d-1) && k <= delta+(d-1) {
-				reverseIdx := offset + (delta - k)
+				reverseIdx := offset + k
 				if reverseIdx >= 0 && reverseIdx < vectorSize {
 					reverseX := vr[reverseIdx]
 					if reverseX >= 0 && x >= reverseX {

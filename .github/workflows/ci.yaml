@@ -43,3 +43,6 @@ jobs:
 
       - name: Run benchmarks
         run: go test -bench=. ./...
+
+      - name: Run fuzz tests
+        run: make fuzz

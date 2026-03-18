@@ -57,6 +57,10 @@ race:
 bench:
 	@hack/do.sh bench
 
+.PHONY: fuzz
+fuzz:
+	@hack/do.sh fuzz
+
 .PHONY: build-nolint
 build-nolint:
 	@NOLINT=1 hack/do.sh build

@@ -60,6 +60,16 @@ bench() {
     go test -bench=./... ./...
 }
 
+fuzz() {
+    packages=$(go list ./... | grep -v /vendor/)
+    for pkg in $packages; do
+        if go test -list "^Fuzz" "$pkg" | grep -q "^Fuzz"; then
+            echo "Fuzzing package: $pkg"
+            go test -fuzz=Fuzz -fuzztime=30s "$pkg" "$@"
+        fi
+    done
+}
+
 vet() {
     go vet ./...
 }
